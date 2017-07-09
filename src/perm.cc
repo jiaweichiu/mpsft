@@ -1,4 +1,5 @@
 #include "perm.h"
+#include "rand.h"
 
 namespace {
 
@@ -22,4 +23,9 @@ int32_t InvMod(int32_t a, int32_t m) { return PowMod(a, m - 2, m); }
 
 Perm::Perm(int32_t n, int32_t a, int32_t b) : n_(n), a_(a), b_(b) {
   a_inv_ = InvMod(a, n);
+}
+
+Perm::Perm(int32_t n) : n_(n) {
+  a_ = (RandomInt() % (n_ - 1)) + 1;
+  b_ = RandomInt() % n;
 }

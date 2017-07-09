@@ -5,9 +5,18 @@ cc_library(
 )
 
 cc_library(
+  name = "rand",
+  srcs = ["rand.cc"],
+  hdrs = ["rand.h"],
+)
+
+cc_library(
   name = "perm",
   srcs = ["perm.cc"],
   hdrs = ["perm.h"],
+  deps = [
+    ":rand",
+  ],
 )
 
 cc_binary(
@@ -17,6 +26,7 @@ cc_binary(
     ":catch",
     ":perm",
   ],
+  linkopts = ["-lglog"],
 )
 
 cc_library(
