@@ -1,6 +1,6 @@
 #pragma once
 
-#include "perm.h"
+#include "base.h"
 
 namespace mps {
 
@@ -26,4 +26,4 @@ private:
   int32_t p_;
 };
 
-}  // namespace mps
+} // namespace mps

@@ -20,4 +20,4 @@ TEST_CASE("PermRandom", "") {
   REQUIRE(perm.b() != perm2.b());
 }
 
-}  // namespace mps
+} // namespace mps

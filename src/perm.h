@@ -5,9 +5,9 @@
 namespace mps {
 
 class Perm {
- public:
+public:
   Perm(Int n, Int a, Int b);
-  Perm(Int n);  // Random permutation.
+  Perm(Int n); // Random permutation.
 
   inline Int Forward(Int x) const {
     return (Long(a_) * Long(x) + Long(b_)) % n_;
@@ -33,4 +33,4 @@ class Perm {
   Int a_inv_;
 };
 
-}  // namespace mps
+} // namespace mps

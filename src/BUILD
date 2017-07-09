@@ -37,3 +37,13 @@ cc_library(
     ":perm",
   ],
 )
+
+cc_binary(
+  name = "binner_test",
+  srcs = ["binner_test.cc"],
+  deps = [
+    ":catch",
+    ":binner",
+  ],
+  linkopts = ["-lglog"],
+)

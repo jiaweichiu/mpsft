@@ -1,5 +1,5 @@
-#include "base.h"
 #include "perm.h"
+#include "base.h"
 
 namespace mps {
 
@@ -23,13 +23,11 @@ Int PowMod(Int b, Int e, Int m) {
 Int InvMod(Int a, Int m) { return PowMod(a, m - 2, m); }
 }
 
-Perm::Perm(Int n, Int a, Int b) : n_(n), a_(a), b_(b) {
-  a_inv_ = InvMod(a, n);
-}
+Perm::Perm(Int n, Int a, Int b) : n_(n), a_(a), b_(b) { a_inv_ = InvMod(a, n); }
 
 Perm::Perm(Int n) : n_(n) {
   a_ = (RandomInt() % (n_ - 1)) + 1;
   b_ = RandomInt() % n;
 }
 
-}  // namespace mps
+} // namespace mps

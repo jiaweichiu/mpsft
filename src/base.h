@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cmath>
 #include <complex>
 #include <cstdint>
 #include <glog/logging.h>
@@ -14,4 +15,6 @@ using Cplex = std::complex<Real>;
 
 Int RandomInt();
 
-}  // namespace mps
+inline Int Round(Real x) { return ::floor(x + 0.5); }
+
+} // namespace mps

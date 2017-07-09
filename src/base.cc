@@ -10,8 +10,6 @@ std::mt19937 rng;
 std::uniform_int_distribution<Int> uid;
 }
 
-Int RandomInt() {
-  return uid(rng);
-}
+Int RandomInt() { return uid(rng); }
 
-}  // namespace mps
+} // namespace mps
