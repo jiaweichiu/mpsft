@@ -5,9 +5,9 @@
 namespace mps {
 
 struct BinnerOpt {
-  int32_t n; // Assumed to be prime.
-  int32_t b; // Number of bins.
-  double delta;
+  Int n; // Assumed to be prime.
+  Int b; // Number of bins.
+  Real delta;
 };
 
 class Binner {
@@ -15,15 +15,15 @@ public:
   Binner(const BinnerOpt &opt);
 
 private:
-  int32_t n_;
-  int32_t b_;
-  double delta_;
+  Int n_;
+  Int b_;
+  Real delta_;
 
-  double width_;
-  double sqrt_c_delta_;
-  double sigma_f_;
-  double sigma_t_;
-  int32_t p_;
+  Real width_;
+  Real sqrt_c_delta_;
+  Real sigma_f_;
+  Real sigma_t_;
+  Int p_;
 };
 
 } // namespace mps
