@@ -4,7 +4,7 @@
 
 #include "perm.h"
 
-constexpr int32_t n = 536870909;  // Prime.
+constexpr int32_t n = 536870909; // Prime.
 
 TEST_CASE("PermTest", "Basic") {
   Perm perm(n, 10000000, 10000000);
