@@ -5,9 +5,9 @@ cc_library(
 )
 
 cc_library(
-  name = "rand",
-  srcs = ["rand.cc"],
-  hdrs = ["rand.h"],
+  name = "base",
+  srcs = ["base.cc"],
+  hdrs = ["base.h"],
 )
 
 cc_library(
@@ -15,7 +15,7 @@ cc_library(
   srcs = ["perm.cc"],
   hdrs = ["perm.h"],
   deps = [
-    ":rand",
+    ":base",
   ],
 )
 

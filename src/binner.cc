@@ -3,6 +3,8 @@
 
 #include "binner.h"
 
+namespace mps {
+
 Binner::Binner(const BinnerOpt &opt) {
   CHECK_GT(opt.n, 0);
   CHECK_GT(opt.b, 0);
@@ -17,3 +19,5 @@ Binner::Binner(const BinnerOpt &opt) {
   sigma_f_ = 0.5 / (b_ * 2 * M_SQRT2 * sqrt_c_delta_);
   sigma_t_ = 1.0 / (2 * M_PI * sigma_f_);
 }
+
+}  // namespace mps

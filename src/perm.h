@@ -1,34 +1,36 @@
 #pragma once
 
-#include <cstdint>
+#include "base.h"
+
+namespace mps {
 
 class Perm {
-public:
-  Perm(int32_t n, int32_t a, int32_t b);
-  Perm(int32_t n);  // Random permutation.
+ public:
+  Perm(Int n, Int a, Int b);
+  Perm(Int n);  // Random permutation.
 
-  inline int32_t Forward(int32_t x) const {
-    return (int64_t(a_) * int64_t(x) + int64_t(b_)) % n_;
+  inline Int Forward(Int x) const {
+    return (Long(a_) * Long(x) + Long(b_)) % n_;
   }
 
-  inline int32_t PosForward(int32_t x) const { return (Forward(x) + n_) % n_; }
+  inline Int PosForward(Int x) const { return (Forward(x) + n_) % n_; }
 
-  inline int32_t Backward(int32_t x) const {
-    return (int64_t(a_inv_) * int64_t(x - b_)) % n_;
+  inline Int Backward(Int x) const {
+    return (Long(a_inv_) * Long(x - b_)) % n_;
   }
 
-  inline int32_t PosBackward(int32_t x) const {
-    return (Backward(x) + n_) % n_;
-  }
+  inline Int PosBackward(Int x) const { return (Backward(x) + n_) % n_; }
 
-  inline int32_t n() const { return n_; }
-  inline int32_t a() const { return a_; }
-  inline int32_t b() const { return b_; }
+  inline Int n() const { return n_; }
+  inline Int a() const { return a_; }
+  inline Int b() const { return b_; }
 
   // Random permutation: k -> ak+b.
   // Random modulation exp(2*pi*i*ck/n)
-  int32_t n_;
-  int32_t a_;
-  int32_t b_;
-  int32_t a_inv_;
+  Int n_;
+  Int a_;
+  Int b_;
+  Int a_inv_;
 };
+
+}  // namespace mps

@@ -1,11 +1,11 @@
-#include <cstdint>
-#include <glog/logging.h>
-
 #include "catch.hpp"
 
+#include "base.h"
 #include "perm.h"
 
-constexpr int32_t n = 536870909; // Prime.
+namespace mps {
+
+constexpr Int n = 536870909; // Prime.
 
 TEST_CASE("PermBasic", "") {
   Perm perm(n, 10000000, 10000000);
@@ -19,3 +19,5 @@ TEST_CASE("PermRandom", "") {
   REQUIRE(perm.a() != perm2.a());
   REQUIRE(perm.b() != perm2.b());
 }
+
+}  // namespace mps
