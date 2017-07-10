@@ -10,7 +10,7 @@ namespace {
 std::mt19937 rng;
 std::uniform_int_distribution<Int> uid;
 
-}  // namespace
+} // namespace
 
 Int RandomInt() { return uid(rng); }
 
@@ -34,14 +34,17 @@ void CplexArray::Resize(Int n) {
 }
 
 FFTPlan::FFTPlan(Int n, Int sign, bool in_place) : dummy1_(1), dummy2_(1) {
-  fftw_complex *x = reinterpret_cast<fftw_complex *>(dummy1_.data());
-  fftw_complex *y = reinterpret_cast<fftw_complex *>(in_place ? dummy1_.data()
-                                                          : dummy2_.data());
+  fftw_complex *x = reinterpret_cast<fftw_complex *>(dummy1_.Data());
+  fftw_complex *y = reinterpret_cast<fftw_complex *>(in_place ? dummy1_.Data()
+                                                              : dummy2_.Data());
   plan_ = fftw_plan_dft_1d(n, x, y, sign, FFTW_ESTIMATE);
 }
 
-FFTPlan::~FFTPlan() {
-  fftw_destroy_plan(plan_);
+FFTPlan::~FFTPlan() { fftw_destroy_plan(plan_); }
+
+void FFTPlan::Run(const CplexArray &u, CplexArray *v) {
+  fftw_execute_dft(plan_, reinterpret_cast<fftw_complex *>(u.Data()),
+                   reinterpret_cast<fftw_complex *>(v->Data()));
 }
 
-}  // namespace mps
+} // namespace mps

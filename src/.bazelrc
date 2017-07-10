@@ -1,1 +1,1 @@
-build --linkopt="-lglog -lm -lrt -L/usr/local/lib -lfftw3 -I/usr/local/include"
+build --linkopt="-lglog -lm -lrt -L/usr/local/lib -lfftw3"

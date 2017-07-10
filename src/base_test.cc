@@ -37,4 +37,22 @@ TEST_CASE("CplexArrayBasic", "") {
   Fill(&v);
 }
 
+TEST_CASE("FFTPlanBasic", "") {
+  constexpr int n = 7;
+  FFTPlan plan(n, FFTW_FORWARD, true);
+  CplexArray a(n);
+  Fill(&a);
+  plan.RunInPlace(&a);
+  REQUIRE(RE(a[0]) == Approx(3.5));
+  REQUIRE(IM(a[0]) == Approx(-3.5));
+
+  FFTPlan plan2(n, FFTW_BACKWARD, true);
+  plan2.RunInPlace(&a);
+  for (Int i = 0; i < a.Size(); ++i) {
+    // Different from 0.5 because FFTW does unnormalized FFTs.
+    REQUIRE(RE(a[i]) == Approx(3.5));
+    REQUIRE(IM(a[i]) == Approx(-3.5));
+  }
+}
+
 } // namespace mps
