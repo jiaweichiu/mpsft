@@ -91,8 +91,16 @@ private:
 // yh[a*k+b] = xh[k] exp(2*pi*i*c*k/n).
 // Mode permutation: a, b
 // Mode modulation: c
+// Forward: a*k+b.
+// Backward: a_inv*(k-b).
+// Very lightweight class. Keep logic in the other code.
 struct Transform {
-  Int a, b, c;
+  Transform(Int n);
+  Transform(Int n, Int a, Int b, Int c);
+  Int a;
+  Int b;
+  Int c;
+  Int a_inv;
 };
 
 } // namespace mps

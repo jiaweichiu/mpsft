@@ -20,24 +20,6 @@ cc_test(
 )
 
 cc_library(
-  name = "perm",
-  srcs = ["perm.cc"],
-  hdrs = ["perm.h"],
-  deps = [
-    ":base",
-  ],
-)
-
-cc_test(
-  name = "perm_test",
-  srcs = ["perm_test.cc"],
-  deps = [
-    ":catch",
-    ":perm",
-  ],
-)
-
-cc_library(
   name = "window",
   srcs = ["window.cc"],
   hdrs = ["window.h"],

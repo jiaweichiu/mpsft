@@ -44,4 +44,13 @@ TEST_CASE("FFTPlanBasic", "") {
   }
 }
 
-} // namespace mps
+TEST_CASE("TransformBasic", "") {
+  constexpr Int n = 536870909;  // Prime.
+  Transform tf(n, 10000000, 10000001, 10000002);
+  REQUIRE(tf.a == 10000000);
+  REQUIRE(tf.b == 10000001);
+  REQUIRE(tf.c == 10000002);
+  REQUIRE(PosMod(Long(tf.a_inv) * Long(tf.a), n) == 1);
+}
+
+}  // namespace mps
