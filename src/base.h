@@ -28,6 +28,7 @@ using std::vector;
 
 Int RandomInt();
 
+// Our only macros! We try not to.
 #define RE std::real
 #define IM std::imag
 
