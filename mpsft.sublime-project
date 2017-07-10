@@ -4,7 +4,7 @@
 		{
 			"path": ".",
       "folder_exclude_patterns": ["bazel*"],
-      "file_exclude_patterns": ["catch.hpp"],
+      "file_exclude_patterns": ["catch.hpp", "*.ipynb"],
 		}
 	]
 }

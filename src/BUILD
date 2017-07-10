@@ -10,6 +10,15 @@ cc_library(
   hdrs = ["base.h"],
 )
 
+cc_test(
+  name = "base_test",
+  srcs = ["base_test.cc"],
+  deps = [
+    ":catch",
+    ":base",
+  ],
+)
+
 cc_library(
   name = "perm",
   srcs = ["perm.cc"],
@@ -19,15 +28,33 @@ cc_library(
   ],
 )
 
-cc_binary(
+cc_test(
   name = "perm_test",
   srcs = ["perm_test.cc"],
   deps = [
     ":catch",
     ":perm",
   ],
-  linkopts = ["-lglog"],
 )
+
+cc_library(
+  name = "window",
+  srcs = ["window.cc"],
+  hdrs = ["window.h"],
+  deps = [
+    ":base",
+  ],
+)
+
+cc_test(
+  name = "window_test",
+  srcs = ["window_test.cc"],
+  deps = [
+    ":catch",
+    ":window",
+  ],
+)
+
 
 cc_library(
 	name = "binner",
@@ -38,12 +65,11 @@ cc_library(
   ],
 )
 
-cc_binary(
-  name = "binner_test",
-  srcs = ["binner_test.cc"],
-  deps = [
-    ":catch",
-    ":binner",
-  ],
-  linkopts = ["-lglog"],
-)
+#cc_test(
+#  name = "binner_test",
+#  srcs = ["binner_test.cc"],
+#  deps = [
+#    ":catch",
+#    ":binner",
+#  ],
+#)

@@ -1,10 +1,12 @@
 #pragma once
 
-#include <glog/logging.h>
 #include <cmath>
 #include <complex>
 #include <cstdint>
+#include <fftw3.h>
+#include <glog/logging.h>
 #include <iostream>
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -15,24 +17,77 @@ using Long = int64_t;
 using Real = double;
 using Cplex = std::complex<Real>;
 
+using IntPair = std::pair<Int, Int>;
+using RealPair = std::pair<Real, Real>;
 using CplexPair = std::pair<Cplex, Cplex>;
 
 using std::string;
+using std::unique_ptr;
 using std::vector;
 
 Int RandomInt();
 
 // Force cast into longs.
-inline Long PosMod(Long x, Long n) { return ((x % n) + n) % n; }
-inline Long Mod(Long x, Long n) { return x % n; }
+inline Int PosMod(Long x, Long n) { return ((x % n) + n) % n; }
+inline Int Mod(Long x, Long n) { return x % n; }
 
-inline Int Round(Real x) { return ::floor(x + 0.5); }
-inline Cplex Sinusoid(Real theta) { return Cplex(::cos(theta), ::sin(theta)); }
+inline Real Square(Real x) { return x * x; }
+inline Int Round(Real x) { return std::round(x); }
+inline Cplex Sinusoid(Real theta) {
+  return Cplex(std::cos(theta), std::sin(theta));
+}
 
 // Equivalent to multiplying by i: (x+iy)*i = -y+ix.
-inline Cplex RotateForward(Cplex x) { return Cplex(-std::imag(x), std::real(x)); }
+inline Cplex RotateForward(Cplex x) {
+  return Cplex(-std::imag(x), std::real(x));
+}
 
-// Multiply by -i.
-inline Cplex RotateBackward(Cplex x) { return Cplex(std::imag(x), -std::real(x)); }
+// Equivalent to multiplying by -i: (x+iy)*(-i) = y-ix.
+inline Cplex RotateBackward(Cplex x) {
+  return Cplex(std::imag(x), -std::real(x));
+}
 
-}  // namespace mps
+class CplexArray {
+public:
+  CplexArray();
+  CplexArray(Int n);
+  ~CplexArray();
+  void Resize(Int n);
+  void Reset();
+
+  inline Int Size() const { return n_; }
+  inline Cplex &operator[](Int i) { return data_[i]; }
+  inline const Cplex &operator[](Int i) const { return data_[i]; }
+  inline Cplex *data() const { return data_; }
+
+private:
+  Int n_ = 0;
+  Cplex *data_ = nullptr;
+};
+
+class FFTPlan {
+public:
+  // For sign:
+  // #define FFTW_FORWARD (-1)
+  // #define FFTW_BACKWARD (+1)
+  FFTPlan(Int n, Int sign, bool in_place);
+  ~FFTPlan();
+
+  // If in-place, u, v should be the same.
+  // We assume this agrees with in_place supplied to constructor.
+  void Run(const CplexArray &u, CplexArray *v);
+
+private:
+  CplexArray dummy1_, dummy2_;
+  fftw_plan plan_;
+};
+
+// y[t] = x[a*t+c] exp(2*pi*i*b*t/n).
+// yh[a*k+b] = xh[k] exp(2*pi*i*c*k/n).
+// Mode permutation: a, b
+// Mode modulation: c
+struct Transform {
+  Int a, b, c;
+};
+
+} // namespace mps

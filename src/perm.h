@@ -10,16 +10,20 @@ public:
   Perm(Int n); // Random permutation.
 
   inline Int Forward(Int x) const {
-    return (Long(a_) * Long(x) + Long(b_)) % n_;
+    return Mod(Long(a_) * Long(x) + Long(b_), n_);
   }
 
-  inline Int PosForward(Int x) const { return (Forward(x) + n_) % n_; }
+  inline Int PosForward(Int x) const {
+    return PosMod(Long(a_) * Long(x) + Long(b_), n_);
+  }
 
   inline Int Backward(Int x) const {
-    return (Long(a_inv_) * Long(x - b_)) % n_;
+    return Mod(Long(a_inv_) * Long(x - b_), n_);
   }
 
-  inline Int PosBackward(Int x) const { return (Backward(x) + n_) % n_; }
+  inline Int PosBackward(Int x) const {
+    return PosMod(Long(a_inv_) * Long(x - b_), n_);
+  }
 
   inline Int n() const { return n_; }
   inline Int a() const { return a_; }

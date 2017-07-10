@@ -16,8 +16,8 @@ TEST_CASE("PermBasic", "") {
 TEST_CASE("PermRandom", "") {
   Perm perm(n);
   Perm perm2(n);
-  REQUIRE(perm.a() != perm2.a());
-  REQUIRE(perm.b() != perm2.b());
+  REQUIRE_FALSE(perm.a() == perm2.a());
+  REQUIRE_FALSE(perm.b() == perm2.b());
 }
 
 } // namespace mps
