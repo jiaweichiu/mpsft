@@ -12,6 +12,7 @@ public:
   inline Real wt(Int t) const { return wt_[t]; }
 
   inline Int p() const { return p_; }
+  inline Int p2() const { return (p_ - 1) / 2; }
   inline Int bins() const { return bins_; }
 
   // Real Energy() const;

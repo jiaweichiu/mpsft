@@ -1,5 +1,6 @@
 #pragma once
 
+#include <algorithm>
 #include <cmath>
 #include <complex>
 #include <cstdint>
@@ -51,8 +52,11 @@ public:
   CplexArray();
   CplexArray(Int n);
   ~CplexArray();
+
   void Resize(Int n);
   void Reset();
+  void Fill(Cplex x);
+  void Clear();
 
   inline Int Size() const { return n_; }
   inline Cplex &operator[](Int i) { return data_[i]; }

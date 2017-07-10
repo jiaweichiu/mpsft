@@ -33,6 +33,10 @@ void CplexArray::Resize(Int n) {
   data_ = reinterpret_cast<Cplex *>(fftw_malloc(sizeof(Cplex) * n));
 }
 
+void CplexArray::Fill(Cplex x) { std::fill(data_, data_ + n_, x); }
+
+void CplexArray::Clear() { Fill(Cplex(0, 0)); }
+
 FFTPlan::FFTPlan(Int n, Int sign, bool in_place) : dummy1_(1), dummy2_(1) {
   fftw_complex *x = reinterpret_cast<fftw_complex *>(dummy1_.Data());
   fftw_complex *y = reinterpret_cast<fftw_complex *>(in_place ? dummy1_.Data()

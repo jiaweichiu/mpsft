@@ -13,8 +13,38 @@ TEST_CASE("WindowBasic", "") {
   Window window(n, bins, delta);
 
   const Int p = window.p();
-  const Int p2 = (p - 1) / 2;
-  // LOG(INFO) << window.Energy();
+  const Int p2 = window.p2();
+
+  CplexArray a(n);
+  a.Clear();
+  a[0] = window.wt(0);
+  for (Int i = 1; i <= p2; ++i) {
+    a[i] = a[n - i] = window.wt(i);
+  }
+
+  CplexArray ah(n);
+  FFTPlan plan(n, -1, false);
+  plan.Run(a, &ah);
+
+  for (Int i = 0; i < n; ++i) {
+    REQUIRE(IM(ah[i]) == Approx(0));
+  }
+
+  REQUIRE(RE(ah[0]) == Approx(1));
+  REQUIRE(RE(ah[1]) == Approx(1));
+  REQUIRE(RE(ah[n - 1]) == Approx(1));
+  REQUIRE(RE(ah[2]) == Approx(1));
+  REQUIRE(RE(ah[n - 2]) == Approx(1));
+
+  for (Int i = 1; i < n / (4 * bins); ++i) {
+    REQUIRE(RE(ah[i]) > 0.5);
+    REQUIRE(RE(ah[n - i]) > 0.5);
+  }
+
+  const Int w = n / (2 * bins);
+  for (Int i = w; i < n - w; ++i) {
+    REQUIRE(std::abs(RE(ah[i])) < delta);
+  }
 }
 
 } // namespace mps

@@ -4,44 +4,33 @@
 
 namespace mps {
 
-namespace {
-
-void Fill(CplexArray *v) {
-  // Just to see if it will crash.
-  for (Int i = 0; i < v->Size(); ++i) {
-    (*v)[i] = Cplex(0.5, -0.5);
-  }
-}
-
-} // namespace
-
 TEST_CASE("CplexArrayBasic", "") {
   CplexArray u;
   REQUIRE(u.Size() == 0);
-  Fill(&u);
+  u.Fill(Cplex(0.5, -0.5));
 
   u.Resize(50);
   REQUIRE(u.Size() == 50);
-  Fill(&u);
+  u.Fill(Cplex(0.5, -0.5));
 
   CplexArray v(100);
   REQUIRE(v.Size() == 100);
-  Fill(&v);
+  v.Fill(Cplex(0.5, -0.5));
 
   v.Resize(10);
   REQUIRE(v.Size() == 10);
-  Fill(&v);
+  v.Fill(Cplex(0.5, -0.5));
 
   v.Resize(10000);
   REQUIRE(v.Size() == 10000);
-  Fill(&v);
+  v.Fill(Cplex(0.5, -0.5));
 }
 
 TEST_CASE("FFTPlanBasic", "") {
   constexpr int n = 7;
   FFTPlan plan(n, FFTW_FORWARD, true);
   CplexArray a(n);
-  Fill(&a);
+  a.Fill(Cplex(0.5, -0.5));
   plan.RunInPlace(&a);
   REQUIRE(RE(a[0]) == Approx(3.5));
   REQUIRE(IM(a[0]) == Approx(-3.5));
