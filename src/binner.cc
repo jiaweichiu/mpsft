@@ -27,6 +27,11 @@ void BinInTime(const Window &win, const Transform &tf, const TauSet &taus,
                const CplexArray &x, FFTPlan *plan, CplexArray *out1,
                CplexArray *out2) {
   // const Int q = taus.q;
+  DCHECK(plan);
+  DCHECK(out1);
+  DCHECK(out2);
+  DCHECK_EQ(plan->sign(), FFTW_FORWARD);
+
   const Int bins = win.bins();
   DCHECK_EQ(bins, out1->Size());
   DCHECK_EQ(bins, out2->Size());

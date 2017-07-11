@@ -55,7 +55,7 @@ void CplexArray::Fill(Cplex x) { std::fill(data_, data_ + n_, x); }
 
 void CplexArray::Clear() { Fill(Cplex(0, 0)); }
 
-FFTPlan::FFTPlan(Int n, Int sign) : n_(n), dummy1_(1), dummy2_(1) {
+FFTPlan::FFTPlan(Int n, char sign) : n_(n), sign_(sign), dummy1_(1), dummy2_(1) {
   fftw_complex *x = reinterpret_cast<fftw_complex *>(dummy1_.Data());
   fftw_complex *y = reinterpret_cast<fftw_complex *>(dummy2_.Data());
   plan_ = fftw_plan_dft_1d(n, x, y, sign, FFTW_ESTIMATE);

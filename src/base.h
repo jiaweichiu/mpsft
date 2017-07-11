@@ -74,10 +74,11 @@ public:
   // For sign:
   // #define FFTW_FORWARD (-1)
   // #define FFTW_BACKWARD (+1)
-  FFTPlan(Int n, Int sign);
+  FFTPlan(Int n, char sign);
   ~FFTPlan();
 
   inline Int n() const { return n_; }
+  inline char sign() const { return sign_; }
 
   // If in-place, u, v should be the same.
   // We assume this agrees with in_place supplied to constructor.
@@ -85,6 +86,7 @@ public:
 
 private:
   Int n_;
+  char sign_;
   CplexArray dummy1_, dummy2_;
   fftw_plan plan_;
 };
