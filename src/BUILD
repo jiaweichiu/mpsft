@@ -43,15 +43,16 @@ cc_library(
 	srcs = ["binner.cc"],
 	hdrs = ["binner.h"],
   deps = [
-    ":perm",
+    ":base",
+    ":window",
   ],
 )
 
-#cc_test(
-#  name = "binner_test",
-#  srcs = ["binner_test.cc"],
-#  deps = [
-#    ":catch",
-#    ":binner",
-#  ],
-#)
+cc_test(
+  name = "binner_test",
+  srcs = ["binner_test.cc"],
+  deps = [
+    ":catch",
+    ":binner",
+  ],
+)

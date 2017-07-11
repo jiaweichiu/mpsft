@@ -23,7 +23,7 @@ TEST_CASE("WindowBasic", "") {
   }
 
   CplexArray ah(n);
-  FFTPlan plan(n, -1, false);
+  FFTPlan plan(n, -1);
   plan.Run(a, &ah);
 
   for (Int i = 0; i < n; ++i) {

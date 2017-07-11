@@ -17,7 +17,7 @@ Window::Window(Int n, Int bins, Real delta)
   width_ = 1.0 / (2.0 * bins_);
   sqrt_c_delta_ = ::sqrt(-::log(delta_));
   sigma_f_ = 0.5 / (bins_ * 2.0 * M_SQRT2 * sqrt_c_delta_);
-  sigma_t_ = 1.0 / (2.0 * M_PI * sigma_f_);
+  sigma_t_ = 1.0 / ((2.0 * M_PI) * sigma_f_);
 
   {
     // Decide p, the size of support.
@@ -49,19 +49,9 @@ Real Window::SampleInTime(Int i) const {
 
 Real Window::SampleInFreq(Real xi) const {
   const Real c = 0.5 * width_;
-  // const Real d = 1.0 / (M_SQRT2 * sigma_f_);
   const Real d = M_SQRT2 * M_PI * sigma_t_;
   return 0.5 * (boost::math::erf<Real>((xi + c) * d) -
                 boost::math::erf<Real>((xi - c) * d));
 }
-
-// Real Window::Energy() const {
-//   const Int p2 = (p_ - 1) / 2;
-//   Real out = Square(wt_[0]);
-//   for (Int i = 1; i <= p2; ++i) {
-//     out += 2 * Square(wt_[i]);
-//   }
-//   return out;
-// }
 
 } // namespace mps

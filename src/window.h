@@ -9,8 +9,13 @@ public:
   Window(Int n, Int bins, Real delta);
 
   // Assume 0 <= t <= p2 where p2=(p-1)/2. Assume p is odd.
-  inline Real wt(Int t) const { return wt_[t]; }
+  inline Real wt(Int t) const {
+    DCHECK_GE(t, 0);
+    DCHECK_LE(t, p2());
+    return wt_[t];
+  }
 
+  inline Int n() const { return n_; }
   inline Int p() const { return p_; }
   inline Int p2() const { return (p_ - 1) / 2; }
   inline Int bins() const { return bins_; }
