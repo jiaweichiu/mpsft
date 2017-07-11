@@ -48,10 +48,11 @@ void BinInTime(const Window &win, const Transform &tf, const TauSet &taus,
   for (Int i = 0; i < p; ++i) {
     const Int t = i <= p2 ? i : i - p;
     const Real wt = win.wt(i <= p2 ? i : p - i);
-    // LOG(INFO) << "t=" << t << " wt=" << wt;
     const Int j = PosMod(Long(tf.a) * Long(t + tau) + Long(tf.c), n);
     const Int k = PosMod(Long(tf.b) * Long(t + tau), n);
-    const Real angle = (2.0 * M_PI) * (Real(k) / Real(n) - delta);
+    // Do mods for better accuracy.
+    const Real angle =
+        (2.0 * M_PI) * (Real(k) / Real(n) + std::fmod(delta * Real(t), 1.0));
     (*out1)[i % bins] += (x[j] * Sinusoid(angle)) * wt;
   }
   // Do B-point FFT.
@@ -74,7 +75,7 @@ void BinInFreq(const Window &win, const Transform &tf, const TauSet &taus,
     const Real wf = win.SampleInFreq(xi);
     const Int s = Mod(Long(tf.c) * Long(k) + Long(l) * Long(tau), n);
     const Real angle = (2.0 * M_PI) * (Real(s) / Real(n));
-    (*out)[i] -= (coef[i] * Sinusoid(angle)) * wf;
+    (*out)[bin] -= (coef[i] * Sinusoid(angle)) * wf;
   }
 }
 

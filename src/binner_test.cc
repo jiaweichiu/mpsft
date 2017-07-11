@@ -20,10 +20,9 @@ TEST_CASE("BinnerBasic", "") {
   // Prepare x.
   CplexArray x(n);
   x.Clear();
-  for (Int i = 0; i < coef.Size(); ++i) {
-    for (Int t = 0; t < n; ++t) {
-      x[t] += coef[i] * Sinusoid((2.0 * M_PI) * Real(t) / Real(n));
-    }
+  for (Int t = 0; t < n; ++t) {
+    x[t] +=
+        coef[0] * Sinusoid((2.0 * M_PI) * Mod(loc[0] * Real(t), n) / Real(n));
   }
 
   // Prepare binning.
@@ -35,24 +34,27 @@ TEST_CASE("BinnerBasic", "") {
   CplexArray out1(bins);
   CplexArray out2(bins);
   FFTPlan plan(bins, -1);
-  
+
   BinInTime(win, tf, taus, x, &plan, &out1, &out2);
+  REQUIRE(RE(out2[1]) == Approx(1.12652));
+  REQUIRE(IM(out2[1]) == Approx(-0.108838));
   for (Int i = 0; i < bins; ++i) {
-    LOG(INFO) << out2[i];
+    if (i != 1) {
+      REQUIRE(std::abs(out2[i]) == Approx(0));
+    }
   }
 
   // BinInFreq.
   CplexArray out(bins);
   out.Clear();
   BinInFreq(win, tf, taus, coef, loc, &out); // Subtract.
-  for (Int i = 0; i < bins; ++i) {
-    LOG(INFO) << out[i];
-  }
 
-  REQUIRE(RE(out[0]) == Approx(-1.12652));
-  REQUIRE(IM(out[0]) == Approx(0.108838));
-  for (Int i = 1; i < bins; ++i) {
-    REQUIRE(std::abs(out[i]) == Approx(0));
+  REQUIRE(RE(out[1]) == Approx(-1.12652));
+  REQUIRE(IM(out[1]) == Approx(0.108838));
+  for (Int i = 0; i < bins; ++i) {
+    if (i != 1) {
+      REQUIRE(std::abs(out[i]) == Approx(0));
+    }
   }
 }
 

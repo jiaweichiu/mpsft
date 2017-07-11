@@ -31,7 +31,6 @@ private:
   Real delta_;
 
   Real width_;
-  Real sqrt_c_delta_;
   Real sigma_f_;
   Real sigma_t_;
   Int p_; // Size of support of window in time domain.

@@ -15,15 +15,15 @@ Window::Window(Int n, Int bins, Real delta)
   CHECK_EQ(1, bins_ % 2) << "Odd b expected";
 
   width_ = 1.0 / (2.0 * bins_);
-  sqrt_c_delta_ = ::sqrt(-::log(delta_));
-  sigma_f_ = 0.5 / (bins_ * 2.0 * M_SQRT2 * sqrt_c_delta_);
+  const Real sqrt_c_delta = ::sqrt(-::log(delta_));
+  sigma_f_ = 0.5 / (bins_ * 2.0 * M_SQRT2 * sqrt_c_delta);
   sigma_t_ = 1.0 / ((2.0 * M_PI) * sigma_f_);
 
   {
     // Decide p, the size of support.
     // p has to be sufficiently large.
-    Real tmp = 2.0 * M_SQRT2 * sigma_t_ * sqrt_c_delta_ + 1;
-    Int factor = Round(tmp / Real(bins_));
+    Real tmp = 2.0 * M_SQRT2 * sigma_t_ * sqrt_c_delta + 1;
+    Int factor = Int(std::ceil(tmp / Real(bins_)));
     if ((factor % 2) == 0) {
       ++factor;
     }
