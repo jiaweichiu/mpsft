@@ -67,21 +67,23 @@ void BinInTime(const Window &win, const Transform &tf, const TauSet &taus,
 
 void BinInFreq(const Window &win, const Transform &tf, const TauSet &taus,
                const CplexArray &coef, const vector<Int> &loc,
-               CplexArray *out) {
-  const Int tau = taus.q; // CHANGE.
-
+               CplexMatrix *out) {
   DCHECK_EQ(coef.size(), loc.size());
   const Int bins = win.bins();
   const Int n = win.n();
+
   for (Int i = 0; i < coef.size(); ++i) {
     const Int k = loc[i];
     const Int l = PosMod(Long(tf.a) * Long(k) + Long(tf.b), n); // 0 to n-1.
     const Int bin = Int(Long(l) * Long(bins) / Long(n));
     const Real xi = (Real(bin) + 0.5) / Real(bins) - Real(l) / Real(n);
     const Real wf = win.SampleInFreq(xi);
-    const Int s = Mod(Long(tf.c) * Long(k) + Long(l) * Long(tau), n);
-    const Real angle = (2.0 * M_PI) * (Real(s) / Real(n));
-    (*out)[bin] -= (coef[i] * Sinusoid(angle)) * wf;
+    for (Int u = 0; u < taus.size(); ++u) {
+      const Int tau = taus.value(u);
+      const Int s = Mod(Long(tf.c) * Long(k) + Long(l) * Long(tau), n);
+      const Real angle = (2.0 * M_PI) * (Real(s) / Real(n));
+      (*out)[u][bin] -= (coef[i] * Sinusoid(angle)) * wf;
+    }
   }
 }
 

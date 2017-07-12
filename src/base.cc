@@ -62,6 +62,12 @@ CplexMatrix::CplexMatrix(Int rows, Int cols)
   }
 }
 
+void CplexMatrix::Clear() {
+  for (Int i = 0; i < rows_; ++i) {
+    data_[i].Clear();
+  }
+}
+
 FFTPlan::FFTPlan(Int n, char sign)
     : n_(n), sign_(sign), dummy1_(1), dummy2_(1) {
   fftw_complex *x = reinterpret_cast<fftw_complex *>(dummy1_.data());

@@ -29,10 +29,11 @@ TEST_CASE("BinnerBasic", "") {
   Transform tf(n, 3, 847, 45);
   TauSet taus;
   taus.q = 106;
+  taus.list_s = {3, 7};
 
   // BinInTime.
   CplexArray scratch(bins);
-  CplexMatrix out_time(1, bins);
+  CplexMatrix out_time(taus.size(), bins);
   
   FFTPlan plan(bins, -1);
   BinInTime(win, tf, taus, x, &plan, &out_time, &scratch);
@@ -45,15 +46,22 @@ TEST_CASE("BinnerBasic", "") {
   }
 
   // BinInFreq.
-  CplexArray out(bins);
-  out.Clear();
-  BinInFreq(win, tf, taus, coef, loc, &out); // Subtract.
+  CplexMatrix out_freq(taus.size(), bins);
+  out_freq.Clear();
+  BinInFreq(win, tf, taus, coef, loc, &out_freq); // Subtract.
 
-  REQUIRE(RE(out[1]) == Approx(-1.12652));
-  REQUIRE(IM(out[1]) == Approx(0.108838));
+  REQUIRE(RE(out_freq[0][1]) == Approx(-1.12652));
+  REQUIRE(IM(out_freq[0][1]) == Approx(0.108838));
   for (Int i = 0; i < bins; ++i) {
     if (i != 1) {
-      REQUIRE(std::abs(out[i]) == Approx(0));
+      REQUIRE(std::abs(out_freq[0][i]) == Approx(0));
+    }
+  }
+
+  // Compare out_time and out_freq.
+  for (Int i = 0; i < taus.size(); ++i) {
+    for (Int j = 0; j < bins; ++j) {
+      REQUIRE(std::abs(out_time[i][j] + out_freq[i][j]) == Approx(0));
     }
   }
 }

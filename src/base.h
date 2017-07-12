@@ -76,6 +76,7 @@ public:
   inline Int cols() const { return cols_; }
   inline CplexArray &operator[](Int i) { return data_[i]; }
   inline const CplexArray &operator[](Int i) const { return data_[i]; }
+  void Clear();
 
 private:
   Int rows_;
