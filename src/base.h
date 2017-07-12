@@ -59,14 +59,28 @@ public:
   void Fill(Cplex x);
   void Clear();
 
-  inline Int Size() const { return n_; }
+  inline Int size() const { return n_; }
   inline Cplex &operator[](Int i) { return data_[i]; }
   inline const Cplex &operator[](Int i) const { return data_[i]; }
-  inline Cplex *Data() const { return data_; }
+  inline Cplex *data() const { return data_; }
 
 private:
   Int n_ = 0;
   Cplex *data_ = nullptr;
+};
+
+class CplexMatrix {
+public:
+  CplexMatrix(Int rows, Int cols);
+  inline Int rows() const { return rows_; }
+  inline Int cols() const { return cols_; }
+  inline CplexArray &operator[](Int i) { return data_[i]; }
+  inline const CplexArray &operator[](Int i) const { return data_[i]; }
+
+private:
+  Int rows_;
+  Int cols_;
+  vector<CplexArray> data_;
 };
 
 class FFTPlan {

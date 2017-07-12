@@ -31,16 +31,16 @@ TEST_CASE("BinnerBasic", "") {
   taus.q = 106;
 
   // BinInTime.
-  CplexArray out1(bins);
-  CplexArray out2(bins);
+  CplexArray scratch(bins);
+  CplexMatrix out_time(1, bins);
+  
   FFTPlan plan(bins, -1);
-
-  BinInTime(win, tf, taus, x, &plan, &out1, &out2);
-  REQUIRE(RE(out2[1]) == Approx(1.12652));
-  REQUIRE(IM(out2[1]) == Approx(-0.108838));
+  BinInTime(win, tf, taus, x, &plan, &out_time, &scratch);
+  REQUIRE(RE(out_time[0][1]) == Approx(1.12652));
+  REQUIRE(IM(out_time[0][1]) == Approx(-0.108838));
   for (Int i = 0; i < bins; ++i) {
     if (i != 1) {
-      REQUIRE(std::abs(out2[i]) == Approx(0));
+      REQUIRE(std::abs((out_time[0])[i]) == Approx(0));
     }
   }
 

@@ -24,44 +24,45 @@ namespace mps {
 // }
 
 void BinInTime(const Window &win, const Transform &tf, const TauSet &taus,
-               const CplexArray &x, FFTPlan *plan, CplexArray *out1,
-               CplexArray *out2) {
+               const CplexArray &x, FFTPlan *plan, CplexMatrix *out,
+               CplexArray *scratch) {
   // const Int q = taus.q;
   DCHECK(plan);
-  DCHECK(out1);
-  DCHECK(out2);
+  DCHECK(scratch);
+  DCHECK_EQ(out->rows(), taus.size());
   DCHECK_EQ(plan->sign(), FFTW_FORWARD);
 
   const Int bins = win.bins();
-  DCHECK_EQ(bins, out1->Size());
-  DCHECK_EQ(bins, out2->Size());
+  DCHECK_EQ(bins, scratch->size());
   DCHECK_EQ(bins, plan->n());
 
   const Real delta = -0.5 / Real(bins);
   // const Cplex bq_factor = Sinusoid(Mod(Long(tf.b) * Long(q), n));
 
   const Int n = win.n();
-  DCHECK_EQ(n, x.Size());
+  DCHECK_EQ(n, x.size());
 
   const Int p = win.p();
   const Int p2 = (p - 1) / 2;
 
-  const Int tau = taus.q; // CHANGE
-
-  out1->Clear();
-
-  for (Int i = 0; i < p; ++i) {
-    const Int t = i <= p2 ? i : i - p;
-    const Real wt = win.wt(i <= p2 ? i : p - i);
-    const Int j = PosMod(Long(tf.a) * Long(t + tau) + Long(tf.c), n);
-    const Int k = PosMod(Long(tf.b) * Long(t + tau), n);
-    // Do mods for better accuracy.
-    const Real angle =
-        (2.0 * M_PI) * (Real(k) / Real(n) + std::fmod(delta * Real(t), 1.0));
-    (*out1)[i % bins] += (x[j] * Sinusoid(angle)) * wt;
+  for (Int u = 0; u < taus.size(); ++u) {
+    const Int tau = taus.value(u);
+    scratch->Clear();
+    for (Int i = 0; i < p; ++i) {
+      const Int t = i <= p2 ? i : i - p;
+      const Real wt = win.wt(i <= p2 ? i : p - i);
+      const Int j = PosMod(Long(tf.a) * Long(t + tau) + Long(tf.c), n);
+      const Int k = PosMod(Long(tf.b) * Long(t + tau), n);
+      // Do mods for better accuracy.
+      const Real angle =
+          (2.0 * M_PI) * (Real(k) / Real(n) + std::fmod(delta * Real(t), 1.0));
+      (*scratch)[i % bins] += (x[j] * Sinusoid(angle)) * wt;
+    }
+    // Do B-point FFT.
+    CplexArray& v = (*out)[u];
+    DCHECK_EQ(bins, v.size());
+    plan->Run(*scratch, &v);
   }
-  // Do B-point FFT.
-  plan->Run(*out1, out2);
 }
 
 void BinInFreq(const Window &win, const Transform &tf, const TauSet &taus,
@@ -69,10 +70,10 @@ void BinInFreq(const Window &win, const Transform &tf, const TauSet &taus,
                CplexArray *out) {
   const Int tau = taus.q; // CHANGE.
 
-  DCHECK_EQ(coef.Size(), loc.size());
+  DCHECK_EQ(coef.size(), loc.size());
   const Int bins = win.bins();
   const Int n = win.n();
-  for (Int i = 0; i < coef.Size(); ++i) {
+  for (Int i = 0; i < coef.size(); ++i) {
     const Int k = loc[i];
     const Int l = PosMod(Long(tf.a) * Long(k) + Long(tf.b), n); // 0 to n-1.
     const Int bin = Int(Long(l) * Long(bins) / Long(n));

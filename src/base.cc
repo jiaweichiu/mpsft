@@ -55,17 +55,25 @@ void CplexArray::Fill(Cplex x) { std::fill(data_, data_ + n_, x); }
 
 void CplexArray::Clear() { Fill(Cplex(0, 0)); }
 
-FFTPlan::FFTPlan(Int n, char sign) : n_(n), sign_(sign), dummy1_(1), dummy2_(1) {
-  fftw_complex *x = reinterpret_cast<fftw_complex *>(dummy1_.Data());
-  fftw_complex *y = reinterpret_cast<fftw_complex *>(dummy2_.Data());
+CplexMatrix::CplexMatrix(Int rows, Int cols)
+    : rows_(rows), cols_(cols), data_(rows) {
+  for (Int i = 0; i < rows; ++i) {
+    data_[i].Resize(cols);
+  }
+}
+
+FFTPlan::FFTPlan(Int n, char sign)
+    : n_(n), sign_(sign), dummy1_(1), dummy2_(1) {
+  fftw_complex *x = reinterpret_cast<fftw_complex *>(dummy1_.data());
+  fftw_complex *y = reinterpret_cast<fftw_complex *>(dummy2_.data());
   plan_ = fftw_plan_dft_1d(n, x, y, sign, FFTW_ESTIMATE);
 }
 
 FFTPlan::~FFTPlan() { fftw_destroy_plan(plan_); }
 
 void FFTPlan::Run(const CplexArray &u, CplexArray *v) {
-  fftw_execute_dft(plan_, reinterpret_cast<fftw_complex *>(u.Data()),
-                   reinterpret_cast<fftw_complex *>(v->Data()));
+  fftw_execute_dft(plan_, reinterpret_cast<fftw_complex *>(u.data()),
+                   reinterpret_cast<fftw_complex *>(v->data()));
 }
 
 Transform::Transform(Int n) {

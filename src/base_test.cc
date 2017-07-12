@@ -6,11 +6,11 @@ namespace mps {
 
 TEST_CASE("CplexArrayBasic", "") {
   CplexArray u;
-  REQUIRE(u.Size() == 0);
+  REQUIRE(u.size() == 0);
   u.Fill(Cplex(0.5, -0.5));
 
   u.Resize(50);
-  REQUIRE(u.Size() == 50);
+  REQUIRE(u.size() == 50);
   u.Fill(Cplex(0.5, -0.5));
 
   u.Reset();
@@ -18,15 +18,15 @@ TEST_CASE("CplexArrayBasic", "") {
   u.Reset();
 
   CplexArray v(100);
-  REQUIRE(v.Size() == 100);
+  REQUIRE(v.size() == 100);
   v.Fill(Cplex(0.5, -0.5));
 
   v.Resize(10);
-  REQUIRE(v.Size() == 10);
+  REQUIRE(v.size() == 10);
   v.Fill(Cplex(0.5, -0.5));
 
   v.Resize(10000);
-  REQUIRE(v.Size() == 10000);
+  REQUIRE(v.size() == 10000);
   v.Fill(Cplex(0.5, -0.5));
 }
 
@@ -43,7 +43,7 @@ TEST_CASE("FFTPlanBasic", "") {
 
   FFTPlan plan2(n, FFTW_BACKWARD);
   plan2.Run(b, &a);
-  for (Int i = 0; i < a.Size(); ++i) {
+  for (Int i = 0; i < a.size(); ++i) {
     // Different from 0.5 because FFTW does unnormalized FFTs.
     REQUIRE(RE(a[i]) == Approx(3.5));
     REQUIRE(IM(a[i]) == Approx(-3.5));
