@@ -11,19 +11,10 @@ TEST_CASE("BinnerBasic", "") {
   const Int bins = 5;
   Window win(n, bins, 1e-6);
 
-  // Prepare x_hat.
-  CplexArray coef(1);
-  coef[0] = Cplex(2.0, 0);
-  vector<Int> loc(1);
-  loc[0] = 550;
-
-  // Prepare x.
-  CplexArray x(n);
-  x.Clear();
-  for (Int t = 0; t < n; ++t) {
-    x[t] +=
-        coef[0] * Sinusoid((2.0 * M_PI) * Mod(loc[0] * Real(t), n) / Real(n));
-  }
+  // Prepare x_hat and x.
+  const CplexArray coef = {{2.0, 0}};
+  const vector<Int> loc = {550};
+  const CplexArray x = EvaluateModes(n, coef, loc);
 
   // Prepare binning.
   Transform tf(n, 3, 847, 45);
@@ -34,7 +25,7 @@ TEST_CASE("BinnerBasic", "") {
   // BinInTime.
   CplexArray scratch(bins);
   CplexMatrix out_time(taus.size(), bins);
-  
+
   FFTPlan plan(bins, -1);
   BinInTime(win, tf, taus, x, &plan, &out_time, &scratch);
   REQUIRE(RE(out_time[0][1]) == Approx(1.12652));

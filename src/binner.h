@@ -13,15 +13,7 @@ struct TauSet {
   inline Int size() const { return 1 + 2 * list_s.size(); }
 
   // Tau(0) = q; Tau(1) = q+s[0]; Tau(2) = q-s[0]; ...
-  inline Int value(Int idx) const {
-    if (idx == 0) {
-      return q;
-    }
-    if (idx & 1) { // Odd.
-      return q + list_s[(idx - 1) / 2];
-    }
-    return q - list_s[idx / 2 - 1];
-  }
+  inline Int value(Int idx) const;
 };
 
 /*
@@ -38,6 +30,7 @@ void BinInTime(const Window &win, const Transform &tf, const TauSet &taus,
 
 // Subtract results from out. Similar convention as BinInTime.
 void BinInFreq(const Window &win, const Transform &tf, const TauSet &taus,
-               const CplexArray &coef, const vector<Int> &loc, CplexMatrix *out);
+               const CplexArray &coef, const vector<Int> &loc,
+               CplexMatrix *out);
 
 } // namespace mps

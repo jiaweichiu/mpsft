@@ -4,6 +4,16 @@
 
 namespace mps {
 
+Int TauSet::value(Int idx) const {
+  if (idx == 0) {
+    return q;
+  }
+  if (idx & 1) {
+    return q + list_s[(idx - 1) / 2];
+  }
+  return q - list_s[idx / 2 - 1];
+}
+
 // delta = -0.5/bins.
 // bq_factor = Sinusoid(b*q/N).
 // win_factor = wt * 0.5.
@@ -59,7 +69,7 @@ void BinInTime(const Window &win, const Transform &tf, const TauSet &taus,
       (*scratch)[i % bins] += (x[j] * Sinusoid(angle)) * wt;
     }
     // Do B-point FFT.
-    CplexArray& v = (*out)[u];
+    CplexArray &v = (*out)[u];
     DCHECK_EQ(bins, v.size());
     plan->Run(*scratch, &v);
   }

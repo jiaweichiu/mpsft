@@ -6,6 +6,7 @@
 #include <cstdint>
 #include <fftw3.h>
 #include <glog/logging.h>
+#include <initializer_list>
 #include <iostream>
 #include <memory>
 #include <string>
@@ -26,7 +27,11 @@ using std::string;
 using std::unique_ptr;
 using std::vector;
 
+void MainInit(int argc, char *const argv[]);
+
+void RandomSeed(Long seed);
 Int RandomInt();
+Real RandomNormal();
 
 // Our only macros! We try not to.
 #define RE std::real
@@ -35,6 +40,7 @@ Int RandomInt();
 // Force cast into longs.
 inline Int PosMod(Long x, Long n) { return ((x % n) + n) % n; }
 inline Int Mod(Long x, Long n) { return x % n; }
+inline Real AbsSq(Cplex x) { return RE(x) * RE(x) + IM(x) * IM(x); }
 
 inline Real Square(Real x) { return x * x; }
 inline Int Round(Real x) { return std::round(x); }
@@ -53,6 +59,7 @@ public:
   CplexArray();
   CplexArray(Int n);
   ~CplexArray();
+  CplexArray(std::initializer_list<Cplex> l);
 
   void Resize(Int n);
   void Reset();
@@ -68,6 +75,10 @@ private:
   Int n_ = 0;
   Cplex *data_ = nullptr;
 };
+
+CplexArray EvaluateModes(Int n, const CplexArray &coef, const vector<Int> loc);
+CplexArray GenerateXhat(Int n, const CplexArray &coef, const vector<Int> &loc,
+                        Real snr);
 
 class CplexMatrix {
 public:

@@ -2,6 +2,9 @@ cc_library(
   name = "catch",
   srcs = ["catch.cc"],
   hdrs = ["catch.hpp"],
+  deps = [
+    ":base",
+  ],
 )
 
 cc_library(
@@ -15,6 +18,15 @@ cc_test(
   srcs = ["base_test.cc"],
   deps = [
     ":catch",
+    ":base",
+  ],
+)
+
+cc_library(
+  name = "svd",
+  srcs = ["svd.cc"],
+  hdrs = ["svd.h"],
+  deps = [
     ":base",
   ],
 )
@@ -52,7 +64,26 @@ cc_test(
   name = "binner_test",
   srcs = ["binner_test.cc"],
   deps = [
-    ":catch",
     ":binner",
+    ":catch",
+  ],
+)
+
+cc_library(
+  name = "mpsft",
+  srcs = ["mpsft.cc"],
+  hdrs = ["mpsft.h"],
+  deps = [
+    ":window",
+    ":binner",
+  ],
+)
+
+cc_test(
+  name = "mpsft_test",
+  srcs = ["mpsft_test.cc"],
+  deps = [
+    ":catch",
+    ":mpsft",
   ],
 )

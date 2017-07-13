@@ -4,8 +4,9 @@
 // #define CATCH_CONFIG_MAIN
 #include "catch.hpp"
 
+#include "base.h"
+
 int main(int argc, char *const argv[]) {
-  google::InitGoogleLogging(argv[0]);
-  google::InstallFailureSignalHandler();
+  mps::MainInit(argc, argv);
   return Catch::Session().run(argc, argv);
 }

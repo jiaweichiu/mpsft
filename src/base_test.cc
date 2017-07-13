@@ -28,6 +28,10 @@ TEST_CASE("CplexArrayBasic", "") {
   v.Resize(10000);
   REQUIRE(v.size() == 10000);
   v.Fill(Cplex(0.5, -0.5));
+
+  CplexArray w = {{0.5, 0.6}, {1.5, 1.6}};
+  REQUIRE(std::abs(w[0] - Cplex(0.5, 0.6)) == Approx(0));
+  REQUIRE(std::abs(w[1] - Cplex(1.5, 1.6)) == Approx(0));
 }
 
 TEST_CASE("FFTPlanBasic", "") {
@@ -57,6 +61,19 @@ TEST_CASE("TransformBasic", "") {
   REQUIRE(tf.b == 10000001);
   REQUIRE(tf.c == 10000002);
   REQUIRE(PosMod(Long(tf.a_inv) * Long(tf.a), n) == 1);
+}
+
+TEST_CASE("GenerateXhat", "") {
+  constexpr Int n = 5;    // Prime.
+  constexpr Real snr = 8; // Expected snr.
+  const CplexArray coef = {Cplex(0.5, 0.6)};
+  const vector<Int> loc = {2};
+  const CplexArray xh = GenerateXhat(n, coef, loc, snr);
+  const Real signal_energy = AbsSq(coef[0]);
+  const Real noise_energy =
+      AbsSq(xh[0]) + AbsSq(xh[1]) + AbsSq(xh[3]) + AbsSq(xh[4]);
+  const Real snr2 = std::sqrt(signal_energy / noise_energy); // Measured snr.
+  REQUIRE(snr2 == Approx(snr));
 }
 
 } // namespace mps

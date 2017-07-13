@@ -9,6 +9,7 @@ namespace {
 
 std::mt19937 rng;
 std::uniform_int_distribution<Int> uid;
+std::normal_distribution<Real> nd;
 
 // PowMod returns mod(b^e, m).
 // b=base, e=exponent, m=modulus.
@@ -29,11 +30,25 @@ Int InvMod(Int a, Int m) { return PowMod(a, m - 2, m); }
 
 } // namespace
 
+void MainInit(int argc, char *const argv[]) {
+  google::InitGoogleLogging(argv[0]);
+  google::InstallFailureSignalHandler();
+  rng.seed(123534);
+  LOG(INFO) << "mps::MainInit";
+}
+
+void RandomSeed(Long seed) { rng.seed(seed); }
 Int RandomInt() { return uid(rng); }
+Real RandomNormal() { return nd(rng); }
 
 CplexArray::CplexArray() {}
 
 CplexArray::CplexArray(Int n) { Resize(n); }
+
+CplexArray::CplexArray(std::initializer_list<Cplex> l) {
+  Resize(l.size());
+  std::copy(l.begin(), l.end(), data_);
+}
 
 void CplexArray::Reset() {
   if (data_) {
@@ -54,6 +69,47 @@ void CplexArray::Resize(Int n) {
 void CplexArray::Fill(Cplex x) { std::fill(data_, data_ + n_, x); }
 
 void CplexArray::Clear() { Fill(Cplex(0, 0)); }
+
+CplexArray EvaluateModes(Int n, const CplexArray &coef, const vector<Int> loc) {
+  CHECK_EQ(coef.size(), loc.size());
+  CplexArray x(n);
+  x.Clear();
+  for (Int i = 0; i < coef.size(); ++i) {
+    for (Int t = 0; t < n; ++t) {
+      const Real angle = (2.0 * M_PI) * Mod(loc[i] * Real(t), n) / Real(n);
+      x[t] += coef[i] * Sinusoid(angle);
+    }
+  }
+  return x;
+}
+
+// Generate Xhat with desired SNR.
+// SNR defined here as sqrt(signal energy / noise energy).
+CplexArray GenerateXhat(Int n, const CplexArray &coef, const vector<Int> &loc,
+                        Real snr) {
+  CHECK_EQ(coef.size(), loc.size());
+
+  CplexArray out(n);
+  Real noise_energy = 0;
+  for (Int i = 0; i < n; ++i) {
+    out[i] = Cplex(RandomNormal(), RandomNormal());
+    noise_energy += AbsSq(out[i]);
+  }
+  Real signal_energy = 0;
+  for (Int i = 0; i < coef.size(); ++i) {
+    signal_energy += AbsSq(coef[i]);
+    noise_energy -= AbsSq(out[loc[i]]);
+    out[loc[i]] = 0;
+  }
+  const Real factor = std::sqrt(signal_energy / noise_energy) / snr;
+  for (Int i = 0; i < n; ++i) {
+    out[i] *= factor;
+  }
+  for (Int i = 0; i < coef.size(); ++i) {
+    out[loc[i]] = coef[i];
+  }
+  return out;
+}
 
 CplexMatrix::CplexMatrix(Int rows, Int cols)
     : rows_(rows), cols_(cols), data_(rows) {
@@ -85,6 +141,7 @@ void FFTPlan::Run(const CplexArray &u, CplexArray *v) {
 Transform::Transform(Int n) {
   a = (RandomInt() % (n - 1)) + 1;
   b = RandomInt() % n;
+  c = RandomInt() % n;
   a_inv = InvMod(a, n);
 }
 
