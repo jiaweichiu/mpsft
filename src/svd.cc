@@ -4,7 +4,7 @@
 
 namespace mps {
 
-bool SVD22(const Mat22 &a, Real* sigma) {
+bool SVD22(const Mat22 &a, Real *sigma) {
   Eigen::JacobiSVD<Mat22> solver(a, Eigen::ComputeFullV);
 
   const auto &sv = solver.singularValues();
