@@ -31,6 +31,15 @@ cc_library(
   ],
 )
 
+cc_test(
+  name = "svd_test",
+  srcs = ["svd_test.cc"],
+  deps = [
+    ":svd",
+    ":catch",
+  ],
+)
+
 cc_library(
   name = "window",
   srcs = ["window.cc"],

@@ -63,7 +63,7 @@ void BinInTime(const Window &win, const Transform &tf, const TauSet &taus,
       const Real wt = win.wt(i <= p2 ? i : p - i);
       const Int j = PosMod(Long(tf.a) * Long(t + tau) + Long(tf.c), n);
       const Int k = PosMod(Long(tf.b) * Long(t + tau), n);
-      // Do mods for better accuracy.
+      // Do mods for better accuracy. Note fmod can be negative, but it is ok.
       const Real angle =
           (2.0 * M_PI) * (Real(k) / Real(n) + std::fmod(delta * Real(t), 1.0));
       (*scratch)[i % bins] += (x[j] * Sinusoid(angle)) * wt;
