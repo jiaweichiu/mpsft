@@ -2,15 +2,33 @@
 
 #include "base.h"
 #include "binner.h"
-#include "mpsft.h"
+#include "iterate.h"
 
 namespace mps {
+
+namespace {
+
+std::pair<Int, Int> CountGoodBad(const ModeMap& found, const ModeMap& ans) {
+  Int bad = 0;
+  Int good = 0;
+  for (const auto &kv : found) {
+    auto it = ans.find(kv.first);
+    if (it == ans.end()) {
+      ++bad;
+    } else {
+      ++good;
+    }
+  }
+  return std::make_pair(good, bad);
+}
+
+}  // namespace
 
 /*TEST_CASE("IterateBasic", "") {
   RandomSeed(123537);
 
   constexpr Int n = 1109;
-  constexpr Real sigma = 0.2;
+  constexpr double sigma = 0.2;
 
   IterateOptions opt;
   opt.bins = 5;
@@ -41,21 +59,19 @@ namespace mps {
   REQUIRE(std::abs(it2->second - Cplex(-2.4, 1.5)) < 1e-1);
 }*/
 
+
 TEST_CASE("IterateMore", "") {
   RandomSeed(123537);
 
   constexpr Int n = kPrimes[20];
-  constexpr Int num_modes = 1;
-  constexpr Real sigma = 1e-7;
+  constexpr Int num_modes = 1000;
+  constexpr double sigma = 1e-7;
 
   IterateOptions opt;
-  opt.bins = num_modes * 5;
-  if ((opt.bins % 2) == 0) {
-    ++opt.bins;
-  }
+  opt.bins = 2 * num_modes + 1;
   opt.window_delta = 1e-6;
-  opt.trials = 5;
-  opt.bin_threshold = 0.2;
+  opt.trials = 3;
+  opt.bin_threshold = 0.01;
   opt.window_threshold = 0.1;
 
   // Generate a list of random coefficients, each of magnitude 1.0.
@@ -73,21 +89,17 @@ TEST_CASE("IterateMore", "") {
   CplexArray x(n);
   plan.Run(xh, &x); // xh is the solution.
 
-  ModeMap ans_mm;
-  Int bad = 0;
-  Iterate(x, opt, &ans_mm);
-  for (const auto& kv : ans_mm) {
-    auto it = mm.find(kv.first);
-    LOG(INFO)<< kv.first << " " << std::abs(kv.second);
-    if (it == mm.end()) {
-      ++bad;
-    }
-  }
-  LOG(INFO) << "bad=" << bad << " good=" << ans_mm.size() - bad;
-  /*Iterate(x, opt, &ans_mm);
-  LOG(INFO) << ans_mm.size();
-  Iterate(x, opt, &ans_mm);
-  LOG(INFO) << ans_mm.size();*/
+  ModeMap found_mm;
+  Iterate(x, opt, &found_mm);
+  auto result = CountGoodBad(found_mm, mm);
+  REQUIRE(result.first >= 300);
+  REQUIRE(result.second <= 100);
+
+  opt.bins = (num_modes - 300) * 2 + 1;
+  Iterate(x, opt, &found_mm);
+  result = CountGoodBad(found_mm, mm);
+  REQUIRE(result.first >= 600);
+  REQUIRE(result.second <= 100);
 }
 
 } // namespace mps

@@ -1,4 +1,4 @@
-#include "mpsft.h"
+#include "iterate.h"
 #include "freqid.h"
 
 namespace mps {
@@ -36,7 +36,7 @@ void Iterate(const CplexArray &x, const IterateOptions &opt, ModeMap *mm) {
   FFTPlan plan(bins, FFTW_FORWARD);
   CplexArray scratch(bins);
 
-  vector<Real> list_q;
+  vector<double> list_q;
   TauSet taus;
   for (Int bit = 0; bit < bits; ++bit) {
     taus.list_s.push_back((1 << bit) * bins);
@@ -56,9 +56,9 @@ void Iterate(const CplexArray &x, const IterateOptions &opt, ModeMap *mm) {
     BinInFreq(win, tf, taus, *mm, a);
   }
 
-  Real sigma[2];
+  double sigma[2];
   for (Int b = 0; b < bins; ++b) {
-    Real bin_energy = 0;
+    double bin_energy = 0;
     for (Int trial = 0; trial < trials; ++trial) {
       bin_energy += AbsSq((*bin_coefs[trial])[0][b]);
     }
@@ -90,16 +90,16 @@ void Iterate(const CplexArray &x, const IterateOptions &opt, ModeMap *mm) {
     // xi1 is between 0 and 1.
     // [0, 1] is divided into 2^bits minibins.
     // xi1 is the center of one of these minibins.
-    const Real xi1 = Real(2 * xi_sum + 1) / Real(1 << (bits + 1));
+    const double xi1 = double(2 * xi_sum + 1) / double(1 << (bits + 1));
 
     // k1 is mode location after random permutation.
-    const Int k1 = std::round(Real(n) * (Real(b) + xi1) / Real(bins));
+    const Int k1 = std::round(double(n) * (double(b) + xi1) / double(bins));
     DCHECK_GE(k1, 0);
     DCHECK_LT(k1, n);
 
     // Check window in frequency / attentuation factor. If too small, reject.
-    const Real xi = Real(k1) / Real(n) - (Real(b) + 0.5) / Real(bins);
-    const Real wf = win.SampleInFreq(xi);
+    const double xi = double(k1) / double(n) - (double(b) + 0.5) / double(bins);
+    const double wf = win.SampleInFreq(xi);
 
     if (std::abs(wf) < opt.window_threshold) {
       continue;
@@ -110,16 +110,17 @@ void Iterate(const CplexArray &x, const IterateOptions &opt, ModeMap *mm) {
     for (Int trial = 0; trial < trials; ++trial) {
       const CplexMatrix &a = *bin_coefs[trial];
 
-      const Real angle =
-          -2.0 * M_PI * Real(Mod(Long(list_q[trial]) * Long(k1), n)) / Real(n);
+      const double angle = -2.0 * M_PI *
+                           double(Mod(Long(list_q[trial]) * Long(k1), n)) /
+                           double(n);
       const Cplex factor = Sinusoid(angle);
       coef_sum += a[0][b] * factor;
 
       for (Int bit = 0; bit < bits; ++bit) {
         // Try to do only one Sinusoid here instead of two, using symmetry.
-        const Real angle2 = -2.0 * M_PI *
-                            Real(Mod(Long(taus.list_s[bit]) * Long(k1), n)) /
-                            Real(n);
+        const double angle2 =
+            -2.0 * M_PI * double(Mod(Long(taus.list_s[bit]) * Long(k1), n)) /
+            double(n);
         const Cplex factor2 = Sinusoid(angle2);
         const Cplex f1 = factor * factor2;
         const Cplex f2 = factor * std::conj(factor2); // Divide by factor2.
@@ -127,13 +128,13 @@ void Iterate(const CplexArray &x, const IterateOptions &opt, ModeMap *mm) {
         coef_sum += a[2 * bit + 2][b] * f2;
       }
     }
-    Cplex coef = coef_sum / Real(trials * taus.size());
+    Cplex coef = coef_sum / double(trials * taus.size());
 
     // Undo the transform.
     // k0 is original mode location.
     const Int k0 = PosMod(Long(tf.a_inv) * (Long(k1) - Long(tf.b)), n);
-    coef *=
-        Sinusoid(-2.0 * M_PI * Real(Mod(Long(tf.c) * Long(k0), n)) / Real(n));
+    coef *= Sinusoid(-2.0 * M_PI * double(Mod(Long(tf.c) * Long(k0), n)) /
+                     double(n));
     coef /= wf;
 
     (*mm)[k0] += coef;

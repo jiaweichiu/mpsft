@@ -64,20 +64,20 @@ TEST_CASE("TransformBasic", "") {
 }
 
 TEST_CASE("GenerateXhatBasic", "") {
-  constexpr Int n = 5;    // Prime.
-  constexpr Real sigma = 8.0;
+  constexpr Int n = 5; // Prime.
+  constexpr double sigma = 8.0;
   constexpr Cplex coef = Cplex(0.5, 0.6);
   const ModeMap mm = {{2, coef}};
 
   const CplexArray xh = GenerateXhat(n, mm, sigma);
-  const Real noise_energy =
+  const double noise_energy =
       AbsSq(xh[0]) + AbsSq(xh[1]) + AbsSq(xh[3]) + AbsSq(xh[4]);
   REQUIRE(std::sqrt(noise_energy) == Approx(sigma));
 }
 
 TEST_CASE("GenerateXhatFFT", "") {
-  constexpr Int n = 10000;    // Prime.
-  constexpr Real sigma = 5.5;
+  constexpr Int n = 10000; // Prime.
+  constexpr double sigma = 5.5;
   const ModeMap mm;
 
   const CplexArray xh = GenerateXhat(n, mm, sigma);
@@ -85,12 +85,8 @@ TEST_CASE("GenerateXhatFFT", "") {
   FFTPlan plan(n, FFTW_BACKWARD);
   plan.Run(xh, &x);
 
-  Real sum = 0;
-  for (Int i = 0; i < x.size(); ++i) {
-    sum += AbsSq(x[i]);
-  }
   // Mean square error in time domain.
-  const Real mse = std::sqrt(sum / x.size());
+  const double mse = std::sqrt(x.Energy() / x.size());
   REQUIRE(mse == Approx(sigma));
 }
 

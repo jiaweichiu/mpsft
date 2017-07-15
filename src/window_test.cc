@@ -7,7 +7,7 @@ namespace mps {
 
 constexpr Int n = 1109;
 constexpr Int bins = 5;
-constexpr Real delta = 1e-6;
+constexpr double delta = 1e-6;
 
 TEST_CASE("WindowBasic", "") {
   Window window(n, bins, delta);
@@ -50,7 +50,7 @@ TEST_CASE("WindowBasic", "") {
   REQUIRE(window.SampleInFreq(0) == Approx(RE(ah[0])));
   const Int n2 = (n - 1) / 2;
   for (Int i = 1; i <= n2; ++i) {
-    const Real xi = Real(i) / n;
+    const double xi = double(i) / n;
     REQUIRE(window.SampleInFreq(xi) == Approx(RE(ah[i])));
     REQUIRE(window.SampleInFreq(-xi) == Approx(RE(ah[n - i])));
   }

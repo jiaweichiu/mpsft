@@ -13,7 +13,7 @@ struct IterateOptions {
 
   // window_delta controls the window. Smaller delta means a more "accurate"
   // window. However, it also means more work for BinInTime.
-  Real window_delta;
+  double window_delta;
 
   // Increase trials to improve chance of mode identification.
   // Does not help so much with coefficient estimation.
@@ -21,12 +21,12 @@ struct IterateOptions {
 
   // To speed things up, we do not want to process every bin.
   // If the bin coefficient is too small, we want to skip.
-  Real bin_threshold;
+  double bin_threshold;
 
   // Each isolated mode is attentuated by some factor. If this factor is too
   // small, we want to skip because coefficient estimation would be more
   // sensitive to errors.
-  Real window_threshold;
+  double window_threshold;
 };
 
 // x is the signal in time domain.

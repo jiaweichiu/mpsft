@@ -79,9 +79,9 @@ cc_test(
 )
 
 cc_library(
-  name = "mpsft",
-  srcs = ["mpsft.cc"],
-  hdrs = ["mpsft.h"],
+  name = "iterate",
+  srcs = ["iterate.cc"],
+  hdrs = ["iterate.h"],
   deps = [
     ":binner",
     ":freqid",
@@ -90,10 +90,10 @@ cc_library(
 )
 
 cc_test(
-  name = "mpsft_test",
-  srcs = ["mpsft_test.cc"],
+  name = "iterate_test",
+  srcs = ["iterate_test.cc"],
   deps = [
     ":catch",
-    ":mpsft",
+    ":iterate",
   ],
 )

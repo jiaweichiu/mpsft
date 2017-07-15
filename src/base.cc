@@ -9,7 +9,7 @@ namespace {
 
 std::mt19937 rng;
 std::uniform_int_distribution<Int> uid;
-std::normal_distribution<Real> nd;
+std::normal_distribution<double> nd;
 
 // PowMod returns mod(b^e, m).
 // b=base, e=exponent, m=modulus.
@@ -39,7 +39,7 @@ void MainInit(int argc, char *const argv[]) {
 
 void RandomSeed(Long seed) { rng.seed(seed); }
 Int RandomInt() { return uid(rng); }
-Real RandomNormal() { return nd(rng); }
+double RandomNormal() { return nd(rng); }
 
 CplexArray::CplexArray() {}
 
@@ -56,6 +56,14 @@ void CplexArray::Reset() {
     n_ = 0;
     data_ = nullptr;
   }
+}
+
+double CplexArray::Energy() const {
+  double ans = 0;
+  for (Int i = 0; i < n_; ++i) {
+    ans += AbsSq(data_[i]);
+  }
+  return ans;
 }
 
 CplexArray::~CplexArray() { Reset(); }
@@ -75,7 +83,8 @@ CplexArray EvaluateModes(Int n, const ModeMap &mm) {
   x.Clear();
   for (const auto &kv : mm) {
     for (Int t = 0; t < n; ++t) {
-      const Real angle = (2.0 * M_PI) * Mod(kv.first * Real(t), n) / Real(n);
+      const double angle =
+          (2.0 * M_PI) * Mod(kv.first * double(t), n) / double(n);
       x[t] += kv.second * Sinusoid(angle);
     }
   }
@@ -83,9 +92,9 @@ CplexArray EvaluateModes(Int n, const ModeMap &mm) {
 }
 
 // Generate Xhat. Noise energy will sum up to n*sigma*sigma.
-CplexArray GenerateXhat(Int n, const ModeMap &mm, Real sigma) {
+CplexArray GenerateXhat(Int n, const ModeMap &mm, double sigma) {
   CplexArray out(n);
-  Real noise_energy = 0;
+  double noise_energy = 0;
   for (Int i = 0; i < n; ++i) {
     out[i] = Cplex(RandomNormal(), RandomNormal());
     noise_energy += AbsSq(out[i]);
@@ -94,7 +103,7 @@ CplexArray GenerateXhat(Int n, const ModeMap &mm, Real sigma) {
     noise_energy -= AbsSq(out[kv.first]);
   }
   // Rescale noise by this factor.
-  const Real factor = sigma / std::sqrt(noise_energy);
+  const double factor = sigma / std::sqrt(noise_energy);
   for (Int i = 0; i < n; ++i) {
     out[i] *= factor;
   }

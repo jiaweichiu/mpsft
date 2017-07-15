@@ -17,11 +17,9 @@ namespace mps {
 
 using Int = int32_t;
 using Long = int64_t;
-using Real = double;
-using Cplex = std::complex<Real>;
+using Cplex = std::complex<double>;
 
 using IntPair = std::pair<Int, Int>;
-using RealPair = std::pair<Real, Real>;
 using CplexPair = std::pair<Cplex, Cplex>;
 using ModeMap = std::unordered_map<Int, Cplex>;
 
@@ -41,7 +39,7 @@ void MainInit(int argc, char *const argv[]);
 
 void RandomSeed(Long seed);
 Int RandomInt();
-Real RandomNormal();
+double RandomNormal();
 
 // Our only macros! We try not to.
 #define RE std::real
@@ -50,10 +48,10 @@ Real RandomNormal();
 // Force cast into longs.
 inline Int PosMod(Long x, Long n) { return ((x % n) + n) % n; }
 inline Int Mod(Long x, Long n) { return x % n; }
-inline Real AbsSq(Cplex x) { return RE(x) * RE(x) + IM(x) * IM(x); }
+inline double AbsSq(Cplex x) { return RE(x) * RE(x) + IM(x) * IM(x); }
 
-inline Real Square(Real x) { return x * x; }
-inline Cplex Sinusoid(Real theta) {
+inline double Square(double x) { return x * x; }
+inline Cplex Sinusoid(double theta) {
   return Cplex(std::cos(theta), std::sin(theta));
 }
 
@@ -74,6 +72,7 @@ public:
   void Reset();
   void Fill(Cplex x);
   void Clear();
+  double Energy() const;
 
   inline Int size() const { return n_; }
   inline Cplex &operator[](Int i) { return data_[i]; }
@@ -91,7 +90,7 @@ CplexArray EvaluateModes(Int n, const ModeMap &mm);
 // contaminated by N(0, sigma).
 // Note: x(t) = sum_k xh[k] exp(2*pi*i*k*t). This is unnormalized.
 // If xh[k] ~ N(0, s*s), then x(t) ~ N(0, s*s*n) where s*s*n=sigma*sigma.
-CplexArray GenerateXhat(Int n, const ModeMap &mm, Real sigma);
+CplexArray GenerateXhat(Int n, const ModeMap &mm, double sigma);
 
 class CplexMatrix {
 public:

@@ -17,15 +17,16 @@ Int TauSet::value(Int idx) const {
 // delta = -0.5/bins.
 // bq_factor = Sinusoid(b*q/N).
 // win_factor = wt * 0.5.
-// inline CplexPair BinInTimeHelper(Int n, Real delta, const Transform &tf, Int
+// inline CplexPair BinInTimeHelper(Int n, double delta, const Transform &tf,
+// Int
 // t,
-//                                  Int q, Int s, Cplex bq_factor, Real
+//                                  Int q, Int s, Cplex bq_factor, double
 //                                  win_factor,
 //                                  const vector<Cplex> &x) {
 //   const Int i = PosMod(Long(tf.a) * Long(q + s + t) + Long(tf.c), n);
 //   const Int j = PosMod(Long(tf.a) * Long(q - s - t) + Long(tf.c), n);
 //   const Int u = Mod(Long(tf.b) * Long(t + s), n);
-//   const Cplex sinusoid = Sinusoid(Real(u) / Real(n) - delta);
+//   const Cplex sinusoid = Sinusoid(double(u) / double(n) - delta);
 //   const Cplex v1 = x[i] * bq_factor;
 //   const Cplex v2 = std::conj(x[j] * bq_factor);
 
@@ -46,7 +47,7 @@ void BinInTime(const Window &win, const Transform &tf, const TauSet &taus,
   DCHECK_EQ(bins, scratch->size());
   DCHECK_EQ(bins, plan->n());
 
-  const Real delta = -0.5 / Real(bins);
+  const double delta = -0.5 / double(bins);
   // const Cplex bq_factor = Sinusoid(Mod(Long(tf.b) * Long(q), n));
 
   const Int n = win.n();
@@ -60,12 +61,12 @@ void BinInTime(const Window &win, const Transform &tf, const TauSet &taus,
     scratch->Clear();
     for (Int i = 0; i < p; ++i) {
       const Int t = i <= p2 ? i : i - p;
-      const Real wt = win.wt(i <= p2 ? i : p - i);
+      const double wt = win.wt(i <= p2 ? i : p - i);
       const Int j = PosMod(Long(tf.a) * Long(t + tau) + Long(tf.c), n);
       const Int k = PosMod(Long(tf.b) * Long(t + tau), n);
       // Do mods for better accuracy. Note fmod can be negative, but it is ok.
-      const Real angle =
-          (2.0 * M_PI) * (Real(k) / Real(n) + std::fmod(delta * Real(t), 1.0));
+      const double angle = (2.0 * M_PI) * (double(k) / double(n) +
+                                           std::fmod(delta * double(t), 1.0));
       (*scratch)[i % bins] += (x[j] * Sinusoid(angle)) * wt;
     }
     // Do B-point FFT.
@@ -84,12 +85,13 @@ void BinInFreq(const Window &win, const Transform &tf, const TauSet &taus,
     const Int k = kv.first;
     const Int l = PosMod(Long(tf.a) * Long(k) + Long(tf.b), n); // 0 to n-1.
     const Int bin = Int(Long(l) * Long(bins) / Long(n));
-    const Real xi = (Real(bin) + 0.5) / Real(bins) - Real(l) / Real(n);
-    const Real wf = win.SampleInFreq(xi);
+    const double xi =
+        (double(bin) + 0.5) / double(bins) - double(l) / double(n);
+    const double wf = win.SampleInFreq(xi);
     for (Int u = 0; u < taus.size(); ++u) {
       const Int tau = taus.value(u);
       const Int s = Mod(Long(tf.c) * Long(k) + Long(l) * Long(tau), n);
-      const Real angle = (2.0 * M_PI) * (Real(s) / Real(n));
+      const double angle = (2.0 * M_PI) * (double(s) / double(n));
       (*out)[u][bin] -= (kv.second * Sinusoid(angle)) * wf;
     }
   }

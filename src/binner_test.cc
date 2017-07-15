@@ -75,16 +75,9 @@ TEST_CASE("BinnerBigger", "") {
   FFTPlan plan(bins, -1);
   BinInTime(win, tf, taus, x, &plan, &out_time, &scratch);
 
-  for (Int i = 0; i < bins; ++i) {
-    LOG(INFO) << out_time[0][i];
-  }
-
   CplexMatrix out_freq(taus.size(), bins);
   out_freq.Clear();
   BinInFreq(win, tf, taus, mm, &out_freq); // Subtract.
-  for (Int i = 0; i < bins; ++i) {
-    LOG(INFO) << out_freq[0][i];
-  }
 
   for (Int i = 0; i < bins; ++i) {
     REQUIRE(std::abs(out_time[0][i] + out_freq[0][i]) == Approx(0));

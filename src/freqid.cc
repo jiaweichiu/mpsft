@@ -4,7 +4,7 @@ namespace mps {
 
 using Mat22 = Eigen::Matrix<Cplex, 2, 2>;
 
-bool MatPencil(Cplex u0, Cplex u1, Cplex u2, Real *sigma) {
+bool MatPencil(Cplex u0, Cplex u1, Cplex u2, double *sigma) {
   Mat22 a;
   a(0, 0) = u0;
   a(0, 1) = u2;

@@ -7,7 +7,7 @@
 
 namespace mps {
 
-Window::Window(Int n, Int bins, Real delta)
+Window::Window(Int n, Int bins, double delta)
     : n_(n), bins_(bins), delta_(delta) {
   CHECK_GT(n_, 0);
   CHECK_GT(bins_, 0);
@@ -15,15 +15,15 @@ Window::Window(Int n, Int bins, Real delta)
   CHECK_EQ(1, bins_ % 2) << "Odd b expected";
 
   width_ = 1.0 / (2.0 * bins_);
-  const Real sqrt_c_delta = ::sqrt(-::log(delta_));
+  const double sqrt_c_delta = ::sqrt(-::log(delta_));
   sigma_f_ = 0.5 / (bins_ * 2.0 * M_SQRT2 * sqrt_c_delta);
   sigma_t_ = 1.0 / ((2.0 * M_PI) * sigma_f_);
 
   {
     // Decide p, the size of support.
     // p has to be sufficiently large.
-    Real tmp = 2.0 * M_SQRT2 * sigma_t_ * sqrt_c_delta + 1;
-    Int factor = Int(std::ceil(tmp / Real(bins_)));
+    double tmp = 2.0 * M_SQRT2 * sigma_t_ * sqrt_c_delta + 1;
+    Int factor = Int(std::ceil(tmp / double(bins_)));
     if ((factor % 2) == 0) {
       ++factor;
     }
@@ -40,18 +40,18 @@ Window::Window(Int n, Int bins, Real delta)
   }
 }
 
-Real Window::SampleInTime(Int i) const {
-  const Real t = Real(i);
-  const Real u = t * M_PI * sigma_f_;
-  return width_ * boost::math::sinc_pi<Real>(t * M_PI * width_) *
+double Window::SampleInTime(Int i) const {
+  const double t = double(i);
+  const double u = t * M_PI * sigma_f_;
+  return width_ * boost::math::sinc_pi<double>(t * M_PI * width_) *
          ::exp(-2.0 * u * u);
 }
 
-Real Window::SampleInFreq(Real xi) const {
-  const Real c = 0.5 * width_;
-  const Real d = M_SQRT2 * M_PI * sigma_t_;
-  return 0.5 * (boost::math::erf<Real>((xi + c) * d) -
-                boost::math::erf<Real>((xi - c) * d));
+double Window::SampleInFreq(double xi) const {
+  const double c = 0.5 * width_;
+  const double d = M_SQRT2 * M_PI * sigma_t_;
+  return 0.5 * (boost::math::erf<double>((xi + c) * d) -
+                boost::math::erf<double>((xi - c) * d));
 }
 
 } // namespace mps
