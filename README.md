@@ -17,3 +17,13 @@ It has been a long time. I need to update some details, and at least put on arxi
 make
 make install
 ```
+
+## Install Google benchmarks
+
+Follow instructions to install Google benchmarks.
+
+Then make a symbolic link to the static lib. Ensure you can build `:benchmark`.
+
+```
+ln -s /usr/local/lib/libbenchmark.a libbenchmark.a
+```

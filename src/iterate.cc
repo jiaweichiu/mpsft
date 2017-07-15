@@ -78,7 +78,7 @@ void Iterate(const CplexArray &x, const IterateOptions &opt, ModeMap *mm) {
     const Int q = RandomInt() % n;
     list_q.push_back(q);
 
-    bin_coefs[trial].reset(new CplexMatrix(1+2*bits, bins));
+    bin_coefs[trial].reset(new CplexMatrix(1 + 2 * bits, bins));
     // BinInTime will produce "bins" number of coefficients for each tau.
     CplexMatrix *a = bin_coefs[trial].get();
     binner.BinInTime(x, q, a);
@@ -130,8 +130,8 @@ void Iterate(const CplexArray &x, const IterateOptions &opt, ModeMap *mm) {
       for (Int bit = 0; bit < bits; ++bit) {
         // Try to do only one Sinusoid here instead of two, using symmetry.
         const double angle2 =
-            -2.0 * M_PI * double(Mod(Long(bins) * Long(1 << bit) * Long(k1), n)) /
-            double(n);
+            -2.0 * M_PI *
+            double(Mod(Long(bins) * Long(1 << bit) * Long(k1), n)) / double(n);
         const Cplex factor2 = Sinusoid(angle2);
         const Cplex f1 = factor * factor2;
         const Cplex f2 = factor * std::conj(factor2); // Divide by factor2.

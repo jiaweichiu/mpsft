@@ -20,7 +20,7 @@ TEST_CASE("BinnerBasic", "") {
   // Prepare binning.
   Transform tf(n, 3, 847, 45);
   Binner binner(win, tf, bits);
-  
+
   // BinInTime.
   CplexMatrix out_time(1 + 2 * bits, bins);
   binner.BinInTime(x, q, &out_time);

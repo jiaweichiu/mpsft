@@ -1,6 +1,6 @@
 #include <benchmark/benchmark.h>
 
-static void BM_StringCreation(benchmark::State& state) {
+static void BM_StringCreation(benchmark::State &state) {
   while (state.KeepRunning())
     std::string empty_string;
 }
@@ -8,7 +8,7 @@ static void BM_StringCreation(benchmark::State& state) {
 BENCHMARK(BM_StringCreation);
 
 // Define another benchmark
-static void BM_StringCopy(benchmark::State& state) {
+static void BM_StringCopy(benchmark::State &state) {
   std::string x = "hello";
   while (state.KeepRunning())
     std::string copy(x);
