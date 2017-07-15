@@ -27,3 +27,5 @@ Then make a symbolic link to the static lib. Ensure you can build `:benchmark`.
 ```
 ln -s /usr/local/lib/libbenchmark.a libbenchmark.a
 ```
+
+Be sure to disable CPU scaling. See for example https://askubuntu.com/questions/523640/how-i-can-disable-cpu-frequency-scaling-and-set-the-system-to-performance

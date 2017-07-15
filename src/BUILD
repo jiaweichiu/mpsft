@@ -99,8 +99,17 @@ cc_test(
 )
 
 cc_library(
-  name = "benchmark",
+  name = "benchmark_lib",
   srcs = ["libbenchmark.a"],
+)
+
+cc_library(
+  name = "benchmark",
+  srcs = ["benchmark.cc"],
+  deps = [
+    ":base",
+    ":benchmark_lib",
+  ],
 )
 
 cc_test(
