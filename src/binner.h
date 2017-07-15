@@ -16,7 +16,7 @@ namespace mps {
   inline Int value(Int idx) const;
 };*/
 
-class TauSet {
+/*class TauSet {
 public:
   TauSet(Int q, Int bins, Int bits);
   inline Int size() const { return 1 + 2 * bits_; }
@@ -28,7 +28,7 @@ private:
   Int q_;
   Int bins_;
   Int bits_;
-};
+};*/
 
 /*
 1) Assume plan is forward FFT and has size equal to number of bins.
@@ -38,12 +38,19 @@ private:
 5) scratch is of size B where B is number of bins.
 6) out[0] -> q, out[1] -> q+s[0], out[2] -> q-s[0], out[3] -> q+s[1], ...
 */
-void BinInTime(const Window &win, const Transform &tf, const TauSet &taus,
-               const CplexArray &x, FFTPlan *plan, CplexMatrix *out,
-               CplexArray *scratch);
+class Binner {
+public:
+  Binner(const Window &win, const Transform &tf, Int bits);
 
-// Subtract results from out. Similar convention as BinInTime.
-void BinInFreq(const Window &win, const Transform &tf, const TauSet &taus,
-               const ModeMap &mm, CplexMatrix *out);
+  void BinInTime(const CplexArray &x, Int q, CplexMatrix *out);
+  void BinInFreq(const ModeMap &mm, Int q, CplexMatrix *out);
+
+private:
+  const Window &win_;
+  const Transform &tf_;
+  Int bits_;
+  unique_ptr<FFTPlan> plan_;
+  unique_ptr<CplexArray> scratch_;
+};
 
 } // namespace mps

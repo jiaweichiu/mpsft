@@ -4,17 +4,19 @@
 
 namespace mps {
 
-TauSet::TauSet(Int q, Int bins, Int bits) : q_(q), bins_(bins), bits_(bits) {}
+namespace {
 
-Int TauSet::tau(Int idx) const {
+Int GetTau(Int q, Int bins, Int idx) {
   if (idx == 0) {
-    return q_;
+    return q;
   }
   if (idx & 1) {
-    return q_ + bins_ * (1 << ((idx - 1) / 2));
+    return q + bins * (1 << ((idx - 1) / 2));
   }
-  return q_ - bins_ * (1 << (idx / 2 - 1));
+  return q - bins * (1 << (idx / 2 - 1));
 }
+
+} // namespace
 
 // delta = -0.5/bins.
 // bq_factor = Sinusoid(b*q/N).
@@ -36,67 +38,63 @@ Int TauSet::tau(Int idx) const {
 //                         RotateBackward(win_factor * sinusoid * (v1 - v2)));
 // }
 
-void BinInTime(const Window &win, const Transform &tf, const TauSet &taus,
-               const CplexArray &x, FFTPlan *plan, CplexMatrix *out,
-               CplexArray *scratch) {
-  // const Int q = taus.q;
-  DCHECK(plan);
-  DCHECK(scratch);
-  DCHECK_EQ(out->rows(), taus.size());
-  DCHECK_EQ(plan->sign(), FFTW_FORWARD);
-
-  const Int bins = win.bins();
-  DCHECK_EQ(bins, scratch->size());
-  DCHECK_EQ(bins, plan->n());
+void Binner::BinInTime(const CplexArray &x, Int q, CplexMatrix *out) {
+  CHECK_EQ(out->rows(), 1 + 2 * bits_);
+  const Int bins = win_.bins();
+  const Int n = win_.n();
 
   const double delta = -0.5 / double(bins);
-  // const Cplex bq_factor = Sinusoid(Mod(Long(tf.b) * Long(q), n));
-
-  const Int n = win.n();
   DCHECK_EQ(n, x.size());
 
-  const Int p = win.p();
+  const Int p = win_.p();
   const Int p2 = (p - 1) / 2;
 
-  for (Int u = 0; u < taus.size(); ++u) {
-    const Int tau = taus.tau(u);
-    scratch->Clear();
+  for (Int u = 0; u < out->rows(); ++u) {
+    const Int tau = GetTau(q, bins, u);
+    scratch_->Clear();
     for (Int i = 0; i < p; ++i) {
       const Int t = i <= p2 ? i : i - p;
-      const double wt = win.wt(i <= p2 ? i : p - i);
-      const Int j = PosMod(Long(tf.a) * Long(t + tau) + Long(tf.c), n);
-      const Int k = PosMod(Long(tf.b) * Long(t + tau), n);
+      const double wt = win_.wt(i <= p2 ? i : p - i);
+      const Int j = PosMod(Long(tf_.a) * Long(t + tau) + Long(tf_.c), n);
+      const Int k = PosMod(Long(tf_.b) * Long(t + tau), n);
       // Do mods for better accuracy. Note fmod can be negative, but it is ok.
       const double angle = (2.0 * M_PI) * (double(k) / double(n) +
                                            std::fmod(delta * double(t), 1.0));
-      (*scratch)[i % bins] += (x[j] * Sinusoid(angle)) * wt;
+      (*scratch_)[i % bins] += (x[j] * Sinusoid(angle)) * wt;
     }
     // Do B-point FFT.
     CplexArray &v = (*out)[u];
     DCHECK_EQ(bins, v.size());
-    plan->Run(*scratch, &v);
+    plan_->Run(*scratch_, &v);
   }
 }
 
-void BinInFreq(const Window &win, const Transform &tf, const TauSet &taus,
-               const ModeMap &mm, CplexMatrix *out) {
-  const Int bins = win.bins();
-  const Int n = win.n();
+void Binner::BinInFreq(const ModeMap &mm, Int q, CplexMatrix *out) {
+  CHECK_EQ(out->rows(), 1 + 2 * bits_);
+  const Int bins = win_.bins();
+  const Int n = win_.n();
 
   for (const auto &kv : mm) {
     const Int k = kv.first;
-    const Int l = PosMod(Long(tf.a) * Long(k) + Long(tf.b), n); // 0 to n-1.
+    const Int l = PosMod(Long(tf_.a) * Long(k) + Long(tf_.b), n); // 0 to n-1.
     const Int bin = Int(Long(l) * Long(bins) / Long(n));
     const double xi =
         (double(bin) + 0.5) / double(bins) - double(l) / double(n);
-    const double wf = win.SampleInFreq(xi);
-    for (Int u = 0; u < taus.size(); ++u) {
-      const Int tau = taus.tau(u);
-      const Int s = Mod(Long(tf.c) * Long(k) + Long(l) * Long(tau), n);
+    const double wf = win_.SampleInFreq(xi);
+    for (Int u = 0; u < out->rows(); ++u) {
+      const Int tau = GetTau(q, bins, u);
+      const Int s = Mod(Long(tf_.c) * Long(k) + Long(l) * Long(tau), n);
       const double angle = (2.0 * M_PI) * (double(s) / double(n));
       (*out)[u][bin] -= (kv.second * Sinusoid(angle)) * wf;
     }
   }
+}
+
+Binner::Binner(const Window &win, const Transform &tf, Int bits)
+    : win_(win), tf_(tf), bits_(bits) {
+  const Int bins = win.bins();
+  plan_.reset(new FFTPlan(bins, FFTW_FORWARD));
+  scratch_.reset(new CplexArray(bins));
 }
 
 } // namespace mps
