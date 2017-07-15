@@ -24,7 +24,7 @@ std::pair<Int, Int> CountGoodBad(const ModeMap& found, const ModeMap& ans) {
 
 }  // namespace
 
-/*TEST_CASE("IterateBasic", "") {
+TEST_CASE("IterateBasic", "") {
   RandomSeed(123537);
 
   constexpr Int n = 1109;
@@ -57,7 +57,7 @@ std::pair<Int, Int> CountGoodBad(const ModeMap& found, const ModeMap& ans) {
   auto it2 = ans_mm.find(660);
   REQUIRE(it2 != ans_mm.end());
   REQUIRE(std::abs(it2->second - Cplex(-2.4, 1.5)) < 1e-1);
-}*/
+}
 
 
 TEST_CASE("IterateMore", "") {
