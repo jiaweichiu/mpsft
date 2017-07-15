@@ -68,27 +68,21 @@ void Iterate(const CplexArray &x, const IterateOptions &opt, ModeMap *mm) {
   const Int bits = NumBits(n, bins);
 
   Transform tf(n);
-  FFTPlan plan(bins, FFTW_FORWARD);
-  CplexArray scratch(bins);
+  Binner binner(win, tf, bits);
 
   vector<double> list_q;
-  // TauSet taus;
-  // for (Int bit = 0; bit < bits; ++bit) {
-  //   taus.list_s.push_back((1 << bit) * bins);
-  // }
-
   vector<unique_ptr<CplexMatrix>> bin_coefs(trials);
+
   // Repeat "trials" number of times.
   for (Int trial = 0; trial < trials; ++trial) {
     const Int q = RandomInt() % n;
     list_q.push_back(q);
-    const TauSet taus(q, bins, bits);
 
-    bin_coefs[trial].reset(new CplexMatrix(taus.size(), bins));
+    bin_coefs[trial].reset(new CplexMatrix(1+2*bits, bins));
     // BinInTime will produce "bins" number of coefficients for each tau.
     CplexMatrix *a = bin_coefs[trial].get();
-    BinInTime(win, tf, taus, x, &plan, a, &scratch);
-    BinInFreq(win, tf, taus, *mm, a);
+    binner.BinInTime(x, q, a);
+    binner.BinInFreq(*mm, q, a);
   }
 
   for (Int b = 0; b < bins; ++b) {
@@ -126,9 +120,7 @@ void Iterate(const CplexArray &x, const IterateOptions &opt, ModeMap *mm) {
     // Estimate coefficient in transformed signal.
     Cplex coef_sum = 0;
     for (Int trial = 0; trial < trials; ++trial) {
-      const TauSet taus(list_q[trial], bins, bits);
       const CplexMatrix &a = *bin_coefs[trial];
-
       const double angle = -2.0 * M_PI *
                            double(Mod(Long(list_q[trial]) * Long(k1), n)) /
                            double(n);
@@ -138,7 +130,7 @@ void Iterate(const CplexArray &x, const IterateOptions &opt, ModeMap *mm) {
       for (Int bit = 0; bit < bits; ++bit) {
         // Try to do only one Sinusoid here instead of two, using symmetry.
         const double angle2 =
-            -2.0 * M_PI * double(Mod(Long(taus.offset(bit)) * Long(k1), n)) /
+            -2.0 * M_PI * double(Mod(Long(bins) * Long(1 << bit) * Long(k1), n)) /
             double(n);
         const Cplex factor2 = Sinusoid(angle2);
         const Cplex f1 = factor * factor2;
