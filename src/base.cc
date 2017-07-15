@@ -73,7 +73,7 @@ void CplexArray::Clear() { Fill(Cplex(0, 0)); }
 CplexArray EvaluateModes(Int n, const ModeMap &mm) {
   CplexArray x(n);
   x.Clear();
-  for (const auto& kv : mm) {
+  for (const auto &kv : mm) {
     for (Int t = 0; t < n; ++t) {
       const Real angle = (2.0 * M_PI) * Mod(kv.first * Real(t), n) / Real(n);
       x[t] += kv.second * Sinusoid(angle);
@@ -82,26 +82,23 @@ CplexArray EvaluateModes(Int n, const ModeMap &mm) {
   return x;
 }
 
-// Generate Xhat with desired SNR.
-// SNR defined here as sqrt(signal energy / noise energy).
-CplexArray GenerateXhat(Int n, const ModeMap& mm, Real snr) {
+// Generate Xhat. Noise energy will sum up to n*sigma*sigma.
+CplexArray GenerateXhat(Int n, const ModeMap &mm, Real sigma) {
   CplexArray out(n);
   Real noise_energy = 0;
   for (Int i = 0; i < n; ++i) {
     out[i] = Cplex(RandomNormal(), RandomNormal());
     noise_energy += AbsSq(out[i]);
   }
-  Real signal_energy = 0;
-  for (const auto& kv : mm) {
-    signal_energy += AbsSq(kv.second);
+  for (const auto &kv : mm) {
     noise_energy -= AbsSq(out[kv.first]);
   }
   // Rescale noise by this factor.
-  const Real factor = std::sqrt(signal_energy / noise_energy) / snr;
+  const Real factor = sigma / std::sqrt(noise_energy);
   for (Int i = 0; i < n; ++i) {
     out[i] *= factor;
   }
-  for (const auto& kv : mm) {
+  for (const auto &kv : mm) {
     out[kv.first] = kv.second;
   }
   return out;

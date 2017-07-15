@@ -63,17 +63,35 @@ TEST_CASE("TransformBasic", "") {
   REQUIRE(PosMod(Long(tf.a_inv) * Long(tf.a), n) == 1);
 }
 
-TEST_CASE("GenerateXhat", "") {
+TEST_CASE("GenerateXhatBasic", "") {
   constexpr Int n = 5;    // Prime.
-  constexpr Real snr = 8; // Expected snr.
+  constexpr Real sigma = 8.0;
   constexpr Cplex coef = Cplex(0.5, 0.6);
   const ModeMap mm = {{2, coef}};
-  const CplexArray xh = GenerateXhat(n, mm, snr);
-  const Real signal_energy = AbsSq(coef);
+
+  const CplexArray xh = GenerateXhat(n, mm, sigma);
   const Real noise_energy =
       AbsSq(xh[0]) + AbsSq(xh[1]) + AbsSq(xh[3]) + AbsSq(xh[4]);
-  const Real snr2 = std::sqrt(signal_energy / noise_energy); // Measured snr.
-  REQUIRE(snr2 == Approx(snr));
+  REQUIRE(std::sqrt(noise_energy) == Approx(sigma));
+}
+
+TEST_CASE("GenerateXhatFFT", "") {
+  constexpr Int n = 10000;    // Prime.
+  constexpr Real sigma = 5.5;
+  const ModeMap mm;
+
+  const CplexArray xh = GenerateXhat(n, mm, sigma);
+  CplexArray x(n);
+  FFTPlan plan(n, FFTW_BACKWARD);
+  plan.Run(xh, &x);
+
+  Real sum = 0;
+  for (Int i = 0; i < x.size(); ++i) {
+    sum += AbsSq(x[i]);
+  }
+  // Mean square error in time domain.
+  const Real mse = std::sqrt(sum / x.size());
+  REQUIRE(mse == Approx(sigma));
 }
 
 } // namespace mps

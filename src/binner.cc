@@ -80,7 +80,7 @@ void BinInFreq(const Window &win, const Transform &tf, const TauSet &taus,
   const Int bins = win.bins();
   const Int n = win.n();
 
-  for (const auto& kv : mm) {
+  for (const auto &kv : mm) {
     const Int k = kv.first;
     const Int l = PosMod(Long(tf.a) * Long(k) + Long(tf.b), n); // 0 to n-1.
     const Int bin = Int(Long(l) * Long(bins) / Long(n));

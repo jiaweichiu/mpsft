@@ -29,6 +29,14 @@ using std::string;
 using std::unique_ptr;
 using std::vector;
 
+// List of primes close to powers of 2.
+constexpr Int kPrimes[] = {2,        3,        5,         7,         17,
+                           31,       67,       127,       257,       509,
+                           1021,     2053,     4099,      8191,      16381,
+                           32771,    65537,    131071,    262147,    524287,
+                           1048573,  2097143,  4194301,   8388617,   16777213,
+                           33554467, 67108859, 134217757, 268435459, 536870909};
+
 void MainInit(int argc, char *const argv[]);
 
 void RandomSeed(Long seed);
@@ -77,8 +85,13 @@ private:
   Cplex *data_ = nullptr;
 };
 
-CplexArray EvaluateModes(Int n, const ModeMap& mm);
-CplexArray GenerateXhat(Int n, const ModeMap& mm, Real snr);
+CplexArray EvaluateModes(Int n, const ModeMap &mm);
+
+// Add ambience noise such that in the *time domain*, each sample point is
+// contaminated by N(0, sigma).
+// Note: x(t) = sum_k xh[k] exp(2*pi*i*k*t). This is unnormalized.
+// If xh[k] ~ N(0, s*s), then x(t) ~ N(0, s*s*n) where s*s*n=sigma*sigma.
+CplexArray GenerateXhat(Int n, const ModeMap &mm, Real sigma);
 
 class CplexMatrix {
 public:
