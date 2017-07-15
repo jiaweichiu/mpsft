@@ -17,9 +17,7 @@ TEST_CASE("BinnerBasic", "") {
 
   // Prepare binning.
   Transform tf(n, 3, 847, 45);
-  TauSet taus;
-  taus.q = 106;
-  taus.list_s = {3, 7};
+  TauSet taus(106, bins, 2);
 
   // BinInTime.
   CplexArray scratch(bins);
@@ -67,8 +65,7 @@ TEST_CASE("BinnerBigger", "") {
 
   // Prepare binning.
   Transform tf(n, 0x3FFFFFFF, 0xEEEEEEEE, 0xDDDDDD);
-  TauSet taus;
-  taus.q = 0xFFFFFF;
+  TauSet taus(0xFFFFFF, 1, 0);
 
   CplexArray scratch(bins);
   CplexMatrix out_time(taus.size(), bins);

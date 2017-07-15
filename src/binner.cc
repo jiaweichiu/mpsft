@@ -4,14 +4,16 @@
 
 namespace mps {
 
-Int TauSet::value(Int idx) const {
+TauSet::TauSet(Int q, Int bins, Int bits) : q_(q), bins_(bins), bits_(bits) {}
+
+Int TauSet::tau(Int idx) const {
   if (idx == 0) {
-    return q;
+    return q_;
   }
   if (idx & 1) {
-    return q + list_s[(idx - 1) / 2];
+    return q_ + bins_ * (1 << ((idx - 1) / 2));
   }
-  return q - list_s[idx / 2 - 1];
+  return q_ - bins_ * (1 << (idx / 2 - 1));
 }
 
 // delta = -0.5/bins.
@@ -57,7 +59,7 @@ void BinInTime(const Window &win, const Transform &tf, const TauSet &taus,
   const Int p2 = (p - 1) / 2;
 
   for (Int u = 0; u < taus.size(); ++u) {
-    const Int tau = taus.value(u);
+    const Int tau = taus.tau(u);
     scratch->Clear();
     for (Int i = 0; i < p; ++i) {
       const Int t = i <= p2 ? i : i - p;
@@ -89,7 +91,7 @@ void BinInFreq(const Window &win, const Transform &tf, const TauSet &taus,
         (double(bin) + 0.5) / double(bins) - double(l) / double(n);
     const double wf = win.SampleInFreq(xi);
     for (Int u = 0; u < taus.size(); ++u) {
-      const Int tau = taus.value(u);
+      const Int tau = taus.tau(u);
       const Int s = Mod(Long(tf.c) * Long(k) + Long(l) * Long(tau), n);
       const double angle = (2.0 * M_PI) * (double(s) / double(n));
       (*out)[u][bin] -= (kv.second * Sinusoid(angle)) * wf;

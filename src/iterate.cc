@@ -20,9 +20,9 @@ Int NumBits(Int n, Int bins) {
   return out;
 }
 
-bool IdentifyFreq(const IterateOptions &opt, Int b, Int bits,
-                  const vector<unique_ptr<CplexMatrix>> &bin_coefs,
-                  double *xi) {
+std::pair<double, bool>
+IdentifyFreq(const IterateOptions &opt, Int b, Int bits,
+             const vector<unique_ptr<CplexMatrix>> &bin_coefs) {
   const Int trials = opt.trials;
   double sigma[2];
 
@@ -39,7 +39,7 @@ bool IdentifyFreq(const IterateOptions &opt, Int b, Int bits,
       }
       // 0.5 factor is due to matrix being 2 by 2.
       if (opt.sv_threshold > 0 && sigma[1] * 0.5 > opt.sv_threshold) {
-        return false;
+        return std::make_pair(0, false);
       }
     }
     // LOG(INFO) << "bit=" << bit << " count=" << count;
@@ -51,8 +51,7 @@ bool IdentifyFreq(const IterateOptions &opt, Int b, Int bits,
   // xi is between 0 and 1.
   // [0, 1] is divided into 2^bits minibins.
   // xi is the center of one of these minibins.
-  *xi = double(2 * xi_sum + 1) / double(1 << (bits + 1));
-  return true;
+  return std::make_pair(double(2 * xi_sum + 1) / double(1 << (bits + 1)), true);
 }
 
 } // namespace
@@ -73,20 +72,20 @@ void Iterate(const CplexArray &x, const IterateOptions &opt, ModeMap *mm) {
   CplexArray scratch(bins);
 
   vector<double> list_q;
-  TauSet taus;
-  for (Int bit = 0; bit < bits; ++bit) {
-    taus.list_s.push_back((1 << bit) * bins);
-  }
+  // TauSet taus;
+  // for (Int bit = 0; bit < bits; ++bit) {
+  //   taus.list_s.push_back((1 << bit) * bins);
+  // }
 
   vector<unique_ptr<CplexMatrix>> bin_coefs(trials);
   // Repeat "trials" number of times.
   for (Int trial = 0; trial < trials; ++trial) {
     const Int q = RandomInt() % n;
     list_q.push_back(q);
-    taus.q = q;
+    const TauSet taus(q, bins, bits);
+
     bin_coefs[trial].reset(new CplexMatrix(taus.size(), bins));
-    // BinInTime will produce "bins" number of coefficients for each tau in
-    // taus.
+    // BinInTime will produce "bins" number of coefficients for each tau.
     CplexMatrix *a = bin_coefs[trial].get();
     BinInTime(win, tf, taus, x, &plan, a, &scratch);
     BinInFreq(win, tf, taus, *mm, a);
@@ -104,10 +103,12 @@ void Iterate(const CplexArray &x, const IterateOptions &opt, ModeMap *mm) {
       }
     }
 
-    double xi1;
-    if (!IdentifyFreq(opt, b, bits, bin_coefs, &xi1)) {
+    // res.first is xi, in [0, 1].
+    auto res = IdentifyFreq(opt, b, bits, bin_coefs);
+    if (!res.second) {
       continue;
     }
+    const double xi1 = res.first;
 
     // k1 is mode location after random permutation.
     const Int k1 = std::round(double(n) * (double(b) + xi1) / double(bins));
@@ -125,6 +126,7 @@ void Iterate(const CplexArray &x, const IterateOptions &opt, ModeMap *mm) {
     // Estimate coefficient in transformed signal.
     Cplex coef_sum = 0;
     for (Int trial = 0; trial < trials; ++trial) {
+      const TauSet taus(list_q[trial], bins, bits);
       const CplexMatrix &a = *bin_coefs[trial];
 
       const double angle = -2.0 * M_PI *
@@ -136,7 +138,7 @@ void Iterate(const CplexArray &x, const IterateOptions &opt, ModeMap *mm) {
       for (Int bit = 0; bit < bits; ++bit) {
         // Try to do only one Sinusoid here instead of two, using symmetry.
         const double angle2 =
-            -2.0 * M_PI * double(Mod(Long(taus.list_s[bit]) * Long(k1), n)) /
+            -2.0 * M_PI * double(Mod(Long(taus.offset(bit)) * Long(k1), n)) /
             double(n);
         const Cplex factor2 = Sinusoid(angle2);
         const Cplex f1 = factor * factor2;
@@ -145,7 +147,7 @@ void Iterate(const CplexArray &x, const IterateOptions &opt, ModeMap *mm) {
         coef_sum += a[2 * bit + 2][b] * f2;
       }
     }
-    Cplex coef = coef_sum / double(trials * taus.size());
+    Cplex coef = coef_sum / double(trials * (1 + 2 * bits));
 
     // Undo the transform.
     // k0 is original mode location.

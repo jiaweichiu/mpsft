@@ -5,7 +5,7 @@
 
 namespace mps {
 
-struct TauSet {
+/*struct TauSet {
   // tau's are: q, q +/- s for s in list_s.
   Int q;
   vector<Int> list_s;
@@ -14,6 +14,20 @@ struct TauSet {
 
   // Tau(0) = q; Tau(1) = q+s[0]; Tau(2) = q-s[0]; ...
   inline Int value(Int idx) const;
+};*/
+
+class TauSet {
+public:
+  TauSet(Int q, Int bins, Int bits);
+  inline Int size() const { return 1 + 2 * bits_; }
+  inline Int tau(Int idx) const;
+  inline Int q() const { return q_; }
+  inline Int offset(Int i) const { return bins_ * (1 << i); }
+
+private:
+  Int q_;
+  Int bins_;
+  Int bits_;
 };
 
 /*
