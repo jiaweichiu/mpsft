@@ -20,11 +20,47 @@ Int NumBits(Int n, Int bins) {
   return out;
 }
 
+bool IdentifyFreq(const IterateOptions &opt, Int b, Int bits,
+                  const vector<unique_ptr<CplexMatrix>> &bin_coefs,
+                  double *xi) {
+  const Int trials = opt.trials;
+  double sigma[2];
+
+  Int xi_sum = 0;
+  for (Int bit = 0; bit < bits; ++bit) {
+    Int count = 0;
+    for (Int trial = 0; trial < trials; ++trial) {
+      CplexMatrix &a = *bin_coefs[trial]; // Bin coefficients.
+      const Cplex u1 = a[2 * bit + 1][b];
+      const Cplex u2 = a[2 * bit + 2][b];
+      const Cplex u0 = a[0][b];
+      if (MatPencil(u0, u1, u2, sigma)) {
+        ++count;
+      }
+      // 0.5 factor is due to matrix being 2 by 2.
+      if (opt.sv_threshold > 0 && sigma[1] * 0.5 > opt.sv_threshold) {
+        return false;
+      }
+    }
+    // LOG(INFO) << "bit=" << bit << " count=" << count;
+    xi_sum <<= 1;
+    if (count > trials / 2) {
+      ++xi_sum;
+    }
+  }
+  // xi is between 0 and 1.
+  // [0, 1] is divided into 2^bits minibins.
+  // xi is the center of one of these minibins.
+  *xi = double(2 * xi_sum + 1) / double(1 << (bits + 1));
+  return true;
+}
+
 } // namespace
 
 void Iterate(const CplexArray &x, const IterateOptions &opt, ModeMap *mm) {
   const Int trials = opt.trials;
   const Int bins = opt.bins;
+  CHECK_GT(opt.window_threshold, 0);
 
   CHECK_EQ(1, trials % 2) << "Odd number of trials expected";
 
@@ -56,41 +92,22 @@ void Iterate(const CplexArray &x, const IterateOptions &opt, ModeMap *mm) {
     BinInFreq(win, tf, taus, *mm, a);
   }
 
-  double sigma[2];
   for (Int b = 0; b < bins; ++b) {
-    double bin_energy = 0;
-    for (Int trial = 0; trial < trials; ++trial) {
-      bin_energy += AbsSq((*bin_coefs[trial])[0][b]);
+    if (opt.bin_threshold > 0) {
+      double bin_energy = 0;
+      for (Int trial = 0; trial < trials; ++trial) {
+        bin_energy += AbsSq((*bin_coefs[trial])[0][b]);
+      }
+      bin_energy /= trials;
+      if (bin_energy < opt.bin_threshold * opt.bin_threshold) {
+        continue;
+      }
     }
-    bin_energy /= trials;
-    if (bin_energy < opt.bin_threshold * opt.bin_threshold) {
+
+    double xi1;
+    if (!IdentifyFreq(opt, b, bits, bin_coefs, &xi1)) {
       continue;
     }
-
-    // LOG(INFO) << "b=" << b << " energy=" << std::sqrt(bin_energy);
-
-    Int xi_sum = 0;
-    for (Int bit = 0; bit < bits; ++bit) {
-      Int count = 0;
-      for (Int trial = 0; trial < trials; ++trial) {
-        CplexMatrix &a = *bin_coefs[trial]; // Bin coefficients.
-        const Cplex u1 = a[2 * bit + 1][b];
-        const Cplex u2 = a[2 * bit + 2][b];
-        const Cplex u0 = a[0][b];
-        if (MatPencil(u0, u1, u2, sigma)) {
-          ++count;
-        }
-      }
-      // LOG(INFO) << "bit=" << bit << " count=" << count;
-      xi_sum <<= 1;
-      if (count > trials / 2) {
-        ++xi_sum;
-      }
-    }
-    // xi1 is between 0 and 1.
-    // [0, 1] is divided into 2^bits minibins.
-    // xi1 is the center of one of these minibins.
-    const double xi1 = double(2 * xi_sum + 1) / double(1 << (bits + 1));
 
     // k1 is mode location after random permutation.
     const Int k1 = std::round(double(n) * (double(b) + xi1) / double(bins));
@@ -98,9 +115,9 @@ void Iterate(const CplexArray &x, const IterateOptions &opt, ModeMap *mm) {
     DCHECK_LT(k1, n);
 
     // Check window in frequency / attentuation factor. If too small, reject.
-    const double xi = double(k1) / double(n) - (double(b) + 0.5) / double(bins);
-    const double wf = win.SampleInFreq(xi);
-
+    const double xi0 =
+        double(k1) / double(n) - (double(b) + 0.5) / double(bins);
+    const double wf = win.SampleInFreq(xi0);
     if (std::abs(wf) < opt.window_threshold) {
       continue;
     }

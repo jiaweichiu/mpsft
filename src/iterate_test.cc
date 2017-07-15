@@ -8,7 +8,7 @@ namespace mps {
 
 namespace {
 
-std::pair<Int, Int> CountGoodBad(const ModeMap& found, const ModeMap& ans) {
+std::pair<Int, Int> CountGoodBad(const ModeMap &found, const ModeMap &ans) {
   Int bad = 0;
   Int good = 0;
   for (const auto &kv : found) {
@@ -22,7 +22,7 @@ std::pair<Int, Int> CountGoodBad(const ModeMap& found, const ModeMap& ans) {
   return std::make_pair(good, bad);
 }
 
-}  // namespace
+} // namespace
 
 TEST_CASE("IterateBasic", "") {
   RandomSeed(123537);
@@ -59,13 +59,13 @@ TEST_CASE("IterateBasic", "") {
   REQUIRE(std::abs(it2->second - Cplex(-2.4, 1.5)) < 1e-1);
 }
 
-
+// Use a larger size array. Use more modes.
 TEST_CASE("IterateMore", "") {
   RandomSeed(123537);
 
   constexpr Int n = kPrimes[20];
   constexpr Int num_modes = 1000;
-  constexpr double sigma = 1e-7;
+  constexpr double sigma = 1e-2;
 
   IterateOptions opt;
   opt.bins = 2 * num_modes + 1;
@@ -82,9 +82,7 @@ TEST_CASE("IterateMore", "") {
     const Int loc = RandomInt() % n;
     mm[loc] += coef;
   }
-
   CplexArray xh = GenerateXhat(n, mm, sigma);
-
   FFTPlan plan(n, FFTW_BACKWARD);
   CplexArray x(n);
   plan.Run(xh, &x); // xh is the solution.
@@ -100,6 +98,74 @@ TEST_CASE("IterateMore", "") {
   result = CountGoodBad(found_mm, mm);
   REQUIRE(result.first >= 600);
   REQUIRE(result.second <= 100);
+}
+
+// Assume sigma amount of noise. Use that to calibrate IterateOptions.
+// Bin threshold and SV threshold should be ~sigma^2/bins.
+// For simplicity, we keep the number of bins constant.
+TEST_CASE("IterateFull", "") {
+  RandomSeed(123537);
+
+  constexpr Int n = kPrimes[20];
+  constexpr Int num_modes = 1000;
+  constexpr double sigma = 1e-7;
+
+  IterateOptions opt;
+  opt.bins = 2 * num_modes + 1;
+  opt.window_delta = 1e-6;
+  opt.trials = 3;
+  opt.bin_threshold = 3.0 * sigma / std::sqrt(double(opt.bins));
+  opt.sv_threshold = 1.0 * sigma / std::sqrt(double(opt.bins));
+  opt.window_threshold = 0.1;
+
+  // Generate a list of random coefficients, each of magnitude 1.0.
+  ModeMap mm;
+  for (Int i = 0; i < num_modes; ++i) {
+    Cplex coef(RandomNormal(), RandomNormal());
+    coef /= std::abs(coef);
+    const Int loc = RandomInt() % n;
+    mm[loc] += coef;
+  }
+  CplexArray xh = GenerateXhat(n, mm, sigma);
+  FFTPlan plan(n, FFTW_BACKWARD);
+  CplexArray x(n);
+  plan.Run(xh, &x); // xh is the solution.
+
+  ModeMap found_mm;
+  Iterate(x, opt, &found_mm);
+  auto result = CountGoodBad(found_mm, mm);
+  REQUIRE(result.first >= 250);
+  REQUIRE(result.second <= 30);
+  // LOG(INFO) << result.first;
+  // LOG(INFO) << result.second;
+
+  Iterate(x, opt, &found_mm);
+  result = CountGoodBad(found_mm, mm);
+  REQUIRE(result.first >= 500);
+  REQUIRE(result.second <= 30);
+  // LOG(INFO) << result.first;
+  // LOG(INFO) << result.second;
+
+  Iterate(x, opt, &found_mm);
+  result = CountGoodBad(found_mm, mm);
+  REQUIRE(result.first >= 630);
+  REQUIRE(result.second <= 30);
+  // LOG(INFO) << result.first;
+  // LOG(INFO) << result.second;
+
+  Iterate(x, opt, &found_mm);
+  result = CountGoodBad(found_mm, mm);
+  REQUIRE(result.first >= 730);
+  REQUIRE(result.second <= 30);
+  // LOG(INFO) << result.first;
+  // LOG(INFO) << result.second;
+
+  Iterate(x, opt, &found_mm);
+  result = CountGoodBad(found_mm, mm);
+  REQUIRE(result.first >= 810);
+  REQUIRE(result.second <= 30);
+  // LOG(INFO) << result.first;
+  // LOG(INFO) << result.second;
 }
 
 } // namespace mps
