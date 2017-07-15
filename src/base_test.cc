@@ -66,10 +66,10 @@ TEST_CASE("TransformBasic", "") {
 TEST_CASE("GenerateXhat", "") {
   constexpr Int n = 5;    // Prime.
   constexpr Real snr = 8; // Expected snr.
-  const CplexArray coef = {Cplex(0.5, 0.6)};
-  const vector<Int> loc = {2};
-  const CplexArray xh = GenerateXhat(n, coef, loc, snr);
-  const Real signal_energy = AbsSq(coef[0]);
+  constexpr Cplex coef = Cplex(0.5, 0.6);
+  const ModeMap mm = {{2, coef}};
+  const CplexArray xh = GenerateXhat(n, mm, snr);
+  const Real signal_energy = AbsSq(coef);
   const Real noise_energy =
       AbsSq(xh[0]) + AbsSq(xh[1]) + AbsSq(xh[3]) + AbsSq(xh[4]);
   const Real snr2 = std::sqrt(signal_energy / noise_energy); // Measured snr.

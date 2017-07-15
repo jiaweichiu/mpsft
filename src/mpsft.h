@@ -6,6 +6,6 @@
 namespace mps {
 
 void mpsft(const CplexArray &x, Int bins, Real delta, Int trials,
-           Real threshold);
+           Real threshold, ModeMap* mm);
 
 } // namespace mps

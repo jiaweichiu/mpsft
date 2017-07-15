@@ -70,14 +70,13 @@ void CplexArray::Fill(Cplex x) { std::fill(data_, data_ + n_, x); }
 
 void CplexArray::Clear() { Fill(Cplex(0, 0)); }
 
-CplexArray EvaluateModes(Int n, const CplexArray &coef, const vector<Int> loc) {
-  CHECK_EQ(coef.size(), loc.size());
+CplexArray EvaluateModes(Int n, const ModeMap &mm) {
   CplexArray x(n);
   x.Clear();
-  for (Int i = 0; i < coef.size(); ++i) {
+  for (const auto& kv : mm) {
     for (Int t = 0; t < n; ++t) {
-      const Real angle = (2.0 * M_PI) * Mod(loc[i] * Real(t), n) / Real(n);
-      x[t] += coef[i] * Sinusoid(angle);
+      const Real angle = (2.0 * M_PI) * Mod(kv.first * Real(t), n) / Real(n);
+      x[t] += kv.second * Sinusoid(angle);
     }
   }
   return x;
@@ -85,10 +84,7 @@ CplexArray EvaluateModes(Int n, const CplexArray &coef, const vector<Int> loc) {
 
 // Generate Xhat with desired SNR.
 // SNR defined here as sqrt(signal energy / noise energy).
-CplexArray GenerateXhat(Int n, const CplexArray &coef, const vector<Int> &loc,
-                        Real snr) {
-  CHECK_EQ(coef.size(), loc.size());
-
+CplexArray GenerateXhat(Int n, const ModeMap& mm, Real snr) {
   CplexArray out(n);
   Real noise_energy = 0;
   for (Int i = 0; i < n; ++i) {
@@ -96,17 +92,17 @@ CplexArray GenerateXhat(Int n, const CplexArray &coef, const vector<Int> &loc,
     noise_energy += AbsSq(out[i]);
   }
   Real signal_energy = 0;
-  for (Int i = 0; i < coef.size(); ++i) {
-    signal_energy += AbsSq(coef[i]);
-    noise_energy -= AbsSq(out[loc[i]]);
-    out[loc[i]] = 0;
+  for (const auto& kv : mm) {
+    signal_energy += AbsSq(kv.second);
+    noise_energy -= AbsSq(out[kv.first]);
   }
+  // Rescale noise by this factor.
   const Real factor = std::sqrt(signal_energy / noise_energy) / snr;
   for (Int i = 0; i < n; ++i) {
     out[i] *= factor;
   }
-  for (Int i = 0; i < coef.size(); ++i) {
-    out[loc[i]] = coef[i];
+  for (const auto& kv : mm) {
+    out[kv.first] = kv.second;
   }
   return out;
 }

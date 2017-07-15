@@ -1,8 +1,16 @@
-#include "svd.h"
+#include "freqid.h"
 
 namespace mps {
 
-bool SVD22(const Mat22 &a, Real *sigma) {
+using Mat22 = Eigen::Matrix<Cplex, 2, 2>;
+
+bool MatPencil(Cplex u0, Cplex u1, Cplex u2, Real *sigma) {
+  Mat22 a;
+  a(0, 0) = u0;
+  a(0, 1) = u2;
+  a(1, 0) = u1;
+  a(1, 1) = u0;
+
   Eigen::JacobiSVD<Mat22> solver(a, Eigen::ComputeFullV);
 
   const auto &sv = solver.singularValues();

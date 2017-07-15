@@ -30,7 +30,6 @@ void BinInTime(const Window &win, const Transform &tf, const TauSet &taus,
 
 // Subtract results from out. Similar convention as BinInTime.
 void BinInFreq(const Window &win, const Transform &tf, const TauSet &taus,
-               const CplexArray &coef, const vector<Int> &loc,
-               CplexMatrix *out);
+               const ModeMap& mm, CplexMatrix *out);
 
 } // namespace mps

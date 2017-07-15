@@ -10,6 +10,7 @@
 #include <iostream>
 #include <memory>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 namespace mps {
@@ -22,6 +23,7 @@ using Cplex = std::complex<Real>;
 using IntPair = std::pair<Int, Int>;
 using RealPair = std::pair<Real, Real>;
 using CplexPair = std::pair<Cplex, Cplex>;
+using ModeMap = std::unordered_map<Int, Cplex>;
 
 using std::string;
 using std::unique_ptr;
@@ -43,7 +45,6 @@ inline Int Mod(Long x, Long n) { return x % n; }
 inline Real AbsSq(Cplex x) { return RE(x) * RE(x) + IM(x) * IM(x); }
 
 inline Real Square(Real x) { return x * x; }
-inline Int Round(Real x) { return std::round(x); }
 inline Cplex Sinusoid(Real theta) {
   return Cplex(std::cos(theta), std::sin(theta));
 }
@@ -76,9 +77,8 @@ private:
   Cplex *data_ = nullptr;
 };
 
-CplexArray EvaluateModes(Int n, const CplexArray &coef, const vector<Int> loc);
-CplexArray GenerateXhat(Int n, const CplexArray &coef, const vector<Int> &loc,
-                        Real snr);
+CplexArray EvaluateModes(Int n, const ModeMap& mm);
+CplexArray GenerateXhat(Int n, const ModeMap& mm, Real snr);
 
 class CplexMatrix {
 public:

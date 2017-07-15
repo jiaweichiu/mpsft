@@ -23,19 +23,19 @@ cc_test(
 )
 
 cc_library(
-  name = "svd",
-  srcs = ["svd.cc"],
-  hdrs = ["svd.h"],
+  name = "freqid",
+  srcs = ["freqid.cc"],
+  hdrs = ["freqid.h"],
   deps = [
     ":base",
   ],
 )
 
 cc_test(
-  name = "svd_test",
-  srcs = ["svd_test.cc"],
+  name = "freqid_test",
+  srcs = ["freqid_test.cc"],
   deps = [
-    ":svd",
+    ":freqid",
     ":catch",
   ],
 )
@@ -83,8 +83,9 @@ cc_library(
   srcs = ["mpsft.cc"],
   hdrs = ["mpsft.h"],
   deps = [
-    ":window",
     ":binner",
+    ":freqid",
+    ":window",
   ],
 )
 

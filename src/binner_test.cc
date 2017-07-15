@@ -12,9 +12,8 @@ TEST_CASE("BinnerBasic", "") {
   Window win(n, bins, 1e-6);
 
   // Prepare x_hat and x.
-  const CplexArray coef = {{2.0, 0}};
-  const vector<Int> loc = {550};
-  const CplexArray x = EvaluateModes(n, coef, loc);
+  const ModeMap mm = {{550, Cplex(2.0, 0)}};
+  const CplexArray x = EvaluateModes(n, mm);
 
   // Prepare binning.
   Transform tf(n, 3, 847, 45);
@@ -39,7 +38,7 @@ TEST_CASE("BinnerBasic", "") {
   // BinInFreq.
   CplexMatrix out_freq(taus.size(), bins);
   out_freq.Clear();
-  BinInFreq(win, tf, taus, coef, loc, &out_freq); // Subtract.
+  BinInFreq(win, tf, taus, mm, &out_freq); // Subtract.
 
   REQUIRE(RE(out_freq[0][1]) == Approx(-1.12652));
   REQUIRE(IM(out_freq[0][1]) == Approx(0.108838));
