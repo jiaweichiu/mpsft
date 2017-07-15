@@ -97,3 +97,16 @@ cc_test(
     ":iterate",
   ],
 )
+
+cc_library(
+  name = "benchmark",
+  srcs = ["libbenchmark.a"],
+)
+
+cc_test(
+  name = "benchmark_test",
+  srcs = ["benchmark_test.cc"],
+  deps = [
+    ":benchmark",
+  ],
+)
