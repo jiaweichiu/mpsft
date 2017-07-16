@@ -1,20 +1,16 @@
-# MPSFT: Matrix Pencil Sparse Fourier Transform
-
-<!-- toc -->
-
-## Licensing
+# Licensing
 
 For now, we will use the GPL license. This is mainly due to our use of FFTW. We do intend to move away from that in the near future, say using KissFFT.
 
 We are working on a brief paper to put on arXiv. For now, if you use our results, please kindly reference https://dspace.mit.edu/handle/1721.1/83691?show=full
 
-## Installation
+# Installation
 
-### Bazel
+## Bazel
 
 We use Bazel (aka Blaze at Google). Do take a look at `.bazelrc` and modify accordingly.
 
-### FFTW
+## FFTW
 
 MPSFT will need FFTW to perform FFT on much smaller vectors.
 
@@ -26,7 +22,7 @@ make
 make install
 ```
 
-### Eigen
+## Eigen
 
 We use Eigen though this dependency should probably be removed. It would be convenient to `make install` so that the headers are more accessible.
 
@@ -48,11 +44,11 @@ After that, make a symbolic link to the static lib in the `src` directory. You s
 ln -s /usr/local/lib/libbenchmark.a libbenchmark.a
 ```
 
-## Benchmarks
+# Benchmarks
 
 Make sure CPU scaling is turned off. See miscel section. Make sure everything is compiled from source and optimized for your machine. Make sure we use only a single core for fair comparison. (It is easy to parallelize. We do that later.)
 
-### Benchmarks for binning
+## Benchmarks for binning
 
 ```shell
 bazel build -c opt --config=opt :binner_bench
@@ -83,7 +79,7 @@ The second parameter is `log2(n)`.
 
 We see that for `BinInTime`, there is a ~1.6X gain. For `BinInFreq`, there is a ~1.9X gain.
 
-### Benchmarks for FFTW
+## Benchmarks for FFTW
 
 As expected, FFTW is a lot faster when `n` is a power of 2. Here we see that it is about 3-4X faster. We will need to compare against those powers of 2.
 
@@ -121,7 +117,7 @@ BM_FFTW/2097143  384113082 ns  384051338 ns          2
 BM_FFTW/4194301  814812411 ns  814561923 ns          1
 ```
 
-### Our benchmarks
+## Benchmarks for MPSFT
 
 We use the following parameters.
 
@@ -153,7 +149,7 @@ A couple of parameters are not the most aggressive. For example, `window_delta` 
 
 We use `trials=1` because there is quite little noise here and there is no need to do any probability amplification. We expect `trials` to be odd and the running time is roughly proportional to `trials`. So using `trials=3` will slow us down by ~3X.
 
-## Profiling
+# Profiling
 
 Install gperftools. Link binary to this.
 
@@ -181,9 +177,9 @@ Total: 228 samples
        4   1.8%  87.7%        4   1.8% fftw_cpy2d
 ```
 
-## Miscel
+# Miscel
 
-### CPU scaling
+## CPU scaling
 
 Switch between `performance` and `powersave`.
 
