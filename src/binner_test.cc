@@ -19,11 +19,12 @@ TEST_CASE("BinnerBasic", "") {
 
   // Prepare binning.
   Transform tf(n, 3, 847, 45);
-  Binner binner(win, tf, bits);
+  // BinnerSimple binner(win, bits);
+  BinnerFast binner(win, bits);
 
   // BinInTime.
   CplexMatrix out_time(1 + 2 * bits, bins);
-  binner.BinInTime(x, q, &out_time);
+  binner.BinInTime(x, tf, q, &out_time);
 
   REQUIRE(RE(out_time[0][1]) == Approx(1.12652));
   REQUIRE(IM(out_time[0][1]) == Approx(-0.108838));
@@ -36,7 +37,7 @@ TEST_CASE("BinnerBasic", "") {
   // BinInFreq.
   CplexMatrix out_freq(1 + 2 * bits, bins);
   out_freq.Clear();
-  binner.BinInFreq(mm, q, &out_freq); // Subtract.
+  binner.BinInFreq(mm, tf, q, &out_freq); // Subtract.
 
   REQUIRE(RE(out_freq[0][1]) == Approx(-1.12652));
   REQUIRE(IM(out_freq[0][1]) == Approx(0.108838));
@@ -67,15 +68,16 @@ TEST_CASE("BinnerBigger", "") {
 
   // Prepare binning.
   Transform tf(n, 0x3FFFFFFF, 0xEEEEEEEE, 0xDDDDDD);
-  Binner binner(win, tf, bits);
+  // BinnerSimple binner(win, bits);
+  BinnerFast binner(win, bits);
 
   CplexMatrix out_time(1 + 2 * bits, bins);
-  binner.BinInTime(x, q, &out_time);
+  binner.BinInTime(x, tf, q, &out_time);
 
   // BinInFreq.
   CplexMatrix out_freq(1 + 2 * bits, bins);
   out_freq.Clear();
-  binner.BinInFreq(mm, q, &out_freq); // Subtract.
+  binner.BinInFreq(mm, tf, q, &out_freq); // Subtract.
 
   for (Int i = 0; i < bins; ++i) {
     REQUIRE(std::abs(out_time[0][i] + out_freq[0][i]) == Approx(0));

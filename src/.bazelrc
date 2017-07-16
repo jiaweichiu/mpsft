@@ -1,1 +1,3 @@
 build --linkopt="-lglog -lm -lrt -lpthread -L/usr/local/lib -lfftw3"
+
+build:opt --copt="-march=native" --cxxopt="-march=native"

@@ -68,7 +68,7 @@ void Iterate(const CplexArray &x, const IterateOptions &opt, ModeMap *mm) {
   const Int bits = NumBits(n, bins);
 
   Transform tf(n);
-  Binner binner(win, tf, bits);
+  Binner binner(win, bits);
 
   vector<double> list_q;
   vector<unique_ptr<CplexMatrix>> bin_coefs(trials);
@@ -81,8 +81,8 @@ void Iterate(const CplexArray &x, const IterateOptions &opt, ModeMap *mm) {
     bin_coefs[trial].reset(new CplexMatrix(1 + 2 * bits, bins));
     // BinInTime will produce "bins" number of coefficients for each tau.
     CplexMatrix *a = bin_coefs[trial].get();
-    binner.BinInTime(x, q, a);
-    binner.BinInFreq(*mm, q, a);
+    binner.BinInTime(x, tf, q, a);
+    binner.BinInFreq(*mm, tf, q, a);
   }
 
   for (Int b = 0; b < bins; ++b) {

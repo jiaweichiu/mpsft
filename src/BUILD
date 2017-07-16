@@ -78,6 +78,15 @@ cc_test(
   ],
 )
 
+cc_binary(
+  name = "binner_bench",
+  srcs = ["binner_bench.cc"],
+  deps = [
+    ":binner",
+    ":benchmark",
+  ],
+)
+
 cc_library(
   name = "iterate",
   srcs = ["iterate.cc"],
