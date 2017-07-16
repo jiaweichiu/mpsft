@@ -1,4 +1,5 @@
 #include <complex>
+#include <cstring>
 #include <random>
 
 #include "base.h"
@@ -76,7 +77,7 @@ void CplexArray::Resize(Int n) {
 
 void CplexArray::Fill(Cplex x) { std::fill(data_, data_ + n_, x); }
 
-void CplexArray::Clear() { Fill(Cplex(0, 0)); }
+void CplexArray::Clear() { std::memset(data_, 0, sizeof(Cplex) * n_); }
 
 CplexArray EvaluateModes(Int n, const ModeMap &mm) {
   CplexArray x(n);

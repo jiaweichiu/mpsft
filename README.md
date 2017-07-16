@@ -12,7 +12,7 @@ It has been a long time. I need to update some details, and at least put on arxi
 
 ## Install FFTW
 
-```
+```shell
 ./configure --enable-shared --enable-threads --enable-openmp
 make
 make install
@@ -32,8 +32,15 @@ sudo make install
 
 Then make a symbolic link to the static lib. Ensure you can build `:benchmark`.
 
-```
+```shell
 ln -s /usr/local/lib/libbenchmark.a libbenchmark.a
 ```
 
 Be sure to disable CPU scaling. See for example https://askubuntu.com/questions/523640/how-i-can-disable-cpu-frequency-scaling-and-set-the-system-to-performance
+
+## Benchmarks for binning
+
+```shell
+bazel build -c opt --config=opt :binner_bench
+./bazel-bin/binner_bench
+```

@@ -84,6 +84,29 @@ BinnerFast::BinnerFast(const Window &win, Int bits) : Binner(win, bits) {
   scratch2_.reset(new CplexArray(win.bins()));
 }
 
+inline void BinInTimeHelper(Int i, Int t, double wt, Int offset, Int q, Int n,
+                            Int bins, Cplex bq, double delta,
+                            const Transform &tf, const CplexArray &x,
+                            CplexArray *scratch, CplexArray *scratch2) {
+  const Int ts = t + offset;
+  const Int j1 = PosMod(tf.a * (q + ts) + tf.c, n);
+  const Int j2 = PosMod(tf.a * (q - ts) + tf.c, n);
+  const Cplex x1 = x[j1];
+  const Cplex x2 = x[j2];
+
+  const Int k = Mod(tf.b * ts, n);
+  // Do mods for better accuracy. Note fmod can be negative, but it is ok.
+  const double freq = double(k) / double(n) + std::fmod(delta * double(t), 1.0);
+  // Only one Sinusoid per iteration.
+  const Cplex factor = Sinusoid(freq);
+
+  const Cplex z1 = x1 * bq * factor * wt;
+  const Cplex z2 = std::conj(x2) * std::conj(bq) * factor * wt;
+
+  (*scratch)[i % bins] += 0.5 * (z1 + z2);
+  (*scratch2)[i % bins] += RotateBackward(0.5 * (z1 - z2));
+}
+
 void BinnerFast::BinInTime(const CplexArray &x, const Transform &tf, Int q,
                            CplexMatrix *out) {
   CHECK_EQ(out->rows(), 1 + 2 * bits_);
@@ -116,29 +139,19 @@ void BinnerFast::BinInTime(const CplexArray &x, const Transform &tf, Int q,
     const Int offset = bins * (1 << bit);
     scratch_->Clear();
     scratch2_->Clear();
-    for (Int i = 0; i < p; ++i) {
-      const Int t = i <= p2 ? i : i - p;
-      const double wt = win_.wt(i <= p2 ? i : p - i);
-
-      const Int ts = t + offset;
-      const Int j1 = PosMod(tf.a * (q + ts) + tf.c, n);
-      const Int j2 = PosMod(tf.a * (q - ts) + tf.c, n);
-      const Cplex x1 = x[j1];
-      const Cplex x2 = x[j2];
-
-      const Int k = Mod(tf.b * ts, n);
-      // Do mods for better accuracy. Note fmod can be negative, but it is ok.
-      const double freq =
-          double(k) / double(n) + std::fmod(delta * double(t), 1.0);
-      // Only one Sinusoid per iteration.
-      const Cplex factor = Sinusoid(freq);
-
-      const Cplex z1 = x1 * bq * factor * wt;
-      const Cplex z2 = std::conj(x2) * std::conj(bq) * factor * wt;
-
-      (*scratch_)[i % bins] += 0.5 * (z1 + z2);
-      (*scratch2_)[i % bins] += RotateBackward(0.5 * (z1 - z2));
+    for (Int i = 0; i <= p2; ++i) {
+      const Int t = i;
+      const double wt = win_.wt(i);
+      BinInTimeHelper(i, t, wt, offset, q, n, bins, bq, delta, tf, x,
+                      scratch_.get(), scratch2_.get());
     }
+    for (Int i = p2 + 1; i < p; ++i) {
+      const Int t = i - p;
+      const double wt = win_.wt(p - i);
+      BinInTimeHelper(i, t, wt, offset, q, n, bins, bq, delta, tf, x,
+                      scratch_.get(), scratch2_.get());
+    }
+
     // Do B-point FFT.
     plan_->Run(*scratch_, &(*out)[2 * bit + 1]);
     plan_->Run(*scratch2_, &(*out)[2 * bit + 2]);
