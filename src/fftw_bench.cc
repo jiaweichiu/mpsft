@@ -28,9 +28,8 @@ static void BM_FFTW(benchmark::State &state) {
   const double sigma = 0.1;
 
   ModeMap mm;
-  for (Int i = 0; i < num_modes; ++i) {
-    mm[PosMod(RandomInt(), n)] = Cplex(RandomNormal(), RandomNormal());
-  }
+  GenerateModeMap(n, num_modes, &mm);
+
   CplexArray xh(n);
   GenerateXhat(n, mm, sigma, &xh);
   CplexArray x(n);

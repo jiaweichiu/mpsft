@@ -100,7 +100,7 @@ private:
 };
 
 // Generate ModeMap with k unique modes, each of magnitude one.
-void GenerateModeMap(Int n, Int k, ModeMap* mm);
+void GenerateModeMap(Int n, Int k, ModeMap *mm);
 
 CplexArray EvaluateModes(Int n, const ModeMap &mm);
 
@@ -108,7 +108,7 @@ CplexArray EvaluateModes(Int n, const ModeMap &mm);
 // contaminated by N(0, sigma).
 // Note: x(t) = sum_k xh[k] exp(2*pi*i*k*t). This is unnormalized.
 // If xh[k] ~ N(0, s*s), then x(t) ~ N(0, s*s*n) where s*s*n=sigma*sigma.
-void GenerateXhat(Int n, const ModeMap &mm, double sigma, CplexArray* out);
+void GenerateXhat(Int n, const ModeMap &mm, double sigma, CplexArray *out);
 
 class CplexMatrix {
 public:

@@ -96,7 +96,7 @@ TEST_CASE("IterateMore", "") {
   // Generate a list of random coefficients, each of magnitude 1.0.
   ModeMap mm;
   GenerateModeMap(n, num_modes, &mm);
-  
+
   CplexArray xh(n);
   GenerateXhat(n, mm, sigma, &xh);
   FFTPlan plan(n, FFTW_BACKWARD);
@@ -137,7 +137,7 @@ TEST_CASE("IterateFull", "") {
   // Generate a list of random coefficients, each of magnitude 1.0.
   ModeMap mm;
   GenerateModeMap(n, num_modes, &mm);
-  
+
   CplexArray xh(n);
   GenerateXhat(n, mm, sigma, &xh);
   FFTPlan plan(n, FFTW_BACKWARD);

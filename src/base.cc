@@ -97,7 +97,7 @@ void CplexArray::Fill(Cplex x) { std::fill(data_, data_ + n_, x); }
 
 void CplexArray::Clear() { std::memset(data_, 0, sizeof(Cplex) * n_); }
 
-void GenerateModeMap(Int n, Int k, ModeMap* mm) {
+void GenerateModeMap(Int n, Int k, ModeMap *mm) {
   mm->clear();
   const size_t kk = k;
   while (mm->size() < kk) {
@@ -124,7 +124,7 @@ CplexArray EvaluateModes(Int n, const ModeMap &mm) {
 }
 
 // Generate Xhat. Noise energy will sum up to n*sigma*sigma.
-void GenerateXhat(Int n, const ModeMap &mm, double sigma, CplexArray* out) {
+void GenerateXhat(Int n, const ModeMap &mm, double sigma, CplexArray *out) {
   CHECK_EQ(out->size(), n);
   double noise_energy = 0;
   for (Int i = 0; i < n; ++i) {
@@ -141,7 +141,7 @@ void GenerateXhat(Int n, const ModeMap &mm, double sigma, CplexArray* out) {
   }
   for (const auto &kv : mm) {
     (*out)[kv.first] = kv.second;
-  }  
+  }
 }
 
 CplexMatrix::CplexMatrix(Int rows, Int cols)

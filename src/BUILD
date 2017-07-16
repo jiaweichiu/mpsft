@@ -149,3 +149,14 @@ cc_binary(
     ":demo1",
   ],
 )
+
+cc_binary(
+  name = "demo1_bench",
+  srcs = ["demo1_bench.cc"],
+  deps = [
+    ":base",
+    ":iterate",
+    ":demo1",
+    ":benchmark",
+  ],
+)

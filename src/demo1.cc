@@ -48,7 +48,7 @@ void Demo1::PostAnalyze() {
   double hit_l2_sum = 0;
   double miss_l1_sum = 0;
   double miss_l2_sum = 0;
-  for (const auto& kv : found_mm_) {
+  for (const auto &kv : found_mm_) {
     xh2[kv.first] = kv.second;
     auto it = mm_.find(kv.first);
     const double err = std::abs(kv.second - xh_[kv.first]);
@@ -64,11 +64,13 @@ void Demo1::PostAnalyze() {
   }
   const double hit_l1_err = hit_l1_sum / hit;
   const double hit_l2_err = std::sqrt(hit_l2_sum / hit);
-  LOG(INFO) << "hit count=" << hit << " l1_err=" << hit_l1_err << " l2_err=" << hit_l2_err;
+  LOG(INFO) << "hit count=" << hit << " l1_err=" << hit_l1_err
+            << " l2_err=" << hit_l2_err;
 
   const double miss_l1_err = miss_l1_sum / miss;
   const double miss_l2_err = std::sqrt(miss_l2_sum / miss);
-  LOG(INFO) << "miss count=" << miss << " l1_err=" << miss_l1_err << " l2_err=" << miss_l2_err;
+  LOG(INFO) << "miss count=" << miss << " l1_err=" << miss_l1_err
+            << " l2_err=" << miss_l2_err;
 
   double sum1 = 0;
   double sum2 = 0;
@@ -80,7 +82,6 @@ void Demo1::PostAnalyze() {
   const double l1_err = sum1 / n;
   const double l2_err = std::sqrt(sum2 / n);
   LOG(INFO) << l1_err << " " << l2_err;
-
 }
 
 } // namespace mps

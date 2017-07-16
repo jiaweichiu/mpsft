@@ -19,18 +19,32 @@
 
 #include <benchmark/benchmark.h>
 
+#include "base.h"
+#include "demo1.h"
+#include "iterate.h"
+
+namespace mps {
+
 // Parameters (n, k): n is size of x and there are k modes.
 // TODO: Allow sigma to be varied.
-static void BM_demo1(benchmark::State &state) {
-
+static void BM_Demo1(benchmark::State &state) {
   const Int n = state.range(0);
-  const Int num_modes = 100; // Shouldn't matter.
-  const double sigma = 0.1;
+  const Int num_modes = state.range(1);
+  const double sigma = 1e-3;
 
-  ModeMap mm;
-  for (Int i = 0; i < num_modes; ++i) {
-    mm[PosMod(RandomInt(), n)] = Cplex(RandomNormal(), RandomNormal());
+  Demo1Options opt;
+  opt.trials = 1;
+  opt.min_bins = 301;
+  opt.window_delta = 1e-5;
+  opt.window_threshold = 0.1;
+  opt.max_stale_iter = 5;
+
+  Demo1 demo(opt, n, num_modes, sigma);
+  while (state.KeepRunning()) {
+    demo.Run();
   }
-  const CplexArray xh = GenerateXhat(n, mm, sigma);
-  CplexArray x(n);
 }
+BENCHMARK(BM_Demo1)
+    ->Args({kPrimes[20], 1000});
+
+} // namespace mps
