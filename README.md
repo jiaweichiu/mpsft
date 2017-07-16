@@ -1,3 +1,19 @@
+**Table of Contents**  *generated with [DocToc](http://doctoc.herokuapp.com/)*
+
+- [Licensing](#)
+- [Installation](#)
+  - [Bazel](#)
+  - [FFTW](#)
+  - [Eigen](#)
+    - [Install Google benchmarks (optional)](#)
+- [Benchmarks](#)
+  - [Benchmarks for binning](#)
+  - [Benchmarks for FFTW](#)
+  - [Benchmarks for MPSFT](#)
+- [Profiling](#)
+- [Miscel](#)
+  - [CPU scaling](#)
+
 # Licensing
 
 For now, we will use the GPL license. This is mainly due to our use of FFTW. We do intend to move away from that in the near future, say using KissFFT.
