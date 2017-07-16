@@ -120,11 +120,3 @@ cc_library(
     ":benchmark_lib",
   ],
 )
-
-cc_test(
-  name = "benchmark_test",
-  srcs = ["benchmark_test.cc"],
-  deps = [
-    ":benchmark",
-  ],
-)
