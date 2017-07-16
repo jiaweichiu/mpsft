@@ -17,7 +17,6 @@ namespace mps {
 
 // using Int = int32_t;
 using Int = int64_t;
-using Long = int64_t;
 using Cplex = std::complex<double>;
 
 using ModeMap = std::unordered_map<Int, Cplex>;
@@ -36,7 +35,7 @@ constexpr Int kPrimes[] = {2,        3,        5,         7,         17,
 
 void MainInit(int argc, char *const argv[]);
 
-void RandomSeed(Long seed);
+void RandomSeed(Int seed);
 Int RandomInt();
 double RandomNormal();
 
@@ -44,9 +43,8 @@ double RandomNormal();
 #define RE std::real
 #define IM std::imag
 
-// Force cast into longs.
-inline Int PosMod(Long x, Long n) { return ((x % n) + n) % n; }
-inline Int Mod(Long x, Long n) { return x % n; }
+inline Int PosMod(Int x, Int n) { return ((x % n) + n) % n; }
+inline Int Mod(Int x, Int n) { return x % n; }
 inline double AbsSq(Cplex x) { return RE(x) * RE(x) + IM(x) * IM(x); }
 
 inline double Square(double x) { return x * x; }

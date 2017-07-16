@@ -44,8 +44,8 @@ void BinnerSimple::BinInTime(const CplexArray &x, const Transform &tf, Int q,
     for (Int i = 0; i < p; ++i) {
       const Int t = i <= p2 ? i : i - p;
       const double wt = win_.wt(i <= p2 ? i : p - i);
-      const Int j = PosMod(Long(tf.a) * Long(t + tau) + Long(tf.c), n);
-      const Int k = Mod(Long(tf.b) * Long(t + tau), n);
+      const Int j = PosMod(tf.a * (t + tau) + tf.c, n);
+      const Int k = Mod(tf.b * (t + tau), n);
       // Do mods for better accuracy. Note fmod can be negative, but it is ok.
       const double angle = (2.0 * M_PI) * (double(k) / double(n) +
                                            std::fmod(delta * double(t), 1.0));
@@ -66,15 +66,15 @@ void BinnerSimple::BinInFreq(const ModeMap &mm, const Transform &tf, Int q,
 
   for (const auto &kv : mm) {
     const Int k = kv.first;
-    const Int l = PosMod(Long(tf.a) * Long(k) + Long(tf.b), n); // 0 to n-1.
-    const Int bin = Int(Long(l) * Long(bins) / Long(n));
+    const Int l = PosMod(tf.a * k + tf.b, n); // 0 to n-1.
+    const Int bin = Int(l * bins / n);
     const double xi =
         (double(bin) + 0.5) / double(bins) - double(l) / double(n);
     const double wf = win_.SampleInFreq(xi);
     const Cplex base = kv.second * wf;
     for (Int u = 0; u < out->rows(); ++u) {
       const Int tau = GetTau(q, bins, u);
-      const Int s = Mod(Long(tf.c) * Long(k) + Long(l) * Long(tau), n);
+      const Int s = Mod(tf.c * k + l * tau, n);
       const double angle = (2.0 * M_PI) * (double(s) / double(n));
       (*out)[u][bin] -= base * Sinusoid(angle);
     }
@@ -102,8 +102,8 @@ void BinnerFast::BinInTime(const CplexArray &x, const Transform &tf, Int q,
   for (Int i = 0; i < p; ++i) {
     const Int t = i <= p2 ? i : i - p;
     const double wt = win_.wt(i <= p2 ? i : p - i);
-    const Int j = PosMod(Long(tf.a) * Long(t + q) + Long(tf.c), n);
-    const Int k = Mod(Long(tf.b) * Long(t + q), n);
+    const Int j = PosMod(tf.a * (t + q) + tf.c, n);
+    const Int k = Mod(tf.b * (t + q), n);
     const double angle = (2.0 * M_PI) * (double(k) / double(n) +
                                          std::fmod(delta * double(t), 1.0));
     (*scratch_)[i % bins] += (x[j] * Sinusoid(angle)) * wt;
@@ -112,7 +112,7 @@ void BinnerFast::BinInTime(const CplexArray &x, const Transform &tf, Int q,
 
   // Take care of offsets from q.
   const Cplex bq =
-      Sinusoid((2.0 * M_PI) * double(Mod(Long(tf.b) * Long(q), n)) / double(n));
+      Sinusoid((2.0 * M_PI) * double(Mod(tf.b * q, n)) / double(n));
 
   for (Int bit = 0; bit < bits_; ++bit) {
     const Int offset = bins * (1 << bit);
@@ -122,13 +122,13 @@ void BinnerFast::BinInTime(const CplexArray &x, const Transform &tf, Int q,
       const Int t = i <= p2 ? i : i - p;
       const double wt = win_.wt(i <= p2 ? i : p - i);
 
-      const Long ts = Long(t) + Long(offset);
-      const Int j1 = PosMod(Long(tf.a) * (Long(q) + ts) + Long(tf.c), n);
-      const Int j2 = PosMod(Long(tf.a) * (Long(q) - ts) + Long(tf.c), n);
+      const Int ts = t + offset;
+      const Int j1 = PosMod(tf.a * (q + ts) + tf.c, n);
+      const Int j2 = PosMod(tf.a * (q - ts) + tf.c, n);
       const Cplex x1 = x[j1];
       const Cplex x2 = x[j2];
 
-      const Int k = Mod(Long(tf.b) * ts, n);
+      const Int k = Mod(tf.b * ts, n);
       // Do mods for better accuracy. Note fmod can be negative, but it is ok.
       const double angle = (2.0 * M_PI) * (double(k) / double(n) +
                                            std::fmod(delta * double(t), 1.0));
@@ -164,22 +164,21 @@ void BinnerFast::BinInFreq(const ModeMap &mm, const Transform &tf, Int q,
 
   for (const auto &kv : mm) {
     const Int k0 = kv.first;
-    const Int k1 = PosMod(Long(tf.a) * Long(k0) + Long(tf.b), n); // 0 to n-1.
-    const Int bin = Int(Long(k1) * Long(bins) / Long(n));
+    const Int k1 = PosMod(tf.a * k0 + tf.b, n); // 0 to n-1.
+    const Int bin = Int(k1 * bins / n);
     const double xi =
         (double(bin) + 0.5) / double(bins) - double(k1) / double(n);
     const double wf = win_.SampleInFreq(xi);
 
     const double angle =
-        (2.0 * M_PI) *
-        double(Mod(Long(q) * Long(k1) + Long(tf.c) * Long(k0), n)) / double(n);
+        (2.0 * M_PI) * double(Mod(q * k1 + tf.c * k0, n)) / double(n);
     const Cplex base = wf * kv.second * Sinusoid(angle);
     (*out)[0][bin] -= base;
 
     for (Int bit = 0; bit < bits_; ++bit) {
       const Int offset = bins * (1 << bit);
-      const Cplex factor = Sinusoid(
-          (2.0 * M_PI) * double(Mod(Long(offset) * Long(k1), n)) / double(n));
+      const Cplex factor =
+          Sinusoid((2.0 * M_PI) * double(Mod(offset * k1, n)) / double(n));
       (*out)[bit * 2 + 1][bin] -= base * factor;
       (*out)[bit * 2 + 2][bin] -= base * std::conj(factor); // Divide by factor.
     }

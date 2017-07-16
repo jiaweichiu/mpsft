@@ -17,10 +17,10 @@ Int PowMod(Int b, Int e, Int m) {
   Int r = 1;
   while (e > 0) {
     if (e & 1) { // Odd exponent
-      r = Mod(Long(r) * Long(b), m);
+      r = Mod(r * b, m);
     }
     e >>= 1;
-    b = Mod(Long(b) * Long(b), m);
+    b = Mod(b * b, m);
   }
   return r;
 }
@@ -37,7 +37,7 @@ void MainInit(int argc, char *const argv[]) {
   LOG(INFO) << "mps::MainInit";
 }
 
-void RandomSeed(Long seed) { rng.seed(seed); }
+void RandomSeed(Int seed) { rng.seed(seed); }
 Int RandomInt() { return uid(rng); }
 double RandomNormal() { return nd(rng); }
 

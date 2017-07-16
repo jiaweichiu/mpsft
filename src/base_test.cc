@@ -60,7 +60,7 @@ TEST_CASE("TransformBasic", "") {
   REQUIRE(tf.a == 10000000);
   REQUIRE(tf.b == 10000001);
   REQUIRE(tf.c == 10000002);
-  REQUIRE(PosMod(Long(tf.a_inv) * Long(tf.a), n) == 1);
+  REQUIRE(PosMod(tf.a_inv * tf.a, n) == 1);
 }
 
 TEST_CASE("GenerateXhatBasic", "") {

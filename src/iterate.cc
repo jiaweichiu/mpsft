@@ -121,17 +121,15 @@ void Iterate(const CplexArray &x, const IterateOptions &opt, ModeMap *mm) {
     Cplex coef_sum = 0;
     for (Int trial = 0; trial < trials; ++trial) {
       const CplexMatrix &a = *bin_coefs[trial];
-      const double angle = -2.0 * M_PI *
-                           double(Mod(Long(list_q[trial]) * Long(k1), n)) /
-                           double(n);
+      const double angle =
+          -2.0 * M_PI * double(Mod(list_q[trial] * k1, n)) / double(n);
       const Cplex factor = Sinusoid(angle);
       coef_sum += a[0][b] * factor;
 
       for (Int bit = 0; bit < bits; ++bit) {
         // Try to do only one Sinusoid here instead of two, using symmetry.
         const double angle2 =
-            -2.0 * M_PI *
-            double(Mod(Long(bins) * Long(1 << bit) * Long(k1), n)) / double(n);
+            -2.0 * M_PI * double(Mod(bins * (1 << bit) * k1, n)) / double(n);
         const Cplex factor2 = Sinusoid(angle2);
         const Cplex f1 = factor * factor2;
         const Cplex f2 = factor * std::conj(factor2); // Divide by factor2.
@@ -143,9 +141,8 @@ void Iterate(const CplexArray &x, const IterateOptions &opt, ModeMap *mm) {
 
     // Undo the transform.
     // k0 is original mode location.
-    const Int k0 = PosMod(Long(tf.a_inv) * (Long(k1) - Long(tf.b)), n);
-    coef *= Sinusoid(-2.0 * M_PI * double(Mod(Long(tf.c) * Long(k0), n)) /
-                     double(n));
+    const Int k0 = PosMod(tf.a_inv * (k1 - tf.b), n);
+    coef *= Sinusoid(-2.0 * M_PI * double(Mod(tf.c * k0, n)) / double(n));
     coef /= wf;
 
     (*mm)[k0] += coef;
