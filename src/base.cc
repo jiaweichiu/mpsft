@@ -83,9 +83,8 @@ CplexArray EvaluateModes(Int n, const ModeMap &mm) {
   x.Clear();
   for (const auto &kv : mm) {
     for (Int t = 0; t < n; ++t) {
-      const double angle =
-          (2.0 * M_PI) * Mod(kv.first * double(t), n) / double(n);
-      x[t] += kv.second * Sinusoid(angle);
+      const double freq = Mod(kv.first * double(t), n) / double(n);
+      x[t] += kv.second * Sinusoid(freq);
     }
   }
   return x;

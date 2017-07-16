@@ -48,8 +48,9 @@ inline Int Mod(Int x, Int n) { return x % n; }
 inline double AbsSq(Cplex x) { return RE(x) * RE(x) + IM(x) * IM(x); }
 
 inline double Square(double x) { return x * x; }
-inline Cplex Sinusoid(double theta) {
-  return Cplex(std::cos(theta), std::sin(theta));
+inline Cplex Sinusoid(double freq) {
+  freq *= (2.0 * M_PI);
+  return Cplex(std::cos(freq), std::sin(freq));
 }
 
 // Equivalent to multiplying by i: (x+iy)*i = -y+ix.
