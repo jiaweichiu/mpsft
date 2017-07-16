@@ -20,7 +20,15 @@ make install
 
 ## Install Google benchmarks
 
-Follow instructions to install Google benchmarks.
+Follow instructions to install Google benchmarks. Remember to use release mode.
+
+```shell
+mkdir build
+cd build
+cmake -DCMAKE_BUILD_TYPE=Release ../
+make
+sudo make install
+```
 
 Then make a symbolic link to the static lib. Ensure you can build `:benchmark`.
 
