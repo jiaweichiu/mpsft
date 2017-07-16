@@ -30,11 +30,11 @@ namespace mps {
 static void BM_Demo1(benchmark::State &state) {
   const Int n = state.range(0);
   const Int num_modes = state.range(1);
-  const double sigma = 1e-3;
+  const double sigma = 1e-2;
 
   Demo1Options opt;
   opt.trials = 1;
-  opt.min_bins = 301;
+  opt.min_bins = 101;
   opt.window_delta = 1e-5;
   opt.window_threshold = 0.1;
   opt.max_stale_iter = 5;
@@ -45,6 +45,6 @@ static void BM_Demo1(benchmark::State &state) {
   }
 }
 BENCHMARK(BM_Demo1)
-    ->Args({kPrimes[20], 1000});
+    ->Args({kPrimes[20], 500});
 
 } // namespace mps
