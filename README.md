@@ -1,18 +1,19 @@
-**Table of Contents**  *generated with [DocToc](http://doctoc.herokuapp.com/)*
+<!-- MarkdownTOC -->
 
-- [Licensing](#)
-- [Installation](#)
-  - [Bazel](#)
-  - [FFTW](#)
-  - [Eigen](#)
-    - [Install Google benchmarks (optional)](#)
-- [Benchmarks](#)
-  - [Benchmarks for binning](#)
-  - [Benchmarks for FFTW](#)
-  - [Benchmarks for MPSFT](#)
-- [Profiling](#)
-- [Miscel](#)
-  - [CPU scaling](#)
+- Licensing
+- Installation
+  - Bazel
+  - FFTW
+  - Eigen
+- Benchmarks
+  - Benchmarks for binning
+  - Benchmarks for FFTW
+  - Benchmarks for MPSFT
+- Profiling
+- Miscel
+  - CPU scaling
+
+<!-- /MarkdownTOC -->
 
 # Licensing
 
