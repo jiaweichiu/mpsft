@@ -45,6 +45,11 @@ static void BM_Demo1(benchmark::State &state) {
   }
 }
 BENCHMARK(BM_Demo1)
-    ->Args({kPrimes[20], 500});
+    ->Args({kPrimes[22], 1 << 6})
+    ->Args({kPrimes[22], 1 << 7})
+    ->Args({kPrimes[22], 1 << 8})
+    ->Args({kPrimes[22], 1 << 9})
+    ->Args({kPrimes[22], 1 << 10})
+    ->Args({kPrimes[22], 1 << 11});
 
 } // namespace mps

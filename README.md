@@ -119,6 +119,38 @@ BM_FFTW/2097143  384113082 ns  384051338 ns          2
 BM_FFTW/4194301  814812411 ns  814561923 ns          1
 ```
 
+### Our benchmarks
+
+We use the following parameters.
+
+```
+n = 2^22
+window_delta = 1e-5
+window_threshold = 0.1
+max_stale_iter = 5
+min_bins = 101
+sigma = 1e-2
+```
+
+Here are the results. We see that the sparsity has to be around 500 or less in order for MPSFT to be faster than FFTW.
+
+
+```
+-------------------------------------------------------------
+Benchmark                      Time           CPU Iterations
+-------------------------------------------------------------
+BM_Demo1/4194301/64     96312215 ns   96303470 ns          7
+BM_Demo1/4194301/128   119450439 ns  119445622 ns          6
+BM_Demo1/4194301/256   161351308 ns  161341183 ns          4
+BM_Demo1/4194301/512   252232483 ns  252212400 ns          3
+BM_Demo1/4194301/1024  428662101 ns  428636554 ns          2
+BM_Demo1/4194301/2048  750128878 ns  750103387 ns          1
+```
+
+A couple of parameters are not the most aggressive. For example, `window_delta` can be slightly bigger.
+
+We use `trials=1` because there is quite little noise here and there is no need to do any probability amplification. We expect `trials` to be odd and the running time is roughly proportional to `trials`. So using `trials=3` will slow us down by ~3X.
+
 ## Profiling
 
 Install gperftools. Link binary to this.
