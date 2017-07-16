@@ -7,12 +7,13 @@
 namespace mps {
 
 static void BM_BinInTime(benchmark::State &state) {
-  const Int n = kPrimes[state.range(0)];
+  const int binner_type = state.range(0);
+  const Int n = kPrimes[state.range(1)];
   const Int bins = 5;
   const Int bits = 15;
   Window win(n, bins, 1e-6);
   CplexMatrix a(1 + 2 * bits, bins);
-  unique_ptr<Binner> binner(new BinnerSimple(win, bits));
+  unique_ptr<Binner> binner(Binner::Create(binner_type, win, bits));
 
   const ModeMap mm = {{5, Cplex(2.0, 1.0)}};
   const CplexArray x = EvaluateModes(n, mm);
@@ -23,15 +24,22 @@ static void BM_BinInTime(benchmark::State &state) {
     binner->BinInTime(x, tf, q, &a);
   }
 }
-BENCHMARK(BM_BinInTime)->Arg(10)->Arg(12)->Arg(14)->Arg(16);
+BENCHMARK(BM_BinInTime)
+    ->Args({kBinnerSimple, 10})
+    ->Args({kBinnerSimple, 13})
+    ->Args({kBinnerSimple, 16})
+    ->Args({kBinnerFast, 10})
+    ->Args({kBinnerFast, 13})
+    ->Args({kBinnerFast, 16});
 
 static void BM_BinInFreq(benchmark::State &state) {
-  const Int n = kPrimes[state.range(0)];
+  const int binner_type = state.range(0);
+  const Int n = kPrimes[state.range(1)];
   const Int bins = 5;
   const Int bits = 15;
   Window win(n, bins, 1e-6);
   CplexMatrix a(1 + 2 * bits, bins);
-  unique_ptr<Binner> binner(new BinnerSimple(win, bits));
+  unique_ptr<Binner> binner(Binner::Create(binner_type, win, bits));
 
   ModeMap mm;
   // Add some modes.
@@ -45,6 +53,12 @@ static void BM_BinInFreq(benchmark::State &state) {
     binner->BinInFreq(mm, tf, q, &a);
   }
 }
-BENCHMARK(BM_BinInFreq)->Arg(10)->Arg(12)->Arg(14)->Arg(16);
+BENCHMARK(BM_BinInFreq)
+    ->Args({kBinnerSimple, 10})
+    ->Args({kBinnerSimple, 13})
+    ->Args({kBinnerSimple, 16})
+    ->Args({kBinnerFast, 10})
+    ->Args({kBinnerFast, 13})
+    ->Args({kBinnerFast, 16});
 
 } // namespace mps

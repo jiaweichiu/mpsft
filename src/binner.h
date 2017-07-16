@@ -5,10 +5,8 @@
 
 namespace mps {
 
-enum BinnerType {
-  Simple = 1,
-  Fast = 2,
-};
+constexpr int kBinnerSimple = 1;
+constexpr int kBinnerFast = 2;
 
 class Binner {
 public:
@@ -21,7 +19,7 @@ public:
   virtual void BinInFreq(const ModeMap &mm, const Transform &tf, Int q,
                          CplexMatrix *out) = 0;
 
-  static Binner* CreateBinner(BinnerType bt, const Window &win, Int bits);
+  static Binner *Create(int binner_type, const Window &win, Int bits);
 
 protected:
   const Window &win_;
@@ -49,6 +47,9 @@ public:
                  CplexMatrix *out) override;
   void BinInFreq(const ModeMap &mm, const Transform &tf, Int q,
                  CplexMatrix *out) override;
+
+protected:
+  unique_ptr<CplexArray> scratch2_;
 };
 
 } // namespace mps
