@@ -24,21 +24,21 @@ std::pair<Int, Int> CountGoodBad(const ModeMap &found, const ModeMap &ans) {
 
 } // namespace
 
-TEST_CASE("IterateBasic", "") {
+TEST_CASE("IterateOnce", "") {
   RandomSeed(123537);
 
-  constexpr Int n = 1109;
-  constexpr double sigma = 0.2;
+  constexpr Int n = kPrimes[12];
+  constexpr double sigma = 0.1;
 
   IterateOptions opt;
-  opt.bins = 5;
+  opt.bins = 11;
   opt.window_delta = 1e-6;
   opt.trials = 5;
   opt.bin_threshold = 0.2;
   opt.window_threshold = 0.1;
 
   ModeMap mm = {
-      {103, Cplex(3.5, 1.1)}, {660, Cplex(-2.4, 1.5)},
+      {313, Cplex(3.5, 1.1)}, {660, Cplex(-2.4, 1.5)},
   };
   const CplexArray xh = GenerateXhat(n, mm, sigma);
 
@@ -49,8 +49,12 @@ TEST_CASE("IterateBasic", "") {
   ModeMap ans_mm;
   Iterate(x, opt, &ans_mm);
 
+  // for (auto& kv : ans_mm) {
+  //   LOG(INFO) << kv.first << " " << kv.second;
+  // }
+
   REQUIRE(ans_mm.size() == 2);
-  auto it1 = ans_mm.find(103);
+  auto it1 = ans_mm.find(313);
   REQUIRE(it1 != ans_mm.end());
   REQUIRE(std::abs(it1->second - Cplex(3.5, 1.1)) < 1e-1);
 
@@ -136,36 +140,36 @@ TEST_CASE("IterateFull", "") {
   auto result = CountGoodBad(found_mm, mm);
   REQUIRE(result.first >= 250);
   REQUIRE(result.second <= 30);
-  // LOG(INFO) << result.first;
-  // LOG(INFO) << result.second;
+  LOG(INFO) << "Modes found: " << result.first << " good " << result.second
+            << " bad";
 
   Iterate(x, opt, &found_mm);
   result = CountGoodBad(found_mm, mm);
   REQUIRE(result.first >= 500);
   REQUIRE(result.second <= 30);
-  // LOG(INFO) << result.first;
-  // LOG(INFO) << result.second;
+  LOG(INFO) << "Modes found: " << result.first << " good " << result.second
+            << " bad";
 
   Iterate(x, opt, &found_mm);
   result = CountGoodBad(found_mm, mm);
   REQUIRE(result.first >= 630);
   REQUIRE(result.second <= 30);
-  // LOG(INFO) << result.first;
-  // LOG(INFO) << result.second;
+  LOG(INFO) << "Modes found: " << result.first << " good " << result.second
+            << " bad";
 
   Iterate(x, opt, &found_mm);
   result = CountGoodBad(found_mm, mm);
   REQUIRE(result.first >= 730);
   REQUIRE(result.second <= 30);
-  // LOG(INFO) << result.first;
-  // LOG(INFO) << result.second;
+  LOG(INFO) << "Modes found: " << result.first << " good " << result.second
+            << " bad";
 
   Iterate(x, opt, &found_mm);
   result = CountGoodBad(found_mm, mm);
   REQUIRE(result.first >= 810);
   REQUIRE(result.second <= 30);
-  // LOG(INFO) << result.first;
-  // LOG(INFO) << result.second;
+  LOG(INFO) << "Modes found: " << result.first << " good " << result.second
+            << " bad";
 }
 
 } // namespace mps

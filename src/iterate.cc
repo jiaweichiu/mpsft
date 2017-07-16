@@ -68,7 +68,7 @@ void Iterate(const CplexArray &x, const IterateOptions &opt, ModeMap *mm) {
   const Int bits = NumBits(n, bins);
 
   Transform tf(n);
-  Binner binner(win, bits);
+  BinnerSimple binner(win, bits);
 
   vector<double> list_q;
   vector<unique_ptr<CplexMatrix>> bin_coefs(trials);

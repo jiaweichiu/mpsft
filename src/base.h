@@ -15,12 +15,11 @@
 
 namespace mps {
 
-using Int = int32_t;
+// using Int = int32_t;
+using Int = int64_t;
 using Long = int64_t;
 using Cplex = std::complex<double>;
 
-using IntPair = std::pair<Int, Int>;
-using CplexPair = std::pair<Cplex, Cplex>;
 using ModeMap = std::unordered_map<Int, Cplex>;
 
 using std::string;

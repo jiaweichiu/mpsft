@@ -18,26 +18,6 @@ Int GetTau(Int q, Int bins, Int idx) {
 
 } // namespace
 
-// delta = -0.5/bins.
-// bq_factor = Sinusoid(b*q/N).
-// win_factor = wt * 0.5.
-// inline CplexPair BinInTimeHelper(Int n, double delta, const Transform &tf,
-// Int
-// t,
-//                                  Int q, Int s, Cplex bq_factor, double
-//                                  win_factor,
-//                                  const vector<Cplex> &x) {
-//   const Int i = PosMod(Long(tf.a) * Long(q + s + t) + Long(tf.c), n);
-//   const Int j = PosMod(Long(tf.a) * Long(q - s - t) + Long(tf.c), n);
-//   const Int u = Mod(Long(tf.b) * Long(t + s), n);
-//   const Cplex sinusoid = Sinusoid(double(u) / double(n) - delta);
-//   const Cplex v1 = x[i] * bq_factor;
-//   const Cplex v2 = std::conj(x[j] * bq_factor);
-
-//   return std::make_pair(win_factor * sinusoid * (v1 + v2),
-//                         RotateBackward(win_factor * sinusoid * (v1 - v2)));
-// }
-
 Binner::Binner(const Window &win, Int bits) : win_(win), bits_(bits) {
   const Int bins = win.bins();
   plan_.reset(new FFTPlan(bins, FFTW_FORWARD));
