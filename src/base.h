@@ -40,7 +40,6 @@ using Cplex = std::complex<double>;
 using ModeMap = std::unordered_map<Int, Cplex>;
 
 using std::string;
-using std::unique_ptr;
 using std::vector;
 
 // List of primes close to powers of 2.
@@ -100,13 +99,16 @@ private:
   Cplex *data_ = nullptr;
 };
 
+// Generate ModeMap with k unique modes, each of magnitude one.
+void GenerateModeMap(Int n, Int k, ModeMap* mm);
+
 CplexArray EvaluateModes(Int n, const ModeMap &mm);
 
 // Add ambience noise such that in the *time domain*, each sample point is
 // contaminated by N(0, sigma).
 // Note: x(t) = sum_k xh[k] exp(2*pi*i*k*t). This is unnormalized.
 // If xh[k] ~ N(0, s*s), then x(t) ~ N(0, s*s*n) where s*s*n=sigma*sigma.
-CplexArray GenerateXhat(Int n, const ModeMap &mm, double sigma);
+void GenerateXhat(Int n, const ModeMap &mm, double sigma, CplexArray* out);
 
 class CplexMatrix {
 public:

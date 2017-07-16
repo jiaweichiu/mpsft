@@ -87,7 +87,8 @@ TEST_CASE("GenerateXhatBasic", "") {
   constexpr Cplex coef = Cplex(0.5, 0.6);
   const ModeMap mm = {{2, coef}};
 
-  const CplexArray xh = GenerateXhat(n, mm, sigma);
+  CplexArray xh(n);
+  GenerateXhat(n, mm, sigma, &xh);
   const double noise_energy =
       AbsSq(xh[0]) + AbsSq(xh[1]) + AbsSq(xh[3]) + AbsSq(xh[4]);
   REQUIRE(std::sqrt(noise_energy) == Approx(sigma));
@@ -98,7 +99,8 @@ TEST_CASE("GenerateXhatFFT", "") {
   constexpr double sigma = 5.5;
   const ModeMap mm;
 
-  const CplexArray xh = GenerateXhat(n, mm, sigma);
+  CplexArray xh(n);
+  GenerateXhat(n, mm, sigma, &xh);
   CplexArray x(n);
   FFTPlan plan(n, FFTW_BACKWARD);
   plan.Run(xh, &x);

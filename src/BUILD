@@ -22,6 +22,15 @@ cc_test(
   ],
 )
 
+cc_binary(
+  name = "fftw_bench",
+  srcs = ["fftw_bench.cc"],
+  deps = [
+    ":base",
+    ":benchmark",
+  ],
+)
+
 cc_library(
   name = "freqid",
   srcs = ["freqid.cc"],
@@ -118,5 +127,25 @@ cc_library(
   deps = [
     ":base",
     ":benchmark_lib",
+  ],
+)
+
+cc_library(
+  name = "demo1",
+  srcs = ["demo1.cc"],
+  hdrs = ["demo1.h"],
+  deps = [
+    ":base",
+    ":iterate",
+  ],
+)
+
+cc_binary(
+  name = "demo1_main",
+  srcs = ["demo1_main.cc"],
+  deps = [
+    ":base",
+    ":iterate",
+    ":demo1",
   ],
 )

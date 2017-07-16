@@ -31,7 +31,7 @@ static void BM_BinInTime(benchmark::State &state) {
   const Int bits = 15;
   Window win(n, bins, 1e-6);
   CplexMatrix a(1 + 2 * bits, bins);
-  unique_ptr<Binner> binner(Binner::Create(binner_type, win, bits));
+  std::unique_ptr<Binner> binner(Binner::Create(binner_type, win, bits));
 
   const ModeMap mm = {{5, Cplex(2.0, 1.0)}};
   const CplexArray x = EvaluateModes(n, mm);
@@ -57,13 +57,11 @@ static void BM_BinInFreq(benchmark::State &state) {
   const Int bits = 15;
   Window win(n, bins, 1e-6);
   CplexMatrix a(1 + 2 * bits, bins);
-  unique_ptr<Binner> binner(Binner::Create(binner_type, win, bits));
+  std::unique_ptr<Binner> binner(Binner::Create(binner_type, win, bits));
 
-  ModeMap mm;
   // Add some modes.
-  for (Int i = 0; i < 100; ++i) {
-    mm[PosMod(RandomInt(), n)] = Cplex(RandomNormal(), RandomNormal());
-  }
+  ModeMap mm;
+  GenerateModeMap(n, 100, &mm);
 
   while (state.KeepRunning()) {
     const Int q = RandomInt() % n;

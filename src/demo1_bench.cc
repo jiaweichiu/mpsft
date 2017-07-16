@@ -16,13 +16,13 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
  *
  */
+
 #include <benchmark/benchmark.h>
 
-#include "base.h"
+// Parameters (n, k): n is size of x and there are k modes.
+// TODO: Allow sigma to be varied.
+static void BM_demo1(benchmark::State &state) {
 
-namespace mps {
-
-static void BM_FFTW(benchmark::State &state) {
   const Int n = state.range(0);
   const Int num_modes = 100; // Shouldn't matter.
   const double sigma = 0.1;
@@ -31,31 +31,6 @@ static void BM_FFTW(benchmark::State &state) {
   for (Int i = 0; i < num_modes; ++i) {
     mm[PosMod(RandomInt(), n)] = Cplex(RandomNormal(), RandomNormal());
   }
-  CplexArray xh(n);
-  GenerateXhat(n, mm, sigma, &xh);
+  const CplexArray xh = GenerateXhat(n, mm, sigma);
   CplexArray x(n);
-
-  FFTPlan plan(n, FFTW_BACKWARD);
-  while (state.KeepRunning()) {
-    plan.Run(xh, &x);
-  }
 }
-BENCHMARK(BM_FFTW)->RangeMultiplier(2)->Range(1 << 9, 1 << 22);
-
-BENCHMARK(BM_FFTW)
-    ->Arg(kPrimes[9])
-    ->Arg(kPrimes[10])
-    ->Arg(kPrimes[11])
-    ->Arg(kPrimes[12])
-    ->Arg(kPrimes[13])
-    ->Arg(kPrimes[14])
-    ->Arg(kPrimes[15])
-    ->Arg(kPrimes[16])
-    ->Arg(kPrimes[17])
-    ->Arg(kPrimes[18])
-    ->Arg(kPrimes[19])
-    ->Arg(kPrimes[20])
-    ->Arg(kPrimes[21])
-    ->Arg(kPrimes[22]);
-
-} // namespace mps

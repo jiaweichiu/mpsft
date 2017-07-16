@@ -97,6 +97,20 @@ void CplexArray::Fill(Cplex x) { std::fill(data_, data_ + n_, x); }
 
 void CplexArray::Clear() { std::memset(data_, 0, sizeof(Cplex) * n_); }
 
+void GenerateModeMap(Int n, Int k, ModeMap* mm) {
+  mm->clear();
+  const size_t kk = k;
+  while (mm->size() < kk) {
+    const Int idx = PosMod(RandomInt(), n);
+    if (mm->find(idx) != mm->end()) {
+      continue;
+    }
+    Cplex coef(RandomNormal(), RandomNormal());
+    coef /= std::abs(coef);
+    (*mm)[idx] = coef;
+  }
+}
+
 CplexArray EvaluateModes(Int n, const ModeMap &mm) {
   CplexArray x(n);
   x.Clear();
@@ -110,25 +124,24 @@ CplexArray EvaluateModes(Int n, const ModeMap &mm) {
 }
 
 // Generate Xhat. Noise energy will sum up to n*sigma*sigma.
-CplexArray GenerateXhat(Int n, const ModeMap &mm, double sigma) {
-  CplexArray out(n);
+void GenerateXhat(Int n, const ModeMap &mm, double sigma, CplexArray* out) {
+  CHECK_EQ(out->size(), n);
   double noise_energy = 0;
   for (Int i = 0; i < n; ++i) {
-    out[i] = Cplex(RandomNormal(), RandomNormal());
-    noise_energy += AbsSq(out[i]);
+    (*out)[i] = Cplex(RandomNormal(), RandomNormal());
+    noise_energy += AbsSq((*out)[i]);
   }
   for (const auto &kv : mm) {
-    noise_energy -= AbsSq(out[kv.first]);
+    noise_energy -= AbsSq((*out)[kv.first]);
   }
   // Rescale noise by this factor.
   const double factor = sigma / std::sqrt(noise_energy);
   for (Int i = 0; i < n; ++i) {
-    out[i] *= factor;
+    (*out)[i] *= factor;
   }
   for (const auto &kv : mm) {
-    out[kv.first] = kv.second;
-  }
-  return out;
+    (*out)[kv.first] = kv.second;
+  }  
 }
 
 CplexMatrix::CplexMatrix(Int rows, Int cols)

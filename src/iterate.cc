@@ -40,7 +40,7 @@ Int NumBits(Int n, Int bins) {
 
 std::pair<double, bool>
 IdentifyFreq(const IterateOptions &opt, Int b, Int bits,
-             const vector<unique_ptr<CplexMatrix>> &bin_coefs) {
+             const vector<std::unique_ptr<CplexMatrix>> &bin_coefs) {
   const Int trials = opt.trials;
   double sigma[2];
 
@@ -74,7 +74,8 @@ IdentifyFreq(const IterateOptions &opt, Int b, Int bits,
 
 } // namespace
 
-void Iterate(const CplexArray &x, const IterateOptions &opt, ModeMap *mm) {
+bool Iterate(const CplexArray &x, const IterateOptions &opt, ModeMap *mm) {
+  bool found = false; // Whether we found anything new.
   const Int trials = opt.trials;
   const Int bins = opt.bins;
   CHECK_GT(opt.window_threshold, 0);
@@ -89,7 +90,7 @@ void Iterate(const CplexArray &x, const IterateOptions &opt, ModeMap *mm) {
   BinnerSimple binner(win, bits);
 
   vector<double> list_q;
-  vector<unique_ptr<CplexMatrix>> bin_coefs(trials);
+  vector<std::unique_ptr<CplexMatrix>> bin_coefs(trials);
 
   // Repeat "trials" number of times.
   for (Int trial = 0; trial < trials; ++trial) {
@@ -163,7 +164,9 @@ void Iterate(const CplexArray &x, const IterateOptions &opt, ModeMap *mm) {
     coef /= wf;
 
     (*mm)[k0] += coef;
+    found = true;
   }
+  return found;
 }
 
 } // namespace mps

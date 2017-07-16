@@ -42,8 +42,8 @@ public:
 protected:
   const Window &win_;
   Int bits_;
-  unique_ptr<FFTPlan> plan_;
-  unique_ptr<CplexArray> scratch_;
+  std::unique_ptr<FFTPlan> plan_;
+  std::unique_ptr<CplexArray> scratch_;
 };
 
 class BinnerSimple : public Binner {
@@ -67,7 +67,7 @@ public:
                  CplexMatrix *out) override;
 
 protected:
-  unique_ptr<CplexArray> scratch2_;
+  std::unique_ptr<CplexArray> scratch2_;
 };
 
 } // namespace mps
