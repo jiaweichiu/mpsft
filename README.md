@@ -170,6 +170,7 @@ BIN=./bazel-bin/demo1_main
 
 $BIN
 pprof --svg $BIN /tmp/demo1_main.prof > profile/demo1_main_20170717.svg
+pprof --pdf $BIN /tmp/demo1_main.prof > profile/demo1_main_20170717.pdf
 pprof --text $BIN /tmp/demo1_main.prof > profile/demo1_main_20170717.txt
 ```
 
@@ -193,7 +194,7 @@ Total: 164 samples
        0   0.0% 100.0%      164 100.0% __libc_start_main
 ```
 
-Here is the [visualization](src/profile/demo1_main_20170717.svg)
+Here is the [visualization](src/profile/demo1_main_20170717.pdf).
 
 # Miscel
 
