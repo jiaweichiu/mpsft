@@ -142,6 +142,12 @@ sigma = 1e-2
 
 Here are the results. We see that the sparsity has to be around 512 in order for MPSFT to be faster than FFTW.
 
+```shell
+bazel build -c opt --config=opt :demo1_bench
+./bazel-bin/demo1_bench
+```
+
+Results:
 
 ```
 -------------------------------------------------------------
@@ -172,6 +178,8 @@ $BIN
 pprof --svg $BIN /tmp/demo1_main.prof > profile/demo1_main_20170717.svg
 pprof --pdf $BIN /tmp/demo1_main.prof > profile/demo1_main_20170717.pdf
 pprof --text $BIN /tmp/demo1_main.prof > profile/demo1_main_20170717.txt
+
+pprof $BIN /tmp/demo1_main.prof
 ```
 
 We see that `BinInTime` takes up most of the running time.
