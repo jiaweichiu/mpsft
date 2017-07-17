@@ -23,51 +23,83 @@
 
 namespace mps {
 
-constexpr int kBinnerSimple = 1;
-constexpr int kBinnerFast = 2;
+// tau = q +/- (1 << b) where 0 <= b < bits.
+// Num of rows of "out" is 2*bits+1.
 
-class Binner {
+class BinInTime {
 public:
-  Binner(const Window &win, Int bits);
-
-  // tau = q +/- (1 << b) where 0 <= b < bits.
-  // Num of rows of "out" is 2*bits+1.
-  virtual void BinInTime(const CplexArray &x, const Transform &tf, Int q,
-                         CplexMatrix *out) = 0;
-  virtual void BinInFreq(const ModeMap &mm, const Transform &tf, Int q,
-                         CplexMatrix *out) = 0;
-
-  static Binner *Create(int binner_type, const Window &win, Int bits);
+  BinInTime(const Window &win, Int bits);
+  virtual void Run(const CplexArray &x, const Transform &tf, Int q,
+                   CplexMatrix *out) = 0;
+  static BinInTime *Create(int binner_type, const Window &win, Int bits);
 
 protected:
   const Window &win_;
   Int bits_;
   std::unique_ptr<FFTPlan> plan_;
-  std::unique_ptr<CplexArray> scratch_;
 };
 
-class BinnerSimple : public Binner {
+class BinInTimeV0 : public BinInTime {
 public:
-  BinnerSimple(const Window &win, Int bits);
+  BinInTimeV0(const Window &win, Int bits);
+  void Run(const CplexArray &x, const Transform &tf, Int q,
+           CplexMatrix *out) override;
 
-  void BinInTime(const CplexArray &x, const Transform &tf, Int q,
-                 CplexMatrix *out) override;
-  void BinInFreq(const ModeMap &mm, const Transform &tf, Int q,
-                 CplexMatrix *out) override;
+private:
+  CplexArray scratch_;
 };
 
 // Make use of symmetry in tau's to half number of sinusoids.
-class BinnerFast : public Binner {
+class BinInTimeV1 : public BinInTime {
 public:
-  BinnerFast(const Window &win, Int bits);
+  BinInTimeV1(const Window &win, Int bits);
+  void Run(const CplexArray &x, const Transform &tf, Int q,
+           CplexMatrix *out) override;
 
-  void BinInTime(const CplexArray &x, const Transform &tf, Int q,
-                 CplexMatrix *out) override;
-  void BinInFreq(const ModeMap &mm, const Transform &tf, Int q,
-                 CplexMatrix *out) override;
+private:
+  CplexArray scratch_; // Size bins.
+  CplexArray scratch2_;
+};
+
+// Make use of symmetry in tau's to half number of sinusoids.
+// Split big loop into multiple small loops.
+class BinInTimeV2 : public BinInTime {
+public:
+  BinInTimeV2(const Window &win, Int bits);
+  void Run(const CplexArray &x, const Transform &tf, Int q,
+           CplexMatrix *out) override;
+
+private:
+  CplexArray scratch_; // Size p=win.p().
+  CplexArray scratch2_;
+  vector<Int> idx_;
+  vector<Int> idx2_;
+};
+
+class BinInFreq {
+public:
+  BinInFreq(const Window &win, Int bits);
+  virtual void Run(const ModeMap &mm, const Transform &tf, Int q,
+                   CplexMatrix *out) = 0;
+  static BinInFreq *Create(int binner_type, const Window &win, Int bits);
 
 protected:
-  std::unique_ptr<CplexArray> scratch2_;
+  const Window &win_;
+  Int bits_;
+};
+
+class BinInFreqV0 : public BinInFreq {
+public:
+  BinInFreqV0(const Window &win, Int bits);
+  void Run(const ModeMap &mm, const Transform &tf, Int q,
+           CplexMatrix *out) override;
+};
+
+class BinInFreqV1 : public BinInFreq {
+public:
+  BinInFreqV1(const Window &win, Int bits);
+  void Run(const ModeMap &mm, const Transform &tf, Int q,
+           CplexMatrix *out) override;
 };
 
 } // namespace mps
