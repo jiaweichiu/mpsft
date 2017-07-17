@@ -66,8 +66,9 @@ inline double AbsSq(Cplex x) { return RE(x) * RE(x) + IM(x) * IM(x); }
 
 inline double Square(double x) { return x * x; }
 inline Cplex Sinusoid(double freq) {
-  freq *= (2.0 * M_PI);
-  return Cplex(std::cos(freq), std::sin(freq));
+  double s, c;
+  ::sincos(freq * 2.0 * M_PI, &s, &c);
+  return Cplex(c, s);
 }
 
 // Equivalent to multiplying by i: (x+iy)*i = -y+ix.
