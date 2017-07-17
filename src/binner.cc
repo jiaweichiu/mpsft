@@ -179,14 +179,16 @@ BinInTimeV2::BinInTimeV2(const Window &win, Int bits)
     : BinInTime(win, bits), scratch_(win.p()), scratch2_(win.p()),
       idx_(win.p()), idx2_(win.p()) {}
 
-inline void BinInTimeV2Helper1(Int i, Int t, const Transform &tf, Int offset,
+// inline
+void BinInTimeV2Helper1(Int i, Int t, const Transform &tf, Int offset,
                                Int q, Int n, Int *idx, Int *idx2) {
   const Int ts = t + offset;
   idx[i] = PosMod(tf.a * (q + ts) + tf.c, n);
   idx2[i] = PosMod(tf.a * (q - ts) + tf.c, n);
 }
 
-inline void BinInTimeV2Helper2(Int i, Cplex bq, const CplexArray &x, Int *idx,
+// inline
+void BinInTimeV2Helper2(Int i, Cplex bq, const CplexArray &x, Int *idx,
                                Int *idx2, Cplex *out, Cplex *out2) {
   const Cplex x1 = x[idx[i]] * bq;
   const Cplex x2 = std::conj(x[idx2[i]] * bq);
@@ -194,7 +196,8 @@ inline void BinInTimeV2Helper2(Int i, Cplex bq, const CplexArray &x, Int *idx,
   out2[i] = RotateBackward(0.5 * (x1 - x2));
 }
 
-inline void BinInTimeV2Helper3(Int i, Int t, const Transform &tf, Int offset,
+// inline
+void BinInTimeV2Helper3(Int i, Int t, const Transform &tf, Int offset,
                                double wt, Int n, double delta, Cplex *out,
                                Cplex *out2) {
   const Int ts = t + offset;
