@@ -148,6 +148,7 @@ cc_binary(
     ":iterate",
     ":demo1",
   ],
+  linkopts = ["-lprofiler"],
 )
 
 cc_binary(
