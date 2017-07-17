@@ -53,6 +53,9 @@ struct IterateOptions {
   // Use a smaller value to be more conservative and reject more often.
   // If zero, this is ignored.
   double sv_threshold = 0;
+
+  int bin_in_time_type = 2;
+  int bin_in_freq_type = 1;
 };
 
 // x is the signal in time domain.

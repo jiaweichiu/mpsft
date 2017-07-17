@@ -87,7 +87,10 @@ bool Iterate(const CplexArray &x, const IterateOptions &opt, ModeMap *mm) {
   const Int bits = NumBits(n, bins);
 
   Transform tf(n);
-  BinnerFast binner(win, bits);
+  std::unique_ptr<BinInTime> bin_in_time(
+      BinInTime::Create(opt.bin_in_time_type, win, bits));
+  std::unique_ptr<BinInFreq> bin_in_freq(
+      BinInFreq::Create(opt.bin_in_freq_type, win, bits));
 
   vector<double> list_q;
   vector<std::unique_ptr<CplexMatrix>> bin_coefs(trials);
@@ -100,8 +103,8 @@ bool Iterate(const CplexArray &x, const IterateOptions &opt, ModeMap *mm) {
     bin_coefs[trial].reset(new CplexMatrix(1 + 2 * bits, bins));
     // BinInTime will produce "bins" number of coefficients for each tau.
     CplexMatrix *a = bin_coefs[trial].get();
-    binner.BinInTime(x, tf, q, a);
-    binner.BinInFreq(*mm, tf, q, a);
+    bin_in_time->Run(x, tf, q, a);
+    bin_in_freq->Run(*mm, tf, q, a);
   }
 
   for (Int b = 0; b < bins; ++b) {
