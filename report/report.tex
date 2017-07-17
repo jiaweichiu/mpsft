@@ -1,0 +1,46 @@
+\documentclass[10pt]{article}
+\usepackage{mymacros}
+
+\mytitle{Matrix Pencil Sparse Fourier Transform}
+\myauthor{Jiawei Chiu, Laurent Demanet}
+\mydate
+
+\begin{document}
+\pagestyle{plain}
+\maketitle
+
+\section*{Disclaimer}
+This is not a formal publication. We will try to be brief.
+
+\section{Introduction}
+Given a $n$-vector $x$, we like to perform the forward FFT to obtain $\hat{x}$. This is typically done in $O(n \log n)$ time. However, suppose we know that $\hat{x}$ is $k$-sparse plus some noise. Then it is possible to recover these $k$ modes in $O(k)$ time ignoring log factors.
+
+This result is not new. (CITE) However, such SFT (Sparse Fourier Transform) algorithms have seen little practical use because $n$ has to be very large relative to $k$ in order to beat FFTW. For example, for $n=2^{22}$, we need $k\lesssim 2^8$ for AAFFT. We do not consider sFFT3.0 because it works only for the noiseless case, which is unrealistic.
+
+The goal of this work is to improve the overall efficiency of a typical SFT algorithm so that it will see more practical usage.
+
+The main idea is to use the matrix pencil method for two purposes. Firstly, it significantly improves the chance of mode identification. Secondly, it helps detect mode collision, which reduces the chance of creating spurious modes.
+
+The above will make more sense after we describe the SFT framework.
+
+One other important optimization is the use of symmetry to roughly halve the number of trigonometric operations in a code bottleneck. Without this trick, the improvements brought by the matrix pencil method would not be worth its extra cost.
+
+\section{SFT framework}
+
+We will describe various ideas in simplified setups, and leave it to the reader to piece them together.
+
+Before we begin, here is the Fourier convention adopted:
+$$x_t = \sum_k \hat{x}_k e^{2\pi i kt/n}; \quad \hat{x}_k =\frac{1}{n} \sum_t x_t e^{-2\pi i k t/n}.$$
+
+\subsection{Random modulation to mitigate noise}
+
+Suppose there is only one big mode $\hat{x}_{k_0}$. Say we sum all the modes and randomly modulate them to obtain:
+$$U = \sum_k \hat{x}_{k} e^{2\pi i k c/n}.$$
+Above, $c$ is randomly uniformly chosen, and $e^{2\pi i kc/n}$ is the random modulation factor. We know $e^{-2\pi i ck_0/n}U \simeq \hat{x}_{k_0}$. The error is
+$$\eps:=\sum_{k\neq k_0} \hat{x}_k e^{2\pi i (k-k_0)c/n}.$$
+Clearly, $\E \eps = 0$ and $\E \eps^2 = \sum_{k\neq k_0} |\hat{x}_k|^2$. Without this random modulation, the noise modes might add up in the worst possible way.
+
+\subsection{Random permutation to isolate modes}
+
+
+\end{document}

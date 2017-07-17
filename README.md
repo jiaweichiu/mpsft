@@ -164,28 +164,36 @@ We use `trials=1` because there is quite little noise here and there is no need 
 Install gperftools. Link binary to this.
 
 ```shell
-bazel build -c opt --config=opt --linkopt="-lprofiler" :demo1_bench
+bazel build -c opt --config=opt --linkopt="-lprofiler" :demo1_main
 
-BIN=./bazel-bin/demo1_bench
-CPUPROFILE=/tmp/prof.out $BIN
-pprof --web $BIN /tmp/prof.out
+BIN=./bazel-bin/demo1_main
+
+$BIN
+pprof --svg $BIN /tmp/demo1_main.prof > profile/demo1_main_20170717.svg
+pprof --text $BIN /tmp/demo1_main.prof > profile/demo1_main_20170717.txt
 ```
 
 We see that `BinInTime` takes up most of the running time.
 
 ```
-Total: 228 samples
-      77  33.8%  33.8%      126  55.3% mps::BinnerFast::BinInTime
-      42  18.4%  52.2%       43  18.9% sincos
-      23  10.1%  62.3%       44  19.3% apply@1e120
-      13   5.7%  68.0%       13   5.7% t2_32
-      11   4.8%  72.8%       11   4.8% __muldc3
-      10   4.4%  77.2%       10   4.4% n1_32
-       8   3.5%  80.7%        8   3.5% fftw_cpy2d_pair
-       7   3.1%  83.8%        7   3.1% __fmod_finite
-       5   2.2%  86.0%        5   2.2% gammal
-       4   1.8%  87.7%        4   1.8% fftw_cpy2d
+Total: 164 samples
+      81  49.4%  49.4%      152  92.7% mps::BinInTimeV2::Run
+      54  32.9%  82.3%       57  34.8% sincos
+      14   8.5%  90.9%       14   8.5% __muldc3
+       4   2.4%  93.3%        4   2.4% __fmod_finite
+       3   1.8%  95.1%        3   1.8% nearbyint
+       2   1.2%  96.3%        2   1.2% gammal
+       1   0.6%  97.0%        2   1.2% Eigen::internal::svd_precondition_2x2_block_to_be_real::run
+       1   0.6%  97.6%        1   0.6% __nss_passwd_lookup
+       1   0.6%  98.2%        1   0.6% apply@1ee10
+       1   0.6%  98.8%        1   0.6% boost::math::detail::erf_imp
+       1   0.6%  99.4%        1   0.6% fmod
+       1   0.6% 100.0%        8   4.9% mps::BinInFreqV1::Run
+       0   0.0% 100.0%        2   1.2% Eigen::JacobiSVD::compute
+       0   0.0% 100.0%      164 100.0% __libc_start_main
 ```
+
+Here is the [visualization](src/profile/demo1_main_20170717.svg)
 
 # Miscel
 

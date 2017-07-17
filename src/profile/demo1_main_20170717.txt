@@ -1,0 +1,27 @@
+Total: 164 samples
+      81  49.4%  49.4%      152  92.7% mps::BinInTimeV2::Run
+      54  32.9%  82.3%       57  34.8% sincos
+      14   8.5%  90.9%       14   8.5% __muldc3
+       4   2.4%  93.3%        4   2.4% __fmod_finite
+       3   1.8%  95.1%        3   1.8% nearbyint
+       2   1.2%  96.3%        2   1.2% gammal
+       1   0.6%  97.0%        2   1.2% Eigen::internal::svd_precondition_2x2_block_to_be_real::run
+       1   0.6%  97.6%        1   0.6% __nss_passwd_lookup
+       1   0.6%  98.2%        1   0.6% apply@1ee10
+       1   0.6%  98.8%        1   0.6% boost::math::detail::erf_imp
+       1   0.6%  99.4%        1   0.6% fmod
+       1   0.6% 100.0%        8   4.9% mps::BinInFreqV1::Run
+       0   0.0% 100.0%        2   1.2% Eigen::JacobiSVD::compute
+       0   0.0% 100.0%      164 100.0% __libc_start_main
+       0   0.0% 100.0%      164 100.0% _start
+       0   0.0% 100.0%        1   0.6% apply@20f00
+       0   0.0% 100.0%        1   0.6% apply_dit
+       0   0.0% 100.0%        1   0.6% exp
+       0   0.0% 100.0%      164 100.0% main
+       0   0.0% 100.0%      164 100.0% mps::Demo1::Run
+       0   0.0% 100.0%      164 100.0% mps::Iterate
+       0   0.0% 100.0%        2   1.2% mps::MatPencil
+       0   0.0% 100.0%      164 100.0% mps::Run
+       0   0.0% 100.0%        1   0.6% mps::Window::SampleInFreq
+       0   0.0% 100.0%        2   1.2% mps::Window::SampleInTime
+       0   0.0% 100.0%        2   1.2% mps::Window::Window
