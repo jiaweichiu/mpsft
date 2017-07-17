@@ -76,25 +76,18 @@ bazel build -c opt --config=opt :binner_bench
 ---------------------------------------------------------
 Benchmark                  Time           CPU Iterations
 ---------------------------------------------------------
-BM_BinInTime/1/10     529439 ns     529331 ns       1312
-BM_BinInTime/1/13     529241 ns     529011 ns       1317
-BM_BinInTime/1/16     526896 ns     526835 ns       1308
-BM_BinInTime/2/10     327332 ns     326664 ns       2145
-BM_BinInTime/2/13     327918 ns     327265 ns       2142
-BM_BinInTime/2/16     331771 ns     331071 ns       2124
-BM_BinInFreq/1/10     211107 ns     210678 ns       3312
-BM_BinInFreq/1/13     211728 ns     211311 ns       3323
-BM_BinInFreq/1/16     210767 ns     210340 ns       3317
-BM_BinInFreq/2/10     101143 ns     100943 ns       6913
-BM_BinInFreq/2/13     109369 ns     109152 ns       6448
-BM_BinInFreq/2/16     110680 ns     110453 ns       6307
+BM_BinInTime/0/22   69271627 ns   68916698 ns         10
+BM_BinInTime/1/22   48185839 ns   47977874 ns         15
+BM_BinInTime/2/22   40077753 ns   39940766 ns         17
+BM_BinInFreq/0/22     217816 ns     217152 ns       3202
+BM_BinInFreq/1/22     114616 ns     114297 ns       6108
 ```
 
-The first parameter selects the binner. 1 is the basic binner. 2 is the optimized binner. The main optimization has to do with roughly halving the number of trignometric operations.
+The first parameter selects the binner. The second parameter is `log2(n)`.
 
-The second parameter is `log2(n)`.
+Consider `BinInTime`. From V0 to V1, there is a ~1.4X speedup by exploiting symmetry. From V1 to V2, there is a ~1.2X speedup by using smaller loops.
 
-We see that for `BinInTime`, there is a ~1.6X gain. For `BinInFreq`, there is a ~1.9X gain.
+Consider `BinInFreq`, there is a  ~1.9X speedup by exploiting symmetry.
 
 ## Benchmarks for FFTW
 
@@ -147,19 +140,19 @@ min_bins = 101
 sigma = 1e-2
 ```
 
-Here are the results. We see that the sparsity has to be around 500 or less in order for MPSFT to be faster than FFTW.
+Here are the results. We see that the sparsity has to be around 512 in order for MPSFT to be faster than FFTW.
 
 
 ```
 -------------------------------------------------------------
 Benchmark                      Time           CPU Iterations
 -------------------------------------------------------------
-BM_Demo1/4194301/64     96312215 ns   96303470 ns          7
-BM_Demo1/4194301/128   119450439 ns  119445622 ns          6
-BM_Demo1/4194301/256   161351308 ns  161341183 ns          4
-BM_Demo1/4194301/512   252232483 ns  252212400 ns          3
-BM_Demo1/4194301/1024  428662101 ns  428636554 ns          2
-BM_Demo1/4194301/2048  750128878 ns  750103387 ns          1
+BM_Demo1/4194301/64     85397832 ns   84993272 ns          8
+BM_Demo1/4194301/128   101821317 ns  101854972 ns          7
+BM_Demo1/4194301/256   149854974 ns  149830708 ns          5
+BM_Demo1/4194301/512   239573194 ns  239637117 ns          3
+BM_Demo1/4194301/1024  393503798 ns  393601630 ns          2
+BM_Demo1/4194301/2048  654584581 ns  654782524 ns          1
 ```
 
 A couple of parameters are not the most aggressive. For example, `window_delta` can be slightly bigger.
