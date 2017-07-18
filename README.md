@@ -76,18 +76,18 @@ bazel build -c opt --config=opt :binner_bench
 ---------------------------------------------------------
 Benchmark                  Time           CPU Iterations
 ---------------------------------------------------------
-BM_BinInTime/0/22   63373917 ns   63354636 ns         11
-BM_BinInTime/1/22   43959240 ns   43959074 ns         16
-BM_BinInTime/2/22   33298637 ns   33293630 ns         21
-BM_BinInFreq/0/22     198714 ns     198700 ns       3526
-BM_BinInFreq/1/22      96872 ns      96870 ns       7153
+BM_BinInTime/0/22   43343983 ns   43346872 ns         16
+BM_BinInTime/1/22   31140300 ns   31142036 ns         22
+BM_BinInTime/2/22   21985368 ns   21985125 ns         32
+BM_BinInFreq/0/22      78472 ns      78477 ns       8893
+BM_BinInFreq/1/22      44098 ns      44101 ns      15864
 ```
 
 The first parameter selects the binner. The second parameter is `log2(n)`.
 
-Consider `BinInTime`. From V0 to V1, there is a ~1.4X speedup by exploiting symmetry. From V1 to V2, there is a ~1.3X speedup by using smaller loops.
+From V0 to V1 for both `BinInTime` and `BinInFreq`, we exploit symmetry to roughly halve the number of trigonometric operations.
 
-Consider `BinInFreq`, there is a ~2X speedup by exploiting symmetry.
+From V1 to V2 and `BinInTime`, we use smaller loops in hope of better compiler optimization, say vectorization, AVX etc.
 
 ## Benchmarks for FFTW
 
@@ -140,7 +140,7 @@ min_bins = 101
 sigma = 1e-2
 ```
 
-Here are the results. We see that the sparsity has to be around 512 in order for MPSFT to be faster than FFTW.
+Here are the results. We see that the sparsity has to be around 1000 in order for MPSFT to be faster than FFTW.
 
 ```shell
 bazel build -c opt --config=opt :demo1_bench
@@ -153,12 +153,12 @@ Results:
 -------------------------------------------------------------
 Benchmark                      Time           CPU Iterations
 -------------------------------------------------------------
-BM_Demo1/4194301/64     71379097 ns   71364941 ns         10
-BM_Demo1/4194301/128    88312835 ns   88299511 ns          7
-BM_Demo1/4194301/256   128277761 ns  128253990 ns          5
-BM_Demo1/4194301/512   188654357 ns  188613902 ns          4
-BM_Demo1/4194301/1024  325446695 ns  325385261 ns          2
-BM_Demo1/4194301/2048  560357554 ns  560248307 ns          1
+BM_Demo1/4194301/64     48057441 ns   48057968 ns         15
+BM_Demo1/4194301/128    61008096 ns   61012363 ns         11
+BM_Demo1/4194301/256    82409613 ns   82415425 ns          9
+BM_Demo1/4194301/512   128505852 ns  128504101 ns          5
+BM_Demo1/4194301/1024  214738172 ns  214702456 ns          3
+BM_Demo1/4194301/2048  374692767 ns  374709328 ns          2
 ```
 
 A couple of parameters are not the most aggressive. For example, `window_delta` can be slightly bigger.
