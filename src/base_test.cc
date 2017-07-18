@@ -120,7 +120,7 @@ TEST_CASE("SinTwoPiBasic", "") {
 
 TEST_CASE("SinCosTwoPiBasic", "") {
   const Int n = 1234;
-  for (Int i = 0; i <= n; ++i) {
+  for (Int i = -n; i <= n + n; ++i) {
     const double x = double(i) / double(n);
     auto r = SinCosTwoPi(x);
     REQUIRE(r.first == Approx(std::sin(2 * M_PI * x)));

@@ -77,15 +77,15 @@ inline Int Mod(Int x, Int n) { return x % n; }
 inline double AbsSq(Cplex x) { return RE(x) * RE(x) + IM(x) * IM(x); }
 inline double Square(double x) { return x * x; }
 
-inline Cplex Sinusoid(double freq) {
-  double s, c;
-  ::sincos(freq * 2.0 * M_PI, &s, &c);
-  return Cplex(c, s);
-}
 // inline Cplex Sinusoid(double freq) {
-//   auto r = SinCosTwoPi(freq);
-//   return Cplex(r.first, r.second);
+//   double s, c;
+//   ::sincos(freq * 2.0 * M_PI, &s, &c);
+//   return Cplex(c, s);
 // }
+inline Cplex Sinusoid(double freq) {
+  auto r = SinCosTwoPi(freq);
+  return Cplex(r.first, r.second);
+}
 
 // Equivalent to multiplying by i: (x+iy)*i = -y+ix.
 inline Cplex RotateForward(Cplex x) { return Cplex(-IM(x), RE(x)); }

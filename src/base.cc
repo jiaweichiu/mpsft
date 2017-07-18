@@ -116,20 +116,20 @@ std::pair<double, double> SinCosTwoPi(double x) {
   double xb;
   if (x >= 0.75) {
     // Fourth quadrant.
-    xb = x - 0.75;  // x+0.25-1.0.
-    x = -1.0 + x;   // -0.25 < x < 0.
+    xb = x - 0.75; // x+0.25-1.0.
+    x = -1.0 + x;  // -0.25 < x < 0.
   } else if (x >= 0.5) {
     // Third quadrant.
-    xb = x - 0.75;  // -1.0+(x+0.25)=x-0.75.
-    x = 0.5 - x;    // -0.25 < x < 0.
+    xb = x - 0.75; // -1.0+(x+0.25)=x-0.75.
+    x = 0.5 - x;   // -0.25 < x < 0.
   } else if (x >= 0.25) {
     // Second quadrant.
-    xb = 0.25 - x;  // 0.5-(x+0.25)=0.25-x.
-    x = 0.5 - x;    // 0 < x < 0.25.
+    xb = 0.25 - x; // 0.5-(x+0.25)=0.25-x.
+    x = 0.5 - x;   // 0 < x < 0.25.
   } else {
     // First quadrant.
     // 0 < x < 0.25.
-    xb = 0.25 - x;  // 0.5-(x+0.25)=0.25-x.
+    xb = 0.25 - x; // 0.5-(x+0.25)=0.25-x.
   }
   x *= 4.0;
   xb *= 4.0;
