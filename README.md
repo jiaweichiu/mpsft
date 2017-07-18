@@ -76,18 +76,18 @@ bazel build -c opt --config=opt :binner_bench
 ---------------------------------------------------------
 Benchmark                  Time           CPU Iterations
 ---------------------------------------------------------
-BM_BinInTime/0/22   64254592 ns   65285985 ns         10
-BM_BinInTime/1/22   44763790 ns   45316439 ns         16
-BM_BinInTime/2/22   38125950 ns   38496863 ns         18
-BM_BinInFreq/0/22     213263 ns     215111 ns       3249
-BM_BinInFreq/1/22     112746 ns     113640 ns       6134
+BM_BinInTime/0/22   63373917 ns   63354636 ns         11
+BM_BinInTime/1/22   43959240 ns   43959074 ns         16
+BM_BinInTime/2/22   33298637 ns   33293630 ns         21
+BM_BinInFreq/0/22     198714 ns     198700 ns       3526
+BM_BinInFreq/1/22      96872 ns      96870 ns       7153
 ```
 
 The first parameter selects the binner. The second parameter is `log2(n)`.
 
-Consider `BinInTime`. From V0 to V1, there is a ~1.4X speedup by exploiting symmetry. From V1 to V2, there is a ~1.2X speedup by using smaller loops.
+Consider `BinInTime`. From V0 to V1, there is a ~1.4X speedup by exploiting symmetry. From V1 to V2, there is a ~1.3X speedup by using smaller loops.
 
-Consider `BinInFreq`, there is a  ~1.9X speedup by exploiting symmetry.
+Consider `BinInFreq`, there is a ~2X speedup by exploiting symmetry.
 
 ## Benchmarks for FFTW
 
@@ -97,34 +97,34 @@ As expected, FFTW is a lot faster when `n` is a power of 2. Here we see that it 
 -------------------------------------------------------
 Benchmark                Time           CPU Iterations
 -------------------------------------------------------
-BM_FFTW/512           2811 ns       2810 ns     248972
-BM_FFTW/1024          7071 ns       7070 ns      98097
-BM_FFTW/2048         16153 ns      16150 ns      43235
-BM_FFTW/4096         44135 ns      44124 ns      15861
-BM_FFTW/8192        103129 ns     103105 ns       6773
-BM_FFTW/16384       225994 ns     225949 ns       3040
-BM_FFTW/32768       562571 ns     562435 ns       1245
-BM_FFTW/65536      1074076 ns    1073675 ns        638
-BM_FFTW/131072     2535639 ns    2535202 ns        279
-BM_FFTW/262144     6570041 ns    6567777 ns        105
-BM_FFTW/524288    13495382 ns   13493038 ns         54
-BM_FFTW/1048576   45847787 ns   45832947 ns         16
-BM_FFTW/2097152  109663756 ns  109647774 ns          6
-BM_FFTW/4194304  238162189 ns  238126294 ns          3
-BM_FFTW/509          18251 ns      18245 ns      38231
-BM_FFTW/1021         40767 ns      40758 ns      17168
-BM_FFTW/2053         99805 ns      99769 ns       6970
-BM_FFTW/4099        216602 ns     216570 ns       3233
-BM_FFTW/8191        517183 ns     517107 ns       1319
-BM_FFTW/16381      1219395 ns    1218845 ns        571
-BM_FFTW/32771      2297161 ns    2296780 ns        305
-BM_FFTW/65537      3668541 ns    3667993 ns        191
-BM_FFTW/131071    14585802 ns   14583150 ns         48
-BM_FFTW/262147    23815421 ns   23812022 ns         30
-BM_FFTW/524287    81973846 ns   81962204 ns          8
-BM_FFTW/1048573  185319479 ns  185291332 ns          4
-BM_FFTW/2097143  384113082 ns  384051338 ns          2
-BM_FFTW/4194301  814812411 ns  814561923 ns          1
+BM_FFTW/512           2808 ns       2807 ns     246425
+BM_FFTW/1024          7178 ns       7177 ns      97796
+BM_FFTW/2048         16479 ns      16478 ns      42291
+BM_FFTW/4096         45325 ns      45323 ns      15458
+BM_FFTW/8192        112708 ns     112710 ns       6168
+BM_FFTW/16384       230591 ns     230573 ns       3016
+BM_FFTW/32768       577172 ns     577180 ns       1206
+BM_FFTW/65536      1140694 ns    1140611 ns        601
+BM_FFTW/131072     2798055 ns    2797629 ns        253
+BM_FFTW/262144     7015315 ns    7015529 ns         96
+BM_FFTW/524288    14596828 ns   14596991 ns         49
+BM_FFTW/1048576   47893827 ns   47891220 ns         15
+BM_FFTW/2097152  116089786 ns  116075660 ns          6
+BM_FFTW/4194304  241538333 ns  241533821 ns          3
+BM_FFTW/509          18738 ns      18738 ns      37353
+BM_FFTW/1021         43045 ns      43046 ns      16243
+BM_FFTW/2053        102193 ns     102196 ns       6795
+BM_FFTW/4099        224428 ns     224425 ns       3120
+BM_FFTW/8191        518752 ns     518746 ns       1322
+BM_FFTW/16381      1295849 ns    1295800 ns        537
+BM_FFTW/32771      2470733 ns    2470532 ns        285
+BM_FFTW/65537      4041268 ns    4041056 ns        156
+BM_FFTW/131071    14756750 ns   14756669 ns         47
+BM_FFTW/262147    25712783 ns   25711094 ns         27
+BM_FFTW/524287    87817229 ns   87809923 ns          8
+BM_FFTW/1048573  196519341 ns  196502387 ns          4
+BM_FFTW/2097143  406672788 ns  406631881 ns          2
+BM_FFTW/4194301  858727800 ns  858697804 ns          1
 ```
 
 ## Benchmarks for MPSFT
@@ -153,12 +153,12 @@ Results:
 -------------------------------------------------------------
 Benchmark                      Time           CPU Iterations
 -------------------------------------------------------------
-BM_Demo1/4194301/64     85108215 ns   84031097 ns          8
-BM_Demo1/4194301/128   101302040 ns  100489462 ns          7
-BM_Demo1/4194301/256   146711994 ns  146038058 ns          6
-BM_Demo1/4194301/512   222997975 ns  222333162 ns          3
-BM_Demo1/4194301/1024  385268980 ns  384430733 ns          2
-BM_Demo1/4194301/2048  634506174 ns  633584324 ns          1
+BM_Demo1/4194301/64     71379097 ns   71364941 ns         10
+BM_Demo1/4194301/128    88312835 ns   88299511 ns          7
+BM_Demo1/4194301/256   128277761 ns  128253990 ns          5
+BM_Demo1/4194301/512   188654357 ns  188613902 ns          4
+BM_Demo1/4194301/1024  325446695 ns  325385261 ns          2
+BM_Demo1/4194301/2048  560357554 ns  560248307 ns          1
 ```
 
 A couple of parameters are not the most aggressive. For example, `window_delta` can be slightly bigger.
