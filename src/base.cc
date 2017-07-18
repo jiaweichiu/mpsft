@@ -105,6 +105,14 @@ double SinTwoPi(double x) {
 
 // Use cos(x)=sin(pi/2+x). Basically, shift by one quadrant.
 std::pair<double, double> SinCosTwoPi(double x) {
+  if (x >= 1.0) {
+    x -= 1.0;
+  } else if (x < 0) {
+    x += 1.0;
+  }
+  DCHECK_GE(x, 0);
+  DCHECK_LE(x, 1.0);
+
   double xb;
   if (x >= 0.75) {
     // Fourth quadrant.
