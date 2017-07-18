@@ -1,0 +1,19 @@
+Total: 96 samples
+      71  74.0%  74.0%       89  92.7% mps::BinInTimeV2::Run
+      18  18.8%  92.7%       18  18.8% mps::SinCosTwoPi
+       2   2.1%  94.8%        2   2.1% Eigen::internal::real_2x2_jacobi_svd
+       2   2.1%  96.9%        2   2.1% t2_25
+       1   1.0%  97.9%        3   3.1% apply@1b6f0
+       1   1.0%  99.0%        4   4.2% mps::BinInFreqV1::Run
+       1   1.0% 100.0%        1   1.0% mps::Window::Window
+       0   0.0% 100.0%        2   2.1% Eigen::JacobiSVD::compute
+       0   0.0% 100.0%       96 100.0% __libc_start_main
+       0   0.0% 100.0%       96 100.0% _start
+       0   0.0% 100.0%        2   2.1% apply@1cad0
+       0   0.0% 100.0%        3   3.1% apply@20f00
+       0   0.0% 100.0%        3   3.1% apply_dit
+       0   0.0% 100.0%       96 100.0% main
+       0   0.0% 100.0%       96 100.0% mps::Demo1::Run
+       0   0.0% 100.0%       96 100.0% mps::Iterate
+       0   0.0% 100.0%        2   2.1% mps::MatPencil
+       0   0.0% 100.0%       96 100.0% mps::Run

@@ -170,14 +170,14 @@ We use `trials=1` because there is quite little noise here and there is no need 
 Install gperftools. Link binary to this.
 
 ```shell
-bazel build -c opt --config=opt --linkopt="-lprofiler" :demo1_main
+bazel build --config=opt --linkopt="-lprofiler" :demo1_main
 
 BIN=./bazel-bin/demo1_main
 
 $BIN
-pprof --svg $BIN /tmp/demo1_main.prof > profile/demo1_main_20170717.svg
-pprof --pdf $BIN /tmp/demo1_main.prof > profile/demo1_main_20170717.pdf
-pprof --text $BIN /tmp/demo1_main.prof > profile/demo1_main_20170717.txt
+pprof --svg $BIN /tmp/demo1_main.prof > profile/demo1_main_20170718.svg
+pprof --pdf $BIN /tmp/demo1_main.prof > profile/demo1_main_20170718.pdf
+pprof --text $BIN /tmp/demo1_main.prof > profile/demo1_main_20170718.txt
 
 pprof $BIN /tmp/demo1_main.prof
 ```
@@ -203,6 +203,22 @@ Total: 164 samples
 ```
 
 Here is the [visualization](src/profile/demo1_main_20170717.pdf).
+
+After tweaking sin-cos operations, we have:
+
+```
+Total: 96 samples
+      71  74.0%  74.0%       89  92.7% mps::BinInTimeV2::Run
+      18  18.8%  92.7%       18  18.8% mps::SinCosTwoPi
+       2   2.1%  94.8%        2   2.1% Eigen::internal::real_2x2_jacobi_svd
+       2   2.1%  96.9%        2   2.1% t2_25
+       1   1.0%  97.9%        3   3.1% apply@1b6f0
+       1   1.0%  99.0%        4   4.2% mps::BinInFreqV1::Run
+       1   1.0% 100.0%        1   1.0% mps::Window::Window
+       0   0.0% 100.0%        2   2.1% Eigen::JacobiSVD::compute
+```
+
+Here is the [visualization](src/profile/demo1_main_20170718.pdf).
 
 # Miscel
 
