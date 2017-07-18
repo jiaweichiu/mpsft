@@ -84,7 +84,7 @@ inline double Square(double x) { return x * x; }
 // }
 inline Cplex Sinusoid(double freq) {
   auto r = SinCosTwoPi(freq);
-  return Cplex(r.first, r.second);
+  return Cplex(r.second, r.first);
 }
 
 // Equivalent to multiplying by i: (x+iy)*i = -y+ix.
