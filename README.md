@@ -85,7 +85,7 @@ BM_BinInFreq/1/22      44098 ns      44101 ns      15864
 
 The first parameter selects the binner. The second parameter is `log2(n)`.
 
-From V0 to V1 for both `BinInTime` and `BinInFreq`, we exploit symmetry to roughly halve the number of trigonometric operations.
+From V0 to V1 for both `BinInTime` and `BinInFreq`, we exploit symmetry to roughly halve the number of trigonometric operations. The gain is not as much after we provide our own trigonometric functions.
 
 From V1 to V2 and `BinInTime`, we use smaller loops in hope of better compiler optimization, say vectorization, AVX etc.
 
@@ -204,7 +204,7 @@ Total: 164 samples
 
 Here is the [visualization](src/profile/demo1_main_20170717.pdf).
 
-After tweaking sin-cos operations, we have:
+After tweaking sin-cos operations, such that it is almost 10X faster, we have:
 
 ```
 Total: 96 samples
