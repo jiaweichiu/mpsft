@@ -35,7 +35,8 @@ static void BM_BinInTime(benchmark::State &state) {
       BinInTime::Create(bin_in_time_type, win, bits));
 
   const ModeMap mm = {{5, Cplex(2.0, 1.0)}};
-  const CplexArray x = EvaluateModes(n, mm);
+  CplexArray x(n);
+  EvaluateModes(n, mm, &x);
 
   while (state.KeepRunning()) {
     const Int q = RandomInt() % n;

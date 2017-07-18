@@ -32,7 +32,8 @@ TEST_CASE("BinInTime", "") {
   const Int q = 100;
 
   const ModeMap mm = {{500, Cplex(1.0, 0)}};
-  const CplexArray x = EvaluateModes(n, mm);
+  CplexArray x(n);
+  EvaluateModes(n, mm, &x);
 
   Window win(n, bins, 1e-6);
   Transform tf(n, 1, 0, 0);
@@ -65,7 +66,8 @@ void TimeFreqMatch(int bin_in_time_type, int bin_in_freq_type) {
 
   // Prepare x_hat and x.
   const ModeMap mm = {{550, Cplex(2.0, 0)}};
-  const CplexArray x = EvaluateModes(n, mm);
+  CplexArray x(n);
+  EvaluateModes(n, mm, &x);
   Transform tf(n, 3, 847, 45);
 
   // BinInTime.
@@ -119,7 +121,8 @@ void TimeFreqMatchBigger(int bin_in_time_type, int bin_in_freq_type) {
 
   // Prepare x_hat and x.
   const ModeMap mm = {{565336, Cplex(2.0, 1.0)}};
-  const CplexArray x = EvaluateModes(n, mm);
+  CplexArray x(n);
+  EvaluateModes(n, mm, &x);
   Transform tf(n, 0x3FFFFFFF, 0xEEEEEEEE, 0xDDDDDD);
 
   // BinInTime.

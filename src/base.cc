@@ -60,6 +60,96 @@ void RandomSeed(Int seed) { rng.seed(seed); }
 Int RandomInt() { return uid(rng); }
 double RandomNormal() { return nd(rng); }
 
+double SincPi(double x) {
+  constexpr double taylor_0_bound = std::numeric_limits<double>::epsilon();
+  constexpr double taylor_2_bound = std::sqrt(taylor_0_bound);
+  constexpr double taylor_n_bound = std::sqrt(taylor_2_bound);
+  if (x < 0) {
+    x = -x;
+  }
+  if (x >= taylor_n_bound) {
+    return std::sin(x) / x;
+  }
+  double result = 1.0;
+  if (x >= taylor_0_bound) {
+    const double x2 = x * x;
+    result -= x2 / 6.0;
+    if (x >= taylor_2_bound) {
+      result += (x2 * x2) / 120.0;
+    }
+  }
+  return result;
+}
+
+double SinTwoPi(double x) {
+  if (x >= 0.75) {
+    x = -1.0 + x;
+  } else if (x >= 0.25) {
+    x = 0.5 - x;
+  }
+  x *= 4.0;
+  constexpr double coef1 = 1.1336481778117871;
+  constexpr double coef3 = -0.13807177660048911;
+  constexpr double coef5 = 0.0044907175846143066;
+  constexpr double coef7 = -6.8290405376023045e-05;
+  constexpr double z0 = 1.0;
+  const double z1 = x;
+  const double z2 = 2.0 * x * z1 - z0;
+  const double z3 = 2.0 * x * z2 - z1;
+  const double z4 = 2.0 * x * z3 - z2;
+  const double z5 = 2.0 * x * z4 - z3;
+  const double z6 = 2.0 * x * z5 - z4;
+  const double z7 = 2.0 * x * z6 - z5;
+  return coef1 * z1 + coef3 * z3 + coef5 * z5 + coef7 * z7;
+}
+
+// Use cos(x)=sin(pi/2+x). Basically, shift by one quadrant.
+std::pair<double, double> SinCosTwoPi(double x) {
+  double xb;
+  if (x >= 0.75) {
+    // Fourth quadrant.
+    xb = x - 0.75;  // x+0.25-1.0.
+    x = -1.0 + x;   // -0.25 < x < 0.
+  } else if (x >= 0.5) {
+    // Third quadrant.
+    xb = x - 0.75;  // -1.0+(x+0.25)=x-0.75.
+    x = 0.5 - x;    // -0.25 < x < 0.
+  } else if (x >= 0.25) {
+    // Second quadrant.
+    xb = 0.25 - x;  // 0.5-(x+0.25)=0.25-x.
+    x = 0.5 - x;    // 0 < x < 0.25.
+  } else {
+    // First quadrant.
+    // 0 < x < 0.25.
+    xb = 0.25 - x;  // 0.5-(x+0.25)=0.25-x.
+  }
+  x *= 4.0;
+  xb *= 4.0;
+  constexpr double coef1 = 1.1336481778117871;
+  constexpr double coef3 = -0.13807177660048911;
+  constexpr double coef5 = 0.0044907175846143066;
+  constexpr double coef7 = -6.8290405376023045e-05;
+
+  const double z1 = x;
+  const double z2 = 2.0 * x * z1 - 1.0;
+  const double z3 = 2.0 * x * z2 - z1;
+  const double z4 = 2.0 * x * z3 - z2;
+  const double z5 = 2.0 * x * z4 - z3;
+  const double z6 = 2.0 * x * z5 - z4;
+  const double z7 = 2.0 * x * z6 - z5;
+
+  const double z1b = xb;
+  const double z2b = 2.0 * xb * z1b - 1.0;
+  const double z3b = 2.0 * xb * z2b - z1b;
+  const double z4b = 2.0 * xb * z3b - z2b;
+  const double z5b = 2.0 * xb * z4b - z3b;
+  const double z6b = 2.0 * xb * z5b - z4b;
+  const double z7b = 2.0 * xb * z6b - z5b;
+
+  return std::make_pair(coef1 * z1 + coef3 * z3 + coef5 * z5 + coef7 * z7,
+                        coef1 * z1b + coef3 * z3b + coef5 * z5b + coef7 * z7b);
+}
+
 CplexArray::CplexArray() {}
 
 CplexArray::CplexArray(Int n) { Resize(n); }
@@ -111,16 +201,15 @@ void GenerateModeMap(Int n, Int k, ModeMap *mm) {
   }
 }
 
-CplexArray EvaluateModes(Int n, const ModeMap &mm) {
-  CplexArray x(n);
-  x.Clear();
+void EvaluateModes(Int n, const ModeMap &mm, CplexArray *out) {
+  CHECK_EQ(out->size(), n);
+  out->Clear();
   for (const auto &kv : mm) {
     for (Int t = 0; t < n; ++t) {
       const double freq = Mod(kv.first * double(t), n) / double(n);
-      x[t] += kv.second * Sinusoid(freq);
+      (*out)[t] += kv.second * Sinusoid(freq);
     }
   }
-  return x;
 }
 
 // Generate Xhat. Noise energy will sum up to n*sigma*sigma.

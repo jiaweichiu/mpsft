@@ -23,6 +23,15 @@ cc_test(
 )
 
 cc_binary(
+  name = "base_bench",
+  srcs = ["base_bench.cc"],
+  deps = [
+    ":base",
+    ":benchmark",
+  ],
+)
+
+cc_binary(
   name = "fftw_bench",
   srcs = ["fftw_bench.cc"],
   deps = [

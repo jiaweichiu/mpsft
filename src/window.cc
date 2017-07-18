@@ -16,8 +16,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
  *
  */
-#include <boost/math/special_functions/erf.hpp>
-#include <boost/math/special_functions/sinc.hpp>
+#include <cmath>
 #include <glog/logging.h>
 
 #include "base.h"
@@ -61,15 +60,13 @@ Window::Window(Int n, Int bins, double delta)
 double Window::SampleInTime(Int i) const {
   const double t = double(i);
   const double u = t * M_PI * sigma_f_;
-  return width_ * boost::math::sinc_pi<double>(t * M_PI * width_) *
-         ::exp(-2.0 * u * u);
+  return width_ * SincPi(t * M_PI * width_) * std::exp(-2.0 * u * u);
 }
 
 double Window::SampleInFreq(double xi) const {
   const double c = 0.5 * width_;
   const double d = M_SQRT2 * M_PI * sigma_t_;
-  return 0.5 * (boost::math::erf<double>((xi + c) * d) -
-                boost::math::erf<double>((xi - c) * d));
+  return 0.5 * (std::erf((xi + c) * d) - std::erf((xi - c) * d));
 }
 
 } // namespace mps

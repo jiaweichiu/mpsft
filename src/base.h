@@ -18,6 +18,8 @@
  */
 #pragma once
 
+// "Base" lib contains a bunch of handy math functions.
+
 #include <algorithm>
 #include <cmath>
 #include <complex>
@@ -55,6 +57,15 @@ void MainInit(int argc, char *const argv[]);
 void RandomSeed(Int seed);
 Int RandomInt();
 double RandomNormal();
+
+// SincPi(x) = sin(x) / x.
+double SincPi(double x);
+
+// Returns sin(2*pi*x). CAUTION: Assume 0 <= x <= 1.
+double SinTwoPi(double x);
+
+// Returns sin(2*pi*x) and cos(2*pi*x). CAUTION: Assume 0 <= x <= 1.
+std::pair<double, double> SinCosTwoPi(double x);
 
 // Our only macros! We try not to.
 #define RE std::real
@@ -103,7 +114,7 @@ private:
 // Generate ModeMap with k unique modes, each of magnitude one.
 void GenerateModeMap(Int n, Int k, ModeMap *mm);
 
-CplexArray EvaluateModes(Int n, const ModeMap &mm);
+void EvaluateModes(Int n, const ModeMap &mm, CplexArray *out);
 
 // Add ambience noise such that in the *time domain*, each sample point is
 // contaminated by N(0, sigma).

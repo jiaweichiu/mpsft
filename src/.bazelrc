@@ -1,3 +1,21 @@
 build --linkopt="-lglog -lm -lrt -lpthread -L/usr/local/lib -lfftw3"
 
-build:opt --copt="-march=native" --cxxopt="-march=native"
+build:opt \
+--copt="-g0" \
+--copt="-DNDEBUG" \
+--copt="-march=native" \
+--copt="-mtune=native" \
+--copt="-O3" \
+--copt="-ffast-math" \
+--copt="-fno-exceptions" \
+--copt="-mavx" \
+--copt="-ftree-vectorize" \
+--cxxopt="-g0" \
+--cxxopt="-DNDEBUG" \
+--cxxopt="-march=native" \
+--cxxopt="-mtune=native" \
+--cxxopt="-O3" \
+--cxxopt="-ffast-math" \
+--cxxopt="-fno-exceptions" \
+--cxxopt="-mavx" \
+--cxxopt="-ftree-vectorize"

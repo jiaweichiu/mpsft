@@ -110,4 +110,22 @@ TEST_CASE("GenerateXhatFFT", "") {
   REQUIRE(mse == Approx(sigma));
 }
 
+TEST_CASE("SinTwoPiBasic", "") {
+  const Int n = 1234;
+  for (Int i = 0; i <= n; ++i) {
+    const double x = double(i) / double(n);
+    REQUIRE(SinTwoPi(x) == Approx(std::sin(2 * M_PI * x)));
+  }
+}
+
+TEST_CASE("SinCosTwoPiBasic", "") {
+  const Int n = 1234;
+  for (Int i = 0; i <= n; ++i) {
+    const double x = double(i) / double(n);
+    auto r = SinCosTwoPi(x);
+    REQUIRE(r.first == Approx(std::sin(2 * M_PI * x)));
+    REQUIRE(r.second == Approx(std::cos(2 * M_PI * x)));
+  }
+}
+
 } // namespace mps
