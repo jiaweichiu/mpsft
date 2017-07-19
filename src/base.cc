@@ -17,6 +17,7 @@
  *
  */
 #include <complex>
+#include <cstdlib>
 #include <cstring>
 #include <random>
 
@@ -81,7 +82,25 @@ double SincPi(double x) {
   return result;
 }
 
-double SinTwoPi(double x) {
+double SinTwoPi(double a) {
+  const double y = (a >= 0.75) ? -1.0 + a : (a >= 0.25) ? 0.5 - a : a;
+  const double x = 4.0 * y;
+  constexpr double coef1 = 1.1336481778117871;
+  constexpr double coef3 = -0.13807177660048911;
+  constexpr double coef5 = 0.0044907175846143066;
+  constexpr double coef7 = -6.8290405376023045e-05;
+  constexpr double z0 = 1.0;
+  const double z1 = x;
+  const double z2 = 2.0 * x * z1 - z0;
+  const double z3 = 2.0 * x * z2 - z1;
+  const double z4 = 2.0 * x * z3 - z2;
+  const double z5 = 2.0 * x * z4 - z3;
+  const double z6 = 2.0 * x * z5 - z4;
+  const double z7 = 2.0 * x * z6 - z5;
+  return coef1 * z1 + coef3 * z3 + coef5 * z5 + coef7 * z7;
+}
+
+double CosTwoPi(double x) {
   if (x >= 0.75) {
     x = -1.0 + x;
   } else if (x >= 0.25) {
@@ -104,9 +123,11 @@ double SinTwoPi(double x) {
 }
 
 // Use cos(x)=sin(pi/2+x). Basically, shift by one quadrant.
-std::pair<double, double> SinCosTwoPi(double x) {
+/*Cplex Sinusoid(double x) {
   if (x >= 1.0) {
     x -= 1.0;
+  } else if (x < -1.0) {
+    x += 2.0;
   } else if (x < 0) {
     x += 1.0;
   }
@@ -139,24 +160,30 @@ std::pair<double, double> SinCosTwoPi(double x) {
   constexpr double coef7 = -6.8290405376023045e-05;
 
   const double z1 = x;
-  const double z2 = 2.0 * x * z1 - 1.0;
-  const double z3 = 2.0 * x * z2 - z1;
-  const double z4 = 2.0 * x * z3 - z2;
-  const double z5 = 2.0 * x * z4 - z3;
-  const double z6 = 2.0 * x * z5 - z4;
-  const double z7 = 2.0 * x * z6 - z5;
-
   const double z1b = xb;
+
+  const double z2 = 2.0 * x * z1 - 1.0;
   const double z2b = 2.0 * xb * z1b - 1.0;
+
+  const double z3 = 2.0 * x * z2 - z1;
   const double z3b = 2.0 * xb * z2b - z1b;
+
+  const double z4 = 2.0 * x * z3 - z2;
   const double z4b = 2.0 * xb * z3b - z2b;
+
+  const double z5 = 2.0 * x * z4 - z3;
   const double z5b = 2.0 * xb * z4b - z3b;
+
+  const double z6 = 2.0 * x * z5 - z4;
   const double z6b = 2.0 * xb * z5b - z4b;
+
+  const double z7 = 2.0 * x * z6 - z5;
   const double z7b = 2.0 * xb * z6b - z5b;
 
-  return std::make_pair(coef1 * z1 + coef3 * z3 + coef5 * z5 + coef7 * z7,
-                        coef1 * z1b + coef3 * z3b + coef5 * z5b + coef7 * z7b);
-}
+  const double s = coef1 * z1 + coef3 * z3 + coef5 * z5 + coef7 * z7;
+  const double c = coef1 * z1b + coef3 * z3b + coef5 * z5b + coef7 * z7b;
+  return Cplex(c, s);
+}*/
 
 CplexArray::CplexArray() {}
 
@@ -169,7 +196,7 @@ CplexArray::CplexArray(std::initializer_list<Cplex> l) {
 
 void CplexArray::Reset() {
   if (data_) {
-    fftw_free(data_);
+    ::free(data_);
     n_ = 0;
     data_ = nullptr;
   }
@@ -188,7 +215,11 @@ CplexArray::~CplexArray() { Reset(); }
 void CplexArray::Resize(Int n) {
   Reset();
   n_ = n;
-  data_ = reinterpret_cast<Cplex *>(fftw_alloc_complex(n));
+  // data_ = reinterpret_cast<Cplex *>(fftw_alloc_complex(n));
+  size_t m = n * sizeof(Cplex);
+  m = ((m + kAlign - 1) / kAlign) * kAlign;
+  data_ = reinterpret_cast<Cplex *>(::aligned_alloc(kAlign, m));
+  CHECK(data_);
 }
 
 void CplexArray::Fill(Cplex x) { std::fill(data_, data_ + n_, x); }
@@ -209,32 +240,41 @@ void GenerateModeMap(Int n, Int k, ModeMap *mm) {
   }
 }
 
-void EvaluateModes(Int n, const ModeMap &mm, CplexArray *out) {
+void EvaluateModes(Int n, const ModeMap &mm, CplexArray *__restrict__ out) {
   CHECK_EQ(out->size(), n);
   out->Clear();
+  Cplex *data = out->data();
+
   for (const auto &kv : mm) {
+#pragma omp simd aligned(data : kAlign)
     for (Int t = 0; t < n; ++t) {
       const double freq = Mod(kv.first * double(t), n) / double(n);
-      (*out)[t] += kv.second * Sinusoid(freq);
+      data[t] += kv.second * Sinusoid(freq);
     }
   }
 }
 
 // Generate Xhat. Noise energy will sum up to n*sigma*sigma.
-void GenerateXhat(Int n, const ModeMap &mm, double sigma, CplexArray *out) {
+void GenerateXhat(Int n, const ModeMap &mm, double sigma,
+                  CplexArray *__restrict__ out) {
   CHECK_EQ(out->size(), n);
   double noise_energy = 0;
+  Cplex *data = out->data();
+
+#pragma omp simd aligned(data : kAlign) reduction(+ : noise_energy)
   for (Int i = 0; i < n; ++i) {
-    (*out)[i] = Cplex(RandomNormal(), RandomNormal());
-    noise_energy += AbsSq((*out)[i]);
+    data[i] = Cplex(RandomNormal(), RandomNormal());
+    noise_energy += AbsSq(data[i]);
   }
   for (const auto &kv : mm) {
     noise_energy -= AbsSq((*out)[kv.first]);
   }
   // Rescale noise by this factor.
   const double factor = sigma / std::sqrt(noise_energy);
+
+#pragma omp simd aligned(data : kAlign)
   for (Int i = 0; i < n; ++i) {
-    (*out)[i] *= factor;
+    data[i] *= factor;
   }
   for (const auto &kv : mm) {
     (*out)[kv.first] = kv.second;
@@ -253,6 +293,24 @@ void CplexMatrix::Clear() {
     data_[i].Clear();
   }
 }
+
+IntArray::IntArray(Int n) : n_(n) {
+  size_t m = n * sizeof(Int);
+  m = ((m + kAlign - 1) / kAlign) * kAlign;
+  data_ = reinterpret_cast<Int *>(::aligned_alloc(kAlign, m));
+  CHECK(data_);
+}
+
+IntArray::~IntArray() { ::free(data_); }
+
+DoubleArray::DoubleArray(Int n) : n_(n) {
+  size_t m = n * sizeof(double);
+  m = ((m + kAlign - 1) / kAlign) * kAlign;
+  data_ = reinterpret_cast<double *>(::aligned_alloc(kAlign, m));
+  CHECK(data_);
+}
+
+DoubleArray::~DoubleArray() { ::free(data_); }
 
 FFTPlan::FFTPlan(Int n, char sign)
     : n_(n), sign_(sign), dummy1_(1), dummy2_(1) {

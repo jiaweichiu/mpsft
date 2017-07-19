@@ -72,8 +72,8 @@ public:
 private:
   CplexArray scratch_; // Size p=win.p().
   CplexArray scratch2_;
-  vector<Int> idx_;
-  vector<Int> idx2_;
+  IntArray idx_;
+  IntArray idx2_;
 };
 
 class BinInFreq {

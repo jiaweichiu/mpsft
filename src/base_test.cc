@@ -52,6 +52,14 @@ TEST_CASE("CplexArrayBasic", "") {
   REQUIRE(std::abs(w[1] - Cplex(1.5, 1.6)) == Approx(0));
 }
 
+TEST_CASE("IntArrayBasic", "") {
+  IntArray u(55);
+  REQUIRE(u.size() == 55);
+  for (Int i = 0; i < 55; ++i) {
+    u[i] = 333;
+  }
+}
+
 TEST_CASE("FFTPlanBasic", "") {
   constexpr int n = 7;
   FFTPlan plan(n, FFTW_FORWARD);
@@ -118,14 +126,14 @@ TEST_CASE("SinTwoPiBasic", "") {
   }
 }
 
-TEST_CASE("SinCosTwoPiBasic", "") {
+/*TEST_CASE("SinCosTwoPiBasic", "") {
   const Int n = 1234;
   for (Int i = -n; i <= n + n; ++i) {
     const double x = double(i) / double(n);
-    auto r = SinCosTwoPi(x);
-    REQUIRE(r.first == Approx(std::sin(2 * M_PI * x)));
-    REQUIRE(r.second == Approx(std::cos(2 * M_PI * x)));
+    const Cplex z = Sinusoid(x);
+    REQUIRE(IM(z) == Approx(std::sin(2 * M_PI * x)));
+    REQUIRE(RE(z) == Approx(std::cos(2 * M_PI * x)));
   }
-}
+}*/
 
 } // namespace mps

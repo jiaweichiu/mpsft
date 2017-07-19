@@ -236,26 +236,35 @@ void BinInTimeV2::Run(const CplexArray &x, const Transform &tf, Int q,
 
   for (Int bit = 0; bit < bits_; ++bit) {
     const Int offset = bins * (1 << bit);
+    Cplex *__restrict__ s1 = scratch_.data();
+    Cplex *__restrict__ s2 = scratch2_.data();
+    Int *__restrict__ idx1 = idx_.data();
+    Int *__restrict__ idx2 = idx2_.data();
 
+#pragma omp simd aligned(idx1, idx2 : kAlign)
     for (Int i = 0; i <= p2; ++i) {
-      BinInTimeV2Helper1(i, i, tf, offset, q, n, idx_.data(), idx2_.data());
-    }
-    for (Int i = p2 + 1; i < p; ++i) {
-      BinInTimeV2Helper1(i, i - p, tf, offset, q, n, idx_.data(), idx2_.data());
+      BinInTimeV2Helper1(i, i, tf, offset, q, n, idx1, idx2);
     }
 
+#pragma omp simd aligned(idx1, idx2 : kAlign)
+    for (Int i = p2 + 1; i < p; ++i) {
+      BinInTimeV2Helper1(i, i - p, tf, offset, q, n, idx1, idx2);
+    }
+
+#pragma omp simd aligned(idx1, idx2, s1, s2 : kAlign)
     for (Int i = 0; i < p; ++i) {
-      BinInTimeV2Helper2(i, bq, x, idx_.data(), idx2_.data(), scratch_.data(),
-                         scratch2_.data());
+      BinInTimeV2Helper2(i, bq, x, idx1, idx2, s1, s2);
     }
 
+#pragma omp simd aligned(s1, s2 : kAlign)
     for (Int i = 0; i <= p2; ++i) {
-      BinInTimeV2Helper3(i, i, tf, offset, win_.wt(i), n, delta,
-                         scratch_.data(), scratch2_.data());
+      BinInTimeV2Helper3(i, i, tf, offset, win_.wt(i), n, delta, s1, s2);
     }
+
+#pragma omp simd aligned(s1, s2 : kAlign)
     for (Int i = p2 + 1; i < p; ++i) {
-      BinInTimeV2Helper3(i, i - p, tf, offset, win_.wt(p - i), n, delta,
-                         scratch_.data(), scratch2_.data());
+      BinInTimeV2Helper3(i, i - p, tf, offset, win_.wt(p - i), n, delta, s1,
+                         s2);
     }
 
     const Int folds = p / bins;

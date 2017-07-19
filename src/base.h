@@ -35,7 +35,7 @@
 
 namespace mps {
 
-// using Int = int32_t;
+constexpr size_t kAlign = 64;
 using Int = int64_t;
 using Cplex = std::complex<double>;
 
@@ -62,30 +62,46 @@ double RandomNormal();
 double SincPi(double x);
 
 // Returns sin(2*pi*x). CAUTION: Assume 0 <= x <= 1.
+#pragma omp declare simd
 double SinTwoPi(double x);
 
-// Returns sin(2*pi*x) and cos(2*pi*x).
-// CAUTION: Assume -2 <= x <= 2.
-std::pair<double, double> SinCosTwoPi(double x);
+// Returns cos(2*pi*x). CAUTION: Assume 0 <= x <= 1.
+#pragma omp declare simd
+double CosTwoPi(double x);
 
-// Our only macros! We try not to.
-#define RE std::real
-#define IM std::imag
-
-inline Int PosMod(Int x, Int n) { return ((x % n) + n) % n; }
-inline Int Mod(Int x, Int n) { return x % n; }
-inline double AbsSq(Cplex x) { return RE(x) * RE(x) + IM(x) * IM(x); }
-inline double Square(double x) { return x * x; }
+// Returns Cplex(cos(2*pi*x), sin(2*pi*x))
+// CAUTION: Assume -2 < x < 2
+#define Sinusoid(x) Cplex(CosTwoPi(x), SinTwoPi(x))
 
 // inline Cplex Sinusoid(double freq) {
 //   double s, c;
 //   ::sincos(freq * 2.0 * M_PI, &s, &c);
 //   return Cplex(c, s);
 // }
-inline Cplex Sinusoid(double freq) {
-  auto r = SinCosTwoPi(freq);
-  return Cplex(r.second, r.first);
+
+// Our only macros! We try not to.
+#define RE std::real
+#define IM std::imag
+
+#pragma omp declare simd
+inline double PosModOne(double x) {
+  return x - std::floor(x);
 }
+
+#pragma omp declare simd
+inline Int PosMod(Int x, Int n) { return ((x % n) + n) % n; }
+
+#pragma omp declare simd
+inline Int Mod(Int x, Int n) {
+  //return x % n;  // This cannot be vectorized.
+  return x - ((x / n) * n);
+}
+
+#pragma omp declare simd
+inline double AbsSq(Cplex x) { return RE(x) * RE(x) + IM(x) * IM(x); }
+
+#pragma omp declare simd
+inline double Square(double x) { return x * x; }
 
 // Equivalent to multiplying by i: (x+iy)*i = -y+ix.
 inline Cplex RotateForward(Cplex x) { return Cplex(-IM(x), RE(x)); }
@@ -140,6 +156,37 @@ private:
   Int rows_;
   Int cols_;
   vector<CplexArray> data_;
+};
+
+class IntArray {
+public:
+  IntArray(Int n);
+  ~IntArray();
+
+  inline Int size() const { return n_; }
+  inline Int &operator[](Int i) { return data_[i]; }
+  inline const Int &operator[](Int i) const { return data_[i]; }
+  inline Int *data() const { return data_; }
+
+private:
+  Int n_ = 0;
+  Int *data_ = nullptr;
+};
+
+// No templates... KISS.
+class DoubleArray {
+public:
+  DoubleArray(Int n);
+  ~DoubleArray();
+
+  inline Int size() const { return n_; }
+  inline double &operator[](Int i) { return data_[i]; }
+  inline const double &operator[](Int i) const { return data_[i]; }
+  inline double *data() const { return data_; }
+
+private:
+  Int n_ = 0;
+  double *data_ = nullptr;
 };
 
 class FFTPlan {

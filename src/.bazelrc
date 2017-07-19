@@ -1,21 +1,28 @@
+build \
+--copt="-fopenmp-simd"
+
 build --linkopt="-lglog -lm -lrt -lpthread -L/usr/local/lib -lfftw3"
 
 build:opt \
+--copt="-std=c++11" \
 --copt="-g0" \
 --copt="-DNDEBUG" \
 --copt="-march=native" \
---copt="-mtune=native" \
 --copt="-O3" \
 --copt="-ffast-math" \
 --copt="-fno-exceptions" \
 --copt="-mavx" \
+--copt="-fopenmp-simd" \
 --copt="-ftree-vectorize" \
---cxxopt="-g0" \
---cxxopt="-DNDEBUG" \
---cxxopt="-march=native" \
---cxxopt="-mtune=native" \
---cxxopt="-O3" \
---cxxopt="-ffast-math" \
---cxxopt="-fno-exceptions" \
---cxxopt="-mavx" \
---cxxopt="-ftree-vectorize"
+--copt="-fopt-info-vec-optimized"
+
+
+#--copt="-march=corei7" \
+#--copt="-march=native" \
+#--copt="-mtune=native" \
+
+#--copt="-fopt-info-vec-note" \
+#--copt="-fopt-info-vec-missed" \
+#--copt="-fopt-info-vec-optimized" \
+#--copt="-fopt-info-vec-all" \
+
