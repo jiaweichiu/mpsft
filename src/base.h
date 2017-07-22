@@ -64,21 +64,12 @@ int64_t RandomInt64();
 double RandomDouble(); // [0, 1).
 double RandomNormal();
 
-// SincPi(x) = sin(x) / x.
-double SincPi(double x);
-
-// inline Cplex Sinusoid(double freq) {
-//   double s, c;
-//   ::sincos(freq * 2.0 * M_PI, &s, &c);
-//   return Cplex(c, s);
-// }
-
 // Our only macros! We try not to.
 #define RE std::real
 #define IM std::imag
 
-// #pragma omp declare simd
-// inline double PosModOne(double x) { return x - std::floor(x); }
+#pragma omp declare simd
+inline double PosModOne(double x) { return x - std::floor(x); }
 
 // #pragma omp declare simd
 // inline double AbsSq(double re, double im) { return re * re + im * im; }

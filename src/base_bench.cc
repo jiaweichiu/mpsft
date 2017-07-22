@@ -39,7 +39,7 @@ BENCHMARK(BM_ComplexOp);
 
 // Evaluate directly. When ffast-math is on, this should have no difference with
 // the above.
-static void BM_ComplexOp_Vectorized(benchmark::State &state) {
+static void BM_ComplexOp_OMP(benchmark::State &state) {
   Cplex x(RandomNormal(), RandomNormal());
   Cplex y(RandomNormal(), RandomNormal());
   double re = 0;
@@ -55,12 +55,12 @@ static void BM_ComplexOp_Vectorized(benchmark::State &state) {
   benchmark::DoNotOptimize(re);
   benchmark::DoNotOptimize(im);
 }
-BENCHMARK(BM_ComplexOp_Vectorized);
+BENCHMARK(BM_ComplexOp_OMP);
 
 // Currently, fmod cannot be vectorized.
 // No autovectorization expected.
 static void BM_PosModOne(benchmark::State &state) {
-  const Int n = 4096;
+  const int n = 4096;
   DoubleArray out(n);
   for (int i = 0; i < n; ++i) {
     out[i] = RandomNormal() * 10000;
@@ -74,8 +74,8 @@ static void BM_PosModOne(benchmark::State &state) {
 }
 BENCHMARK(BM_PosModOne);
 
-static void BM_PosModOne_Vectorized(benchmark::State &state) {
-  const Int n = 4096;
+static void BM_PosModOne_OMP(benchmark::State &state) {
+  const int n = 4096;
   DoubleArray out(n);
   for (int i = 0; i < n; ++i) {
     out[i] = RandomNormal() * 10000;
@@ -88,72 +88,6 @@ static void BM_PosModOne_Vectorized(benchmark::State &state) {
     }
   }
 }
-BENCHMARK(BM_PosModOne_Vectorized);
-
-// This turns out to be the same as IntMod because there's currently no SIMD
-// instruction for division.
-// static void BM_IntDiv_Vectorized(benchmark::State &state) {
-//   const Int n = 4096;
-//   IntArray out(n);
-//   for (int i = 0; i < n; ++i) {
-//     out[i] = RandomInt();
-//   }
-//   Int *__restrict__ data = out.data();
-//   while (state.KeepRunning()) {
-// #pragma omp simd aligned(data : kAlign)
-//     for (int i = 0; i < n; ++i) {
-//       data[i] = data[i] / kPrimes[15];
-//     }
-//   }
-// }
-// BENCHMARK(BM_IntDiv_Vectorized);
-
-// static void BM_IntDivMagic_Vectorized(benchmark::State &state) {
-//   const Int n = 4096;
-//   IntArray out(n);
-//   for (int i = 0; i < n; ++i) {
-//     out[i] = RandomInt();
-//   }
-//   Int *__restrict__ data = out.data();
-//   const Int multiplier = kPrimesMagic[15].multiplier;
-//   const int shift = kPrimesMagic[15].shift;
-//   while (state.KeepRunning()) {
-// #pragma omp simd aligned(data : kAlign)
-//     for (int i = 0; i < n; ++i) {
-//       // data[i] = ApplyMagic(data[i], multiplier, shift);
-//       // const Int nn = data[i];
-//       data[i] >>= 5;
-//       // const Int x = (__int128(nn) * __int128(multiplier)) >> 64;
-//       // const Int x = (Int(nn) * Int(multiplier)) >> 5;
-//       // const Int y = (multiplier < 0) ? (x + nn) : x;
-//       // data[i] = Int(y >> shift);
-//     }
-//   }
-// }
-// BENCHMARK(BM_IntDivMagic_Vectorized);
-
-// static void BM_SinCos(benchmark::State &state) {
-//   const Int n = 1000;
-//   double s;
-//   double c;
-//   while (state.KeepRunning()) {
-//     for (int i = 0; i <= n; ++i) {
-//       const double x = double(i) / double(n) * (2.0 * M_PI);
-//       ::sincos(x, &s, &c);
-//     }
-//   }
-// }
-// BENCHMARK(BM_SinCos);
-
-// static void BM_SinCosTwoPi(benchmark::State &state) {
-//   const Int n = 1000;
-//   while (state.KeepRunning()) {
-//     for (int i = 0; i <= n; ++i) {
-//       const double x = double(i) / double(n);
-//       benchmark::DoNotOptimize(Sinusoid(x));
-//     }
-//   }
-// }
-// BENCHMARK(BM_SinCosTwoPi);
+BENCHMARK(BM_PosModOne_OMP);
 
 } // namespace mps
