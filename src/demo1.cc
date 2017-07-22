@@ -1,10 +1,30 @@
+/*
+ * Copyright (c) 2017 Jiawei Chiu
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
+ *
+ */
+
 #include "demo1.h"
 #include "base.h"
+#include "gen.h"
 #include "iterate.h"
 
 namespace mps {
 
-Demo1::Demo1(const Demo1Options &opt, Int n, Int k, double sigma)
+Demo1::Demo1(const Demo1Options &opt, int32_t n, int32_t k, double sigma)
     : opt_(opt), k_(k), x_(n), xh_(n), sigma_(sigma) {
   GenerateModeMap(n, k, &mm_);
   GenerateXhat(n, mm_, sigma, &xh_);
@@ -20,11 +40,12 @@ void Demo1::Run() {
 
   VLOG(2) << "Running Demo1";
 
-  Int stale_iter = 0;
+  int32_t stale_iter = 0;
   found_mm_.clear();
 
-  for (Int i = 0; stale_iter < opt_.max_stale_iter; ++i) {
-    i_opt.bins = std::max<Int>((k_ - found_mm_.size()) * 2 + 1, opt_.min_bins);
+  for (int32_t i = 0; stale_iter < opt_.max_stale_iter; ++i) {
+    i_opt.bins =
+        std::max<int32_t>((k_ - found_mm_.size()) * 2 + 1, opt_.min_bins);
     i_opt.bin_threshold = 3.0 * sigma_ / std::sqrt(double(i_opt.bins));
     i_opt.sv_threshold = 1.0 * sigma_ / std::sqrt(double(i_opt.bins));
 
@@ -37,13 +58,13 @@ void Demo1::Run() {
 }
 
 void Demo1::PostAnalyze() {
-  const Int n = x_.size();
+  const int32_t n = x_.size();
 
   CplexArray xh2(n);
-  xh2.Clear();
+  xh2.clear();
 
-  Int hit = 0;
-  Int miss = 0;
+  int32_t hit = 0;
+  int32_t miss = 0;
   double hit_l1_sum = 0;
   double hit_l2_sum = 0;
   double miss_l1_sum = 0;
@@ -74,7 +95,7 @@ void Demo1::PostAnalyze() {
 
   double sum1 = 0;
   double sum2 = 0;
-  for (Int i = 0; i < n; ++i) {
+  for (int32_t i = 0; i < n; ++i) {
     const double err = std::abs(xh2[i] - xh_[i]);
     sum1 += err;
     sum2 += err * err;

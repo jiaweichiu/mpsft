@@ -1,0 +1,24 @@
+Total: 79 samples
+      64  81.0%  81.0%       69  87.3% mps::BinInTimeV3::Run
+       8  10.1%  91.1%        8  10.1% sincos
+       2   2.5%  93.7%        2   2.5% Eigen::JacobiSVD::compute
+       1   1.3%  94.9%        1   1.3% __nss_passwd_lookup
+       1   1.3%  96.2%        1   1.3% apply@1b6f0
+       1   1.3%  97.5%        1   1.3% erf
+       1   1.3%  98.7%        1   1.3% gammal
+       1   1.3% 100.0%        1   1.3% n1_12
+       0   0.0% 100.0%       79 100.0% __libc_start_main
+       0   0.0% 100.0%       79 100.0% _start
+       0   0.0% 100.0%        1   1.3% apply@1e4d0
+       0   0.0% 100.0%        1   1.3% apply@201f0
+       0   0.0% 100.0%        2   2.5% apply@20f00
+       0   0.0% 100.0%        2   2.5% apply_dit
+       0   0.0% 100.0%       79 100.0% main
+       0   0.0% 100.0%        6   7.6% mps::BinInFreqV1::Run
+       0   0.0% 100.0%       79 100.0% mps::Demo1::Run
+       0   0.0% 100.0%       79 100.0% mps::Iterate
+       0   0.0% 100.0%        2   2.5% mps::MatPencil
+       0   0.0% 100.0%       79 100.0% mps::Run
+       0   0.0% 100.0%        1   1.3% mps::Window::SampleInFreq
+       0   0.0% 100.0%        1   1.3% mps::Window::SampleInTime
+       0   0.0% 100.0%        1   1.3% mps::Window::Window

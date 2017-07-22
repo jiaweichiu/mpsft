@@ -54,7 +54,7 @@ struct IterateOptions {
   // If zero, this is ignored.
   double sv_threshold = 0;
 
-  int bin_in_time_type = 2;
+  int bin_in_time_type = 3;
   int bin_in_freq_type = 1;
 };
 

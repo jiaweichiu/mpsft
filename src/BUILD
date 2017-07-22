@@ -234,6 +234,7 @@ cc_library(
   hdrs = ["demo1.h"],
   deps = [
     ":base",
+    ":gen",
     ":iterate",
   ],
 )

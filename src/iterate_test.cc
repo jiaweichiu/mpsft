@@ -137,7 +137,6 @@ TEST_CASE("IterateFull", "") {
   opt.bin_threshold = 3.0 * sigma / std::sqrt(double(opt.bins));
   opt.sv_threshold = 1.0 * sigma / std::sqrt(double(opt.bins));
   opt.window_threshold = 0.1;
-  opt.bin_in_time_type = 2;
 
   // Generate a list of random coefficients, each of magnitude 1.0.
   ModeMap mm;

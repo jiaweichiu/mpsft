@@ -99,7 +99,6 @@ private:
   DoubleArray d1_;
   DoubleArray d2_;
   DoubleArray d3_;
-  DoubleArray d4_;
 };
 
 class BinInFreq {

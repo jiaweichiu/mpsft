@@ -4,6 +4,66 @@
 		"selected_items":
 		[
 			[
+				"Sin",
+				"SinTwoPiBasic"
+			],
+			[
+				"taylo",
+				"taylor_n_bound"
+			],
+			[
+				"taylor_",
+				"taylor_0_bound"
+			],
+			[
+				"bin_",
+				"bin_in_time"
+			],
+			[
+				"bin_in",
+				"bin_in_freq"
+			],
+			[
+				"scra",
+				"scratch2_"
+			],
+			[
+				"BinIn",
+				"BinInFreq"
+			],
+			[
+				"num",
+				"num_modes"
+			],
+			[
+				"Cplex",
+				"CplexArray"
+			],
+			[
+				"Demo1",
+				"Demo1Options"
+			],
+			[
+				"Binn",
+				"BinnerType"
+			],
+			[
+				"binn",
+				"binner_type"
+			],
+			[
+				"benc",
+				"benchmark_lib"
+			],
+			[
+				"bench",
+				"benchmark_test"
+			],
+			[
+				"CPlex",
+				"CplexArray"
+			],
+			[
 				"window",
 				"window_threshold"
 			],
@@ -24,10 +84,6 @@
 				"sigma_t_"
 			],
 			[
-				"BinIn",
-				"BinInTimeHelper"
-			],
-			[
 				"sqr",
 				"sqrt_c_delta_"
 			]
@@ -36,189 +92,108 @@
 	"buffers":
 	[
 		{
-			"file": "src/iterate.h",
+			"file": "src/magic.cc",
 			"settings":
 			{
-				"buffer_size": 1570,
+				"buffer_size": 9099,
 				"encoding": "UTF-8",
 				"line_ending": "Unix"
 			}
 		},
 		{
-			"contents": "#pragma once\n\n#include <algorithm>\n#include <cmath>\n#include <complex>\n#include <cstdint>\n#include <fftw3.h>\n#include <glog/logging.h>\n#include <initializer_list>\n#include <iostream>\n#include <memory>\n#include <string>\n#include <unordered_map>\n#include <vector>\n\nnamespace mps {\n\nusing Int = int32_t;\nusing Long = int64_t;\nusing Cplex = std::complex<double>;\n\nusing IntPair = std::pair<Int, Int>;\nusing CplexPair = std::pair<Cplex, Cplex>;\nusing ModeMap = std::unordered_map<Int, Cplex>;\n\nusing std::string;\nusing std::unique_ptr;\nusing std::vector;\n\n// List of primes close to powers of 2.\nconstexpr Int kPrimes[] = {2,        3,        5,         7,         17,\n                           31,       67,       127,       257,       509,\n                           1021,     2053,     4099,      8191,      16381,\n                           32771,    65537,    131071,    262147,    524287,\n                           1048573,  2097143,  4194301,   8388617,   16777213,\n                           33554467, 67108859, 134217757, 268435459, 536870909};\n\nvoid MainInit(int argc, char *const argv[]);\n\nvoid RandomSeed(Long seed);\nInt RandomInt();\ndouble RandomNormal();\n\n// Our only macros! We try not to.\n#define RE std::real\n#define IM std::imag\n\n// Force cast into longs.\ninline Int PosMod(Long x, Long n) { return ((x % n) + n) % n; }\ninline Int Mod(Long x, Long n) { return x % n; }\ninline double AbsSq(Cplex x) { return RE(x) * RE(x) + IM(x) * IM(x); }\n\ninline double Square(double x) { return x * x; }\ninline Cplex Sinusoid(double theta) {\n  return Cplex(std::cos(theta), std::sin(theta));\n}\n\n// Equivalent to multiplying by i: (x+iy)*i = -y+ix.\ninline Cplex RotateForward(Cplex x) { return Cplex(-IM(x), RE(x)); }\n\n// Equivalent to multiplying by -i: (x+iy)*(-i) = y-ix.\ninline Cplex RotateBackward(Cplex x) { return Cplex(IM(x), -RE(x)); }\n\nclass CplexArray {\npublic:\n  CplexArray();\n  CplexArray(Int n);\n  ~CplexArray();\n  CplexArray(std::initializer_list<Cplex> l);\n\n  void Resize(Int n);\n  void Reset();\n  void Fill(Cplex x);\n  void Clear();\n  double Energy() const;\n\n  inline Int size() const { return n_; }\n  inline Cplex &operator[](Int i) { return data_[i]; }\n  inline const Cplex &operator[](Int i) const { return data_[i]; }\n  inline Cplex *data() const { return data_; }\n\nprivate:\n  Int n_ = 0;\n  Cplex *data_ = nullptr;\n};\n\nCplexArray EvaluateModes(Int n, const ModeMap &mm);\n\n// Add ambience noise such that in the *time domain*, each sample point is\n// contaminated by N(0, sigma).\n// Note: x(t) = sum_k xh[k] exp(2*pi*i*k*t). This is unnormalized.\n// If xh[k] ~ N(0, s*s), then x(t) ~ N(0, s*s*n) where s*s*n=sigma*sigma.\nCplexArray GenerateXhat(Int n, const ModeMap &mm, double sigma);\n\nclass CplexMatrix {\npublic:\n  CplexMatrix(Int rows, Int cols);\n  inline Int rows() const { return rows_; }\n  inline Int cols() const { return cols_; }\n  inline CplexArray &operator[](Int i) { return data_[i]; }\n  inline const CplexArray &operator[](Int i) const { return data_[i]; }\n  void Clear();\n\nprivate:\n  Int rows_;\n  Int cols_;\n  vector<CplexArray> data_;\n};\n\nclass FFTPlan {\npublic:\n  // For sign:\n  // #define FFTW_FORWARD (-1)\n  // #define FFTW_BACKWARD (+1)\n  FFTPlan(Int n, char sign);\n  ~FFTPlan();\n\n  inline Int n() const { return n_; }\n  inline char sign() const { return sign_; }\n\n  // If in-place, u, v should be the same.\n  // We assume this agrees with in_place supplied to constructor.\n  void Run(const CplexArray &u, CplexArray *v);\n\nprivate:\n  Int n_;\n  char sign_;\n  CplexArray dummy1_, dummy2_;\n  fftw_plan plan_;\n};\n\n// y[t] = x[a*t+c] exp(2*pi*i*b*t/n).\n// yh[a*k+b] = xh[k] exp(2*pi*i*c*k/n).\n// Mode permutation: a, b\n// Mode modulation: c\n// Forward: a*k+b.\n// Backward: a_inv*(k-b).\n// Very lightweight class. Keep logic in the other code.\nstruct Transform {\n  Transform(Int n);\n  Transform(Int n, Int a, Int b, Int c);\n  Int a;\n  Int b;\n  Int c;\n  Int a_inv;\n};\n\n} // namespace mps",
-			"file": "src/base.h",
-			"file_size": 3919,
-			"file_write_time": 131445866165722691,
-			"settings":
-			{
-				"buffer_size": 3919,
-				"encoding": "UTF-8",
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"contents": "#pragma once\n\n#include <eigen3/Eigen/Dense>\n\n#include \"base.h\"\n\nnamespace mps {\n\n// u2 is u[-1], u1 is u[1], u0 is u[0].\n// Returns true if we think the angle is in the second half.\n// Assume sigma is an array of size >= 2.\nbool MatPencil(Cplex u0, Cplex u1, Cplex u2, double *sigma);\n\n} // namespace mps\n",
-			"file": "src/freqid.h",
-			"file_size": 305,
-			"file_write_time": 131445870700422725,
-			"settings":
-			{
-				"buffer_size": 305,
-				"encoding": "UTF-8",
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"contents": "#include \"freqid.h\"\n\nnamespace mps {\n\nusing Mat22 = Eigen::Matrix<Cplex, 2, 2>;\n\nbool MatPencil(Cplex u0, Cplex u1, Cplex u2, double *sigma) {\n  Mat22 a;\n  a(0, 0) = u0;\n  a(0, 1) = u2;\n  a(1, 0) = u1;\n  a(1, 1) = u0;\n\n  Eigen::JacobiSVD<Mat22> solver(a, Eigen::ComputeFullV);\n\n  const auto &sv = solver.singularValues();\n  sigma[0] = sv[0];\n  sigma[1] = sv[1];\n  // LOG(INFO) << \"sigma=\" << sv;\n\n  const Mat22 &v = solver.matrixV();\n  // [v(0, 0), v(1, 0)] has unit norm. This is the dominant singular vector.\n  // [v(0, 1), v(1, 1)] has unit norm.\n  // const Cplex w = std::conj(v(0, 0)) * v(1, 0);\n  // LOG(INFO) << w;\n  // return IM(w) < 0;\n  return IM(std::conj(v(0, 0)) * v(1, 0)) < 0;\n}\n\n} // namespace mps",
-			"file": "src/freqid.cc",
-			"file_size": 713,
-			"file_write_time": 131445872225038246,
-			"settings":
-			{
-				"buffer_size": 713,
-				"encoding": "UTF-8",
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"contents": "#include \"catch.hpp\"\n\n#include \"base.h\"\n#include \"freqid.h\"\n\nnamespace mps {\n\nTEST_CASE(\"SVDBasic\", \"\") {\n  Cplex u0 = Cplex(-2.3, 5.2);\n  Cplex u1 = Cplex(-5.5, -3.1);\n  Cplex u2 = Cplex(4.0, 3.0);\n\n  double sigma[2];\n  bool r = MatPencil(u0, u1, u2, sigma);\n  REQUIRE(sigma[0] == Approx(11.34419934));\n  REQUIRE(sigma[1] == Approx(0.91057194));\n  REQUIRE_FALSE(r);\n}\n\nTEST_CASE(\"SVDBasic2\", \"\") {\n  Cplex u0 = Cplex(2.3, 5.2);\n  Cplex u1 = Cplex(5.5, -3.1);\n  Cplex u2 = Cplex(4.0, 3.0);\n\n  double sigma[2];\n  bool r = MatPencil(u0, u1, u2, sigma);\n  REQUIRE(sigma[0] == Approx(9.80673965));\n  REQUIRE(sigma[1] == Approx(5.77476038));\n  REQUIRE(r);\n}\n\nTEST_CASE(\"SVDBasic3\", \"\") {\n  Cplex u0 = Cplex(-15.3, -5.2);\n  Cplex u1 = Cplex(8.0, 3.0);\n  Cplex u2 = Cplex(-1.5, 3.5);\n\n  double sigma[2];\n  bool r = MatPencil(u0, u1, u2, sigma);\n  REQUIRE(sigma[0] == Approx(21.27794592));\n  REQUIRE(sigma[1] == Approx(12.53032391));\n  REQUIRE_FALSE(r);\n}\n\n} // namespace mps",
-			"file": "src/freqid_test.cc",
-			"file_size": 967,
-			"file_write_time": 131445870977377878,
-			"settings":
-			{
-				"buffer_size": 967,
-				"encoding": "UTF-8",
-				"line_ending": "Unix",
-				"name": "svd"
-			}
-		},
-		{
-			"contents": "#include \"iterate.h\"\n#include \"freqid.h\"\n\nnamespace mps {\n\nnamespace {\n\n// Returns 1 + floor(log2(n / bins))\nInt NumBits(Int n, Int bins) {\n  if (n < bins) {\n    return 1;\n  }\n  Int out = 0;\n  // n=2*bins should return 2.\n  // n=2*bins+1 should return 2.\n  while (n >= bins) {\n    n >>= 1;\n    ++out;\n  }\n  return out;\n}\n\nbool IdentifyFreq(const IterateOptions &opt, Int b, Int bits,\n                  const vector<unique_ptr<CplexMatrix>> &bin_coefs,\n                  double *xi) {\n  const Int trials = opt.trials;\n  double sigma[2];\n\n  Int xi_sum = 0;\n  for (Int bit = 0; bit < bits; ++bit) {\n    Int count = 0;\n    for (Int trial = 0; trial < trials; ++trial) {\n      CplexMatrix &a = *bin_coefs[trial]; // Bin coefficients.\n      const Cplex u1 = a[2 * bit + 1][b];\n      const Cplex u2 = a[2 * bit + 2][b];\n      const Cplex u0 = a[0][b];\n      if (MatPencil(u0, u1, u2, sigma)) {\n        ++count;\n      }\n      // 0.5 factor is due to matrix being 2 by 2.\n      if (opt.sv_threshold > 0 && sigma[1] * 0.5 > opt.sv_threshold) {\n        return false;\n      }\n    }\n    // LOG(INFO) << \"bit=\" << bit << \" count=\" << count;\n    xi_sum <<= 1;\n    if (count > trials / 2) {\n      ++xi_sum;\n    }\n  }\n  // xi is between 0 and 1.\n  // [0, 1] is divided into 2^bits minibins.\n  // xi is the center of one of these minibins.\n  *xi = double(2 * xi_sum + 1) / double(1 << (bits + 1));\n  return true;\n}\n\n} // namespace\n\nvoid Iterate(const CplexArray &x, const IterateOptions &opt, ModeMap *mm) {\n  const Int trials = opt.trials;\n  const Int bins = opt.bins;\n  CHECK_GT(opt.window_threshold, 0);\n\n  CHECK_EQ(1, trials % 2) << \"Odd number of trials expected\";\n\n  const Int n = x.size();\n  Window win(n, bins, opt.window_delta);\n  const Int bits = NumBits(n, bins);\n\n  Transform tf(n);\n  FFTPlan plan(bins, FFTW_FORWARD);\n  CplexArray scratch(bins);\n\n  vector<double> list_q;\n  TauSet taus;\n  for (Int bit = 0; bit < bits; ++bit) {\n    taus.list_s.push_back((1 << bit) * bins);\n  }\n\n  vector<unique_ptr<CplexMatrix>> bin_coefs(trials);\n  // Repeat \"trials\" number of times.\n  for (Int trial = 0; trial < trials; ++trial) {\n    const Int q = RandomInt() % n;\n    list_q.push_back(q);\n    taus.q = q;\n    bin_coefs[trial].reset(new CplexMatrix(taus.size(), bins));\n    // BinInTime will produce \"bins\" number of coefficients for each tau in\n    // taus.\n    CplexMatrix *a = bin_coefs[trial].get();\n    BinInTime(win, tf, taus, x, &plan, a, &scratch);\n    BinInFreq(win, tf, taus, *mm, a);\n  }\n\n  for (Int b = 0; b < bins; ++b) {\n    if (opt.bin_threshold > 0) {\n      double bin_energy = 0;\n      for (Int trial = 0; trial < trials; ++trial) {\n        bin_energy += AbsSq((*bin_coefs[trial])[0][b]);\n      }\n      bin_energy /= trials;\n      if (bin_energy < opt.bin_threshold * opt.bin_threshold) {\n        continue;\n      }\n    }\n\n    double xi1;\n    if (!IdentifyFreq(opt, b, bits, bin_coefs, &xi1)) {\n      continue;\n    }\n\n    // k1 is mode location after random permutation.\n    const Int k1 = std::round(double(n) * (double(b) + xi1) / double(bins));\n    DCHECK_GE(k1, 0);\n    DCHECK_LT(k1, n);\n\n    // Check window in frequency / attentuation factor. If too small, reject.\n    const double xi0 =\n        double(k1) / double(n) - (double(b) + 0.5) / double(bins);\n    const double wf = win.SampleInFreq(xi0);\n    if (std::abs(wf) < opt.window_threshold) {\n      continue;\n    }\n\n    // Estimate coefficient in transformed signal.\n    Cplex coef_sum = 0;\n    for (Int trial = 0; trial < trials; ++trial) {\n      const CplexMatrix &a = *bin_coefs[trial];\n\n      const double angle = -2.0 * M_PI *\n                           double(Mod(Long(list_q[trial]) * Long(k1), n)) /\n                           double(n);\n      const Cplex factor = Sinusoid(angle);\n      coef_sum += a[0][b] * factor;\n\n      for (Int bit = 0; bit < bits; ++bit) {\n        // Try to do only one Sinusoid here instead of two, using symmetry.\n        const double angle2 =\n            -2.0 * M_PI * double(Mod(Long(taus.list_s[bit]) * Long(k1), n)) /\n            double(n);\n        const Cplex factor2 = Sinusoid(angle2);\n        const Cplex f1 = factor * factor2;\n        const Cplex f2 = factor * std::conj(factor2); // Divide by factor2.\n        coef_sum += a[2 * bit + 1][b] * f1;\n        coef_sum += a[2 * bit + 2][b] * f2;\n      }\n    }\n    Cplex coef = coef_sum / double(trials * taus.size());\n\n    // Undo the transform.\n    // k0 is original mode location.\n    const Int k0 = PosMod(Long(tf.a_inv) * (Long(k1) - Long(tf.b)), n);\n    coef *= Sinusoid(-2.0 * M_PI * double(Mod(Long(tf.c) * Long(k0), n)) /\n                     double(n));\n    coef /= wf;\n\n    (*mm)[k0] += coef;\n  }\n}\n\n} // namespace mps",
-			"file": "src/iterate.cc",
-			"file_size": 4676,
-			"file_write_time": 131445954273933493,
-			"settings":
-			{
-				"buffer_size": 4676,
-				"encoding": "UTF-8",
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"contents": "cc_library(\n  name = \"catch\",\n  srcs = [\"catch.cc\"],\n  hdrs = [\"catch.hpp\"],\n  deps = [\n    \":base\",\n  ],\n)\n\ncc_library(\n  name = \"base\",\n  srcs = [\"base.cc\"],\n  hdrs = [\"base.h\"],\n)\n\ncc_test(\n  name = \"base_test\",\n  srcs = [\"base_test.cc\"],\n  deps = [\n    \":catch\",\n    \":base\",\n  ],\n)\n\ncc_library(\n  name = \"freqid\",\n  srcs = [\"freqid.cc\"],\n  hdrs = [\"freqid.h\"],\n  deps = [\n    \":base\",\n  ],\n)\n\ncc_test(\n  name = \"freqid_test\",\n  srcs = [\"freqid_test.cc\"],\n  deps = [\n    \":freqid\",\n    \":catch\",\n  ],\n)\n\ncc_library(\n  name = \"window\",\n  srcs = [\"window.cc\"],\n  hdrs = [\"window.h\"],\n  deps = [\n    \":base\",\n  ],\n)\n\ncc_test(\n  name = \"window_test\",\n  srcs = [\"window_test.cc\"],\n  deps = [\n    \":catch\",\n    \":window\",\n  ],\n)\n\n\ncc_library(\n\tname = \"binner\",\n\tsrcs = [\"binner.cc\"],\n\thdrs = [\"binner.h\"],\n  deps = [\n    \":base\",\n    \":window\",\n  ],\n)\n\ncc_test(\n  name = \"binner_test\",\n  srcs = [\"binner_test.cc\"],\n  deps = [\n    \":binner\",\n    \":catch\",\n  ],\n)\n\ncc_library(\n  name = \"iterate\",\n  srcs = [\"iterate.cc\"],\n  hdrs = [\"iterate.h\"],\n  deps = [\n    \":binner\",\n    \":freqid\",\n    \":window\",\n  ],\n)\n\ncc_test(\n  name = \"iterate_test\",\n  srcs = [\"iterate_test.cc\"],\n  deps = [\n    \":catch\",\n    \":iterate\",\n  ],\n)\n",
-			"file": "src/BUILD",
-			"file_size": 1218,
-			"file_write_time": 131445873343183238,
-			"settings":
-			{
-				"buffer_size": 1218,
-				"encoding": "UTF-8",
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"contents": "#include \"catch.hpp\"\n\n#include \"base.h\"\n\nnamespace mps {\n\nTEST_CASE(\"CplexArrayBasic\", \"\") {\n  CplexArray u;\n  REQUIRE(u.size() == 0);\n  u.Fill(Cplex(0.5, -0.5));\n\n  u.Resize(50);\n  REQUIRE(u.size() == 50);\n  u.Fill(Cplex(0.5, -0.5));\n\n  u.Reset();\n  u.Reset();\n  u.Reset();\n\n  CplexArray v(100);\n  REQUIRE(v.size() == 100);\n  v.Fill(Cplex(0.5, -0.5));\n\n  v.Resize(10);\n  REQUIRE(v.size() == 10);\n  v.Fill(Cplex(0.5, -0.5));\n\n  v.Resize(10000);\n  REQUIRE(v.size() == 10000);\n  v.Fill(Cplex(0.5, -0.5));\n\n  CplexArray w = {{0.5, 0.6}, {1.5, 1.6}};\n  REQUIRE(std::abs(w[0] - Cplex(0.5, 0.6)) == Approx(0));\n  REQUIRE(std::abs(w[1] - Cplex(1.5, 1.6)) == Approx(0));\n}\n\nTEST_CASE(\"FFTPlanBasic\", \"\") {\n  constexpr int n = 7;\n  FFTPlan plan(n, FFTW_FORWARD);\n  CplexArray a(n);\n  CplexArray b(n);\n  a.Fill(Cplex(0.5, -0.5));\n\n  plan.Run(a, &b);\n  REQUIRE(RE(b[0]) == Approx(3.5));\n  REQUIRE(IM(b[0]) == Approx(-3.5));\n\n  FFTPlan plan2(n, FFTW_BACKWARD);\n  plan2.Run(b, &a);\n  for (Int i = 0; i < a.size(); ++i) {\n    // Different from 0.5 because FFTW does unnormalized FFTs.\n    REQUIRE(RE(a[i]) == Approx(3.5));\n    REQUIRE(IM(a[i]) == Approx(-3.5));\n  }\n}\n\nTEST_CASE(\"TransformBasic\", \"\") {\n  constexpr Int n = 536870909; // Prime.\n  Transform tf(n, 10000000, 10000001, 10000002);\n  REQUIRE(tf.a == 10000000);\n  REQUIRE(tf.b == 10000001);\n  REQUIRE(tf.c == 10000002);\n  REQUIRE(PosMod(Long(tf.a_inv) * Long(tf.a), n) == 1);\n}\n\nTEST_CASE(\"GenerateXhatBasic\", \"\") {\n  constexpr Int n = 5; // Prime.\n  constexpr double sigma = 8.0;\n  constexpr Cplex coef = Cplex(0.5, 0.6);\n  const ModeMap mm = {{2, coef}};\n\n  const CplexArray xh = GenerateXhat(n, mm, sigma);\n  const double noise_energy =\n      AbsSq(xh[0]) + AbsSq(xh[1]) + AbsSq(xh[3]) + AbsSq(xh[4]);\n  REQUIRE(std::sqrt(noise_energy) == Approx(sigma));\n}\n\nTEST_CASE(\"GenerateXhatFFT\", \"\") {\n  constexpr Int n = 10000; // Prime.\n  constexpr double sigma = 5.5;\n  const ModeMap mm;\n\n  const CplexArray xh = GenerateXhat(n, mm, sigma);\n  CplexArray x(n);\n  FFTPlan plan(n, FFTW_BACKWARD);\n  plan.Run(xh, &x);\n\n  // Mean square error in time domain.\n  const double mse = std::sqrt(x.Energy() / x.size());\n  REQUIRE(mse == Approx(sigma));\n}\n\n} // namespace mps\n",
 			"file": "src/base_test.cc",
-			"file_size": 2207,
-			"file_write_time": 131445867626558715,
 			"settings":
 			{
-				"buffer_size": 2207,
+				"buffer_size": 4114,
 				"encoding": "UTF-8",
 				"line_ending": "Unix"
 			}
 		},
 		{
-			"contents": "#pragma once\n\n#include \"base.h\"\n\nnamespace mps {\n\nclass Window {\npublic:\n  Window(Int n, Int bins, double delta);\n\n  // Assume 0 <= t <= p2 where p2=(p-1)/2. Assume p is odd.\n  inline double wt(Int t) const {\n    DCHECK_GE(t, 0);\n    DCHECK_LE(t, p2());\n    return wt_[t];\n  }\n\n  inline Int n() const { return n_; }\n  inline Int p() const { return p_; }\n  inline Int p2() const { return (p_ - 1) / 2; }\n  inline Int bins() const { return bins_; }\n\n  // double Energy() const;\n\n  double SampleInTime(Int i) const;\n  double SampleInFreq(double xi) const;\n\nprivate:\n  Int n_;\n  Int bins_;\n  double delta_;\n\n  double width_;\n  double sigma_f_;\n  double sigma_t_;\n  Int p_; // Size of support of window in time domain.\n\n  // We precompute the window in time domain.\n  // TODO: It might be more efficient not to store this. Instead, for each t, we\n  // can compute the window at t and then iterate over tau's.\n  vector<double> wt_; // Size is (p-1)/2.\n};\n\n} // namespace mps",
-			"file": "src/window.h",
-			"file_size": 968,
-			"file_write_time": 131445866993520393,
+			"file": "src/base_bench.cc",
 			"settings":
 			{
-				"buffer_size": 968,
+				"buffer_size": 5832,
 				"encoding": "UTF-8",
 				"line_ending": "Unix"
 			}
 		},
 		{
-			"contents": "#include \"catch.hpp\"\n\n#include \"base.h\"\n#include \"window.h\"\n\nnamespace mps {\n\nconstexpr Int n = 1109;\nconstexpr Int bins = 5;\nconstexpr double delta = 1e-6;\n\nTEST_CASE(\"WindowBasic\", \"\") {\n  Window window(n, bins, delta);\n\n  const Int p = window.p();\n  const Int p2 = window.p2();\n\n  CplexArray a(n);\n  a.Clear();\n  a[0] = window.wt(0);\n  for (Int i = 1; i <= p2; ++i) {\n    a[i] = a[n - i] = window.wt(i);\n  }\n\n  CplexArray ah(n);\n  FFTPlan plan(n, -1);\n  plan.Run(a, &ah);\n\n  for (Int i = 0; i < n; ++i) {\n    REQUIRE(IM(ah[i]) == Approx(0));\n  }\n\n  REQUIRE(RE(ah[0]) == Approx(1));\n  REQUIRE(RE(ah[1]) == Approx(1));\n  REQUIRE(RE(ah[n - 1]) == Approx(1));\n  REQUIRE(RE(ah[2]) == Approx(1));\n  REQUIRE(RE(ah[n - 2]) == Approx(1));\n\n  for (Int i = 1; i < n / (4 * bins); ++i) {\n    REQUIRE(RE(ah[i]) > 0.5);\n    REQUIRE(RE(ah[n - i]) > 0.5);\n  }\n\n  const Int w = n / (2 * bins);\n  for (Int i = w; i < n - w; ++i) {\n    REQUIRE(std::abs(RE(ah[i])) < delta);\n  }\n\n  // Check against SampleInFreq.\n  REQUIRE(window.SampleInFreq(0) == Approx(RE(ah[0])));\n  const Int n2 = (n - 1) / 2;\n  for (Int i = 1; i <= n2; ++i) {\n    const double xi = double(i) / n;\n    REQUIRE(window.SampleInFreq(xi) == Approx(RE(ah[i])));\n    REQUIRE(window.SampleInFreq(-xi) == Approx(RE(ah[n - i])));\n  }\n}\n\n} // namespace mps\n",
-			"file": "src/window_test.cc",
-			"file_size": 1302,
-			"file_write_time": 131445869290690738,
+			"contents": "Searching 46 files for \"aligned_allocat\"\n\n0 matches",
 			"settings":
 			{
-				"buffer_size": 1302,
+				"buffer_size": 51,
+				"line_ending": "Unix",
+				"name": "Find Results",
+				"scratch": true
+			}
+		},
+		{
+			"file": "src/vec.txt",
+			"settings":
+			{
+				"buffer_size": 38086,
 				"line_ending": "Unix"
 			}
 		},
 		{
-			"contents": "#include <boost/math/special_functions/erf.hpp>\n#include <boost/math/special_functions/sinc.hpp>\n#include <glog/logging.h>\n\n#include \"base.h\"\n#include \"window.h\"\n\nnamespace mps {\n\nWindow::Window(Int n, Int bins, double delta)\n    : n_(n), bins_(bins), delta_(delta) {\n  CHECK_GT(n_, 0);\n  CHECK_GT(bins_, 0);\n  CHECK_GT(delta_, 0);\n  CHECK_EQ(1, bins_ % 2) << \"Odd b expected\";\n\n  width_ = 1.0 / (2.0 * bins_);\n  const double sqrt_c_delta = ::sqrt(-::log(delta_));\n  sigma_f_ = 0.5 / (bins_ * 2.0 * M_SQRT2 * sqrt_c_delta);\n  sigma_t_ = 1.0 / ((2.0 * M_PI) * sigma_f_);\n\n  {\n    // Decide p, the size of support.\n    // p has to be sufficiently large.\n    double tmp = 2.0 * M_SQRT2 * sigma_t_ * sqrt_c_delta + 1;\n    Int factor = Int(std::ceil(tmp / double(bins_)));\n    if ((factor % 2) == 0) {\n      ++factor;\n    }\n    // p has to be odd and a multiple of b.\n    p_ = factor * bins_;\n  }\n  CHECK_EQ(1, p_ % 2) << \"Odd p expected\";\n\n  const Int p2 = (p_ - 1) / 2;\n  wt_.resize(p2 + 1);\n  wt_[0] = width_;\n  for (Int i = 1; i <= p2; ++i) {\n    wt_[i] = SampleInTime(i);\n  }\n}\n\ndouble Window::SampleInTime(Int i) const {\n  const double t = double(i);\n  const double u = t * M_PI * sigma_f_;\n  return width_ * boost::math::sinc_pi<double>(t * M_PI * width_) *\n         ::exp(-2.0 * u * u);\n}\n\ndouble Window::SampleInFreq(double xi) const {\n  const double c = 0.5 * width_;\n  const double d = M_SQRT2 * M_PI * sigma_t_;\n  return 0.5 * (boost::math::erf<double>((xi + c) * d) -\n                boost::math::erf<double>((xi - c) * d));\n}\n\n} // namespace mps",
-			"file": "src/window.cc",
-			"file_size": 1554,
-			"file_write_time": 131445867200159838,
-			"settings":
-			{
-				"buffer_size": 1554,
-				"encoding": "UTF-8",
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"contents": "#include \"binner.h\"\n#include \"base.h\"\n#include \"window.h\"\n\nnamespace mps {\n\nInt TauSet::value(Int idx) const {\n  if (idx == 0) {\n    return q;\n  }\n  if (idx & 1) {\n    return q + list_s[(idx - 1) / 2];\n  }\n  return q - list_s[idx / 2 - 1];\n}\n\n// delta = -0.5/bins.\n// bq_factor = Sinusoid(b*q/N).\n// win_factor = wt * 0.5.\n// inline CplexPair BinInTimeHelper(Int n, double delta, const Transform &tf,\n// Int\n// t,\n//                                  Int q, Int s, Cplex bq_factor, double\n//                                  win_factor,\n//                                  const vector<Cplex> &x) {\n//   const Int i = PosMod(Long(tf.a) * Long(q + s + t) + Long(tf.c), n);\n//   const Int j = PosMod(Long(tf.a) * Long(q - s - t) + Long(tf.c), n);\n//   const Int u = Mod(Long(tf.b) * Long(t + s), n);\n//   const Cplex sinusoid = Sinusoid(double(u) / double(n) - delta);\n//   const Cplex v1 = x[i] * bq_factor;\n//   const Cplex v2 = std::conj(x[j] * bq_factor);\n\n//   return std::make_pair(win_factor * sinusoid * (v1 + v2),\n//                         RotateBackward(win_factor * sinusoid * (v1 - v2)));\n// }\n\nvoid BinInTime(const Window &win, const Transform &tf, const TauSet &taus,\n               const CplexArray &x, FFTPlan *plan, CplexMatrix *out,\n               CplexArray *scratch) {\n  // const Int q = taus.q;\n  DCHECK(plan);\n  DCHECK(scratch);\n  DCHECK_EQ(out->rows(), taus.size());\n  DCHECK_EQ(plan->sign(), FFTW_FORWARD);\n\n  const Int bins = win.bins();\n  DCHECK_EQ(bins, scratch->size());\n  DCHECK_EQ(bins, plan->n());\n\n  const double delta = -0.5 / double(bins);\n  // const Cplex bq_factor = Sinusoid(Mod(Long(tf.b) * Long(q), n));\n\n  const Int n = win.n();\n  DCHECK_EQ(n, x.size());\n\n  const Int p = win.p();\n  const Int p2 = (p - 1) / 2;\n\n  for (Int u = 0; u < taus.size(); ++u) {\n    const Int tau = taus.value(u);\n    scratch->Clear();\n    for (Int i = 0; i < p; ++i) {\n      const Int t = i <= p2 ? i : i - p;\n      const double wt = win.wt(i <= p2 ? i : p - i);\n      const Int j = PosMod(Long(tf.a) * Long(t + tau) + Long(tf.c), n);\n      const Int k = PosMod(Long(tf.b) * Long(t + tau), n);\n      // Do mods for better accuracy. Note fmod can be negative, but it is ok.\n      const double angle = (2.0 * M_PI) * (double(k) / double(n) +\n                                           std::fmod(delta * double(t), 1.0));\n      (*scratch)[i % bins] += (x[j] * Sinusoid(angle)) * wt;\n    }\n    // Do B-point FFT.\n    CplexArray &v = (*out)[u];\n    DCHECK_EQ(bins, v.size());\n    plan->Run(*scratch, &v);\n  }\n}\n\nvoid BinInFreq(const Window &win, const Transform &tf, const TauSet &taus,\n               const ModeMap &mm, CplexMatrix *out) {\n  const Int bins = win.bins();\n  const Int n = win.n();\n\n  for (const auto &kv : mm) {\n    const Int k = kv.first;\n    const Int l = PosMod(Long(tf.a) * Long(k) + Long(tf.b), n); // 0 to n-1.\n    const Int bin = Int(Long(l) * Long(bins) / Long(n));\n    const double xi =\n        (double(bin) + 0.5) / double(bins) - double(l) / double(n);\n    const double wf = win.SampleInFreq(xi);\n    for (Int u = 0; u < taus.size(); ++u) {\n      const Int tau = taus.value(u);\n      const Int s = Mod(Long(tf.c) * Long(k) + Long(l) * Long(tau), n);\n      const double angle = (2.0 * M_PI) * (double(s) / double(n));\n      (*out)[u][bin] -= (kv.second * Sinusoid(angle)) * wf;\n    }\n  }\n}\n\n} // namespace mps",
-			"file": "src/binner.cc",
-			"file_size": 3344,
-			"file_write_time": 131445873075386639,
-			"settings":
-			{
-				"buffer_size": 3344,
-				"encoding": "UTF-8",
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"contents": "#pragma once\n\n#include \"base.h\"\n#include \"window.h\"\n\nnamespace mps {\n\nstruct TauSet {\n  // tau's are: q, q +/- s for s in list_s.\n  Int q;\n  vector<Int> list_s;\n\n  inline Int size() const { return 1 + 2 * list_s.size(); }\n\n  // Tau(0) = q; Tau(1) = q+s[0]; Tau(2) = q-s[0]; ...\n  inline Int value(Int idx) const;\n};\n\n/*\n1) Assume plan is forward FFT and has size equal to number of bins.\n2) We will clear out1, use it as scratch and output in out2.\n3) Number of tau's is equal to 1+2*len(list_s).\n4) len(out) is equal to number of tau's. Each element is a CplexArray of size B.\n5) scratch is of size B where B is number of bins.\n6) out[0] -> q, out[1] -> q+s[0], out[2] -> q-s[0], out[3] -> q+s[1], ...\n*/\nvoid BinInTime(const Window &win, const Transform &tf, const TauSet &taus,\n               const CplexArray &x, FFTPlan *plan, CplexMatrix *out,\n               CplexArray *scratch);\n\n// Subtract results from out. Similar convention as BinInTime.\nvoid BinInFreq(const Window &win, const Transform &tf, const TauSet &taus,\n               const ModeMap &mm, CplexMatrix *out);\n\n} // namespace mps",
-			"file": "src/binner.h",
-			"file_size": 1098,
-			"file_write_time": 131445647157029814,
-			"settings":
-			{
-				"buffer_size": 1098,
-				"encoding": "UTF-8",
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"contents": "#include <complex>\n#include <random>\n\n#include \"base.h\"\n\nnamespace mps {\n\nnamespace {\n\nstd::mt19937 rng;\nstd::uniform_int_distribution<Int> uid;\nstd::normal_distribution<double> nd;\n\n// PowMod returns mod(b^e, m).\n// b=base, e=exponent, m=modulus.\nInt PowMod(Int b, Int e, Int m) {\n  Int r = 1;\n  while (e > 0) {\n    if (e & 1) { // Odd exponent\n      r = Mod(Long(r) * Long(b), m);\n    }\n    e >>= 1;\n    b = Mod(Long(b) * Long(b), m);\n  }\n  return r;\n}\n\n// Returns a's inverse modulo m. Caution: Assumes prime m.\nInt InvMod(Int a, Int m) { return PowMod(a, m - 2, m); }\n\n} // namespace\n\nvoid MainInit(int argc, char *const argv[]) {\n  google::InitGoogleLogging(argv[0]);\n  google::InstallFailureSignalHandler();\n  rng.seed(123534);\n  LOG(INFO) << \"mps::MainInit\";\n}\n\nvoid RandomSeed(Long seed) { rng.seed(seed); }\nInt RandomInt() { return uid(rng); }\ndouble RandomNormal() { return nd(rng); }\n\nCplexArray::CplexArray() {}\n\nCplexArray::CplexArray(Int n) { Resize(n); }\n\nCplexArray::CplexArray(std::initializer_list<Cplex> l) {\n  Resize(l.size());\n  std::copy(l.begin(), l.end(), data_);\n}\n\nvoid CplexArray::Reset() {\n  if (data_) {\n    fftw_free(data_);\n    n_ = 0;\n    data_ = nullptr;\n  }\n}\n\ndouble CplexArray::Energy() const {\n  double ans = 0;\n  for (Int i = 0; i < n_; ++i) {\n    ans += AbsSq(data_[i]);\n  }\n  return ans;\n}\n\nCplexArray::~CplexArray() { Reset(); }\n\nvoid CplexArray::Resize(Int n) {\n  Reset();\n  n_ = n;\n  data_ = reinterpret_cast<Cplex *>(fftw_alloc_complex(n));\n}\n\nvoid CplexArray::Fill(Cplex x) { std::fill(data_, data_ + n_, x); }\n\nvoid CplexArray::Clear() { Fill(Cplex(0, 0)); }\n\nCplexArray EvaluateModes(Int n, const ModeMap &mm) {\n  CplexArray x(n);\n  x.Clear();\n  for (const auto &kv : mm) {\n    for (Int t = 0; t < n; ++t) {\n      const double angle =\n          (2.0 * M_PI) * Mod(kv.first * double(t), n) / double(n);\n      x[t] += kv.second * Sinusoid(angle);\n    }\n  }\n  return x;\n}\n\n// Generate Xhat. Noise energy will sum up to n*sigma*sigma.\nCplexArray GenerateXhat(Int n, const ModeMap &mm, double sigma) {\n  CplexArray out(n);\n  double noise_energy = 0;\n  for (Int i = 0; i < n; ++i) {\n    out[i] = Cplex(RandomNormal(), RandomNormal());\n    noise_energy += AbsSq(out[i]);\n  }\n  for (const auto &kv : mm) {\n    noise_energy -= AbsSq(out[kv.first]);\n  }\n  // Rescale noise by this factor.\n  const double factor = sigma / std::sqrt(noise_energy);\n  for (Int i = 0; i < n; ++i) {\n    out[i] *= factor;\n  }\n  for (const auto &kv : mm) {\n    out[kv.first] = kv.second;\n  }\n  return out;\n}\n\nCplexMatrix::CplexMatrix(Int rows, Int cols)\n    : rows_(rows), cols_(cols), data_(rows) {\n  for (Int i = 0; i < rows; ++i) {\n    data_[i].Resize(cols);\n  }\n}\n\nvoid CplexMatrix::Clear() {\n  for (Int i = 0; i < rows_; ++i) {\n    data_[i].Clear();\n  }\n}\n\nFFTPlan::FFTPlan(Int n, char sign)\n    : n_(n), sign_(sign), dummy1_(1), dummy2_(1) {\n  fftw_complex *x = reinterpret_cast<fftw_complex *>(dummy1_.data());\n  fftw_complex *y = reinterpret_cast<fftw_complex *>(dummy2_.data());\n  plan_ = fftw_plan_dft_1d(n, x, y, sign, FFTW_ESTIMATE);\n}\n\nFFTPlan::~FFTPlan() { fftw_destroy_plan(plan_); }\n\nvoid FFTPlan::Run(const CplexArray &u, CplexArray *v) {\n  fftw_execute_dft(plan_, reinterpret_cast<fftw_complex *>(u.data()),\n                   reinterpret_cast<fftw_complex *>(v->data()));\n}\n\nTransform::Transform(Int n) {\n  a = (RandomInt() % (n - 1)) + 1;\n  b = RandomInt() % n;\n  c = RandomInt() % n;\n  a_inv = InvMod(a, n);\n}\n\nTransform::Transform(Int n, Int a, Int b, Int c) {\n  this->a = a;\n  this->b = b;\n  this->c = c;\n  this->a_inv = InvMod(a, n);\n}\n\n} // namespace mps",
 			"file": "src/base.cc",
-			"file_size": 3593,
-			"file_write_time": 131445867626518715,
 			"settings":
 			{
-				"buffer_size": 3593,
+				"buffer_size": 10003,
 				"encoding": "UTF-8",
 				"line_ending": "Unix"
 			}
 		},
 		{
-			"contents": "#include \"catch.hpp\"\n\n#include \"base.h\"\n#include \"binner.h\"\n#include \"window.h\"\n\nnamespace mps {\n\nTEST_CASE(\"BinnerBasic\", \"\") {\n  const Int n = 1109;\n  const Int bins = 5;\n  Window win(n, bins, 1e-6);\n\n  // Prepare x_hat and x.\n  const ModeMap mm = {{550, Cplex(2.0, 0)}};\n  const CplexArray x = EvaluateModes(n, mm);\n\n  // Prepare binning.\n  Transform tf(n, 3, 847, 45);\n  TauSet taus;\n  taus.q = 106;\n  taus.list_s = {3, 7};\n\n  // BinInTime.\n  CplexArray scratch(bins);\n  CplexMatrix out_time(taus.size(), bins);\n\n  FFTPlan plan(bins, -1);\n  BinInTime(win, tf, taus, x, &plan, &out_time, &scratch);\n  REQUIRE(RE(out_time[0][1]) == Approx(1.12652));\n  REQUIRE(IM(out_time[0][1]) == Approx(-0.108838));\n  for (Int i = 0; i < bins; ++i) {\n    if (i != 1) {\n      REQUIRE(std::abs((out_time[0])[i]) == Approx(0));\n    }\n  }\n\n  // BinInFreq.\n  CplexMatrix out_freq(taus.size(), bins);\n  out_freq.Clear();\n  BinInFreq(win, tf, taus, mm, &out_freq); // Subtract.\n\n  REQUIRE(RE(out_freq[0][1]) == Approx(-1.12652));\n  REQUIRE(IM(out_freq[0][1]) == Approx(0.108838));\n  for (Int i = 0; i < bins; ++i) {\n    if (i != 1) {\n      REQUIRE(std::abs(out_freq[0][i]) == Approx(0));\n    }\n  }\n\n  // Compare out_time and out_freq.\n  for (Int i = 0; i < taus.size(); ++i) {\n    for (Int j = 0; j < bins; ++j) {\n      REQUIRE(std::abs(out_time[i][j] + out_freq[i][j]) == Approx(0));\n    }\n  }\n}\n\nTEST_CASE(\"BinnerBigger\", \"\") {\n  const Int n = kPrimes[20];\n  const Int bins = 5;\n  Window win(n, bins, 1e-6);\n\n  // Prepare x_hat and x.\n  const ModeMap mm = {{565336, Cplex(2.0, 1.0)}};\n  const CplexArray x = EvaluateModes(n, mm);\n\n  // Prepare binning.\n  Transform tf(n, 0x3FFFFFFF, 0xEEEEEEEE, 0xDDDDDD);\n  TauSet taus;\n  taus.q = 0xFFFFFF;\n\n  CplexArray scratch(bins);\n  CplexMatrix out_time(taus.size(), bins);\n  FFTPlan plan(bins, -1);\n  BinInTime(win, tf, taus, x, &plan, &out_time, &scratch);\n\n  CplexMatrix out_freq(taus.size(), bins);\n  out_freq.Clear();\n  BinInFreq(win, tf, taus, mm, &out_freq); // Subtract.\n\n  for (Int i = 0; i < bins; ++i) {\n    REQUIRE(std::abs(out_time[0][i] + out_freq[0][i]) == Approx(0));\n  }\n}\n\n} // namespace mps",
-			"file": "src/binner_test.cc",
-			"file_size": 2132,
-			"file_write_time": 131445873075386639,
+			"file": "src/magic.h",
 			"settings":
 			{
-				"buffer_size": 2132,
+				"buffer_size": 1044,
 				"line_ending": "Unix"
 			}
 		},
 		{
-			"contents": "#include \"catch.hpp\"\n\n#include \"base.h\"\n#include \"binner.h\"\n#include \"iterate.h\"\n\nnamespace mps {\n\nnamespace {\n\nstd::pair<Int, Int> CountGoodBad(const ModeMap &found, const ModeMap &ans) {\n  Int bad = 0;\n  Int good = 0;\n  for (const auto &kv : found) {\n    auto it = ans.find(kv.first);\n    if (it == ans.end()) {\n      ++bad;\n    } else {\n      ++good;\n    }\n  }\n  return std::make_pair(good, bad);\n}\n\n} // namespace\n\nTEST_CASE(\"IterateBasic\", \"\") {\n  RandomSeed(123537);\n\n  constexpr Int n = 1109;\n  constexpr double sigma = 0.2;\n\n  IterateOptions opt;\n  opt.bins = 5;\n  opt.window_delta = 1e-6;\n  opt.trials = 5;\n  opt.bin_threshold = 0.2;\n  opt.window_threshold = 0.1;\n\n  ModeMap mm = {\n      {103, Cplex(3.5, 1.1)}, {660, Cplex(-2.4, 1.5)},\n  };\n  const CplexArray xh = GenerateXhat(n, mm, sigma);\n\n  FFTPlan plan(n, FFTW_BACKWARD);\n  CplexArray x(n);\n  plan.Run(xh, &x);\n\n  ModeMap ans_mm;\n  Iterate(x, opt, &ans_mm);\n\n  REQUIRE(ans_mm.size() == 2);\n  auto it1 = ans_mm.find(103);\n  REQUIRE(it1 != ans_mm.end());\n  REQUIRE(std::abs(it1->second - Cplex(3.5, 1.1)) < 1e-1);\n\n  auto it2 = ans_mm.find(660);\n  REQUIRE(it2 != ans_mm.end());\n  REQUIRE(std::abs(it2->second - Cplex(-2.4, 1.5)) < 1e-1);\n}\n\n// Use a larger size array. Use more modes.\nTEST_CASE(\"IterateMore\", \"\") {\n  RandomSeed(123537);\n\n  constexpr Int n = kPrimes[20];\n  constexpr Int num_modes = 1000;\n  constexpr double sigma = 1e-2;\n\n  IterateOptions opt;\n  opt.bins = 2 * num_modes + 1;\n  opt.window_delta = 1e-6;\n  opt.trials = 3;\n  opt.bin_threshold = 0.01;\n  opt.window_threshold = 0.1;\n\n  // Generate a list of random coefficients, each of magnitude 1.0.\n  ModeMap mm;\n  for (Int i = 0; i < num_modes; ++i) {\n    Cplex coef(RandomNormal(), RandomNormal());\n    coef /= std::abs(coef);\n    const Int loc = RandomInt() % n;\n    mm[loc] += coef;\n  }\n  CplexArray xh = GenerateXhat(n, mm, sigma);\n  FFTPlan plan(n, FFTW_BACKWARD);\n  CplexArray x(n);\n  plan.Run(xh, &x); // xh is the solution.\n\n  ModeMap found_mm;\n  Iterate(x, opt, &found_mm);\n  auto result = CountGoodBad(found_mm, mm);\n  REQUIRE(result.first >= 300);\n  REQUIRE(result.second <= 100);\n\n  opt.bins = (num_modes - 300) * 2 + 1;\n  Iterate(x, opt, &found_mm);\n  result = CountGoodBad(found_mm, mm);\n  REQUIRE(result.first >= 600);\n  REQUIRE(result.second <= 100);\n}\n\n// Assume sigma amount of noise. Use that to calibrate IterateOptions.\n// Bin threshold and SV threshold should be ~sigma^2/bins.\n// For simplicity, we keep the number of bins constant.\nTEST_CASE(\"IterateFull\", \"\") {\n  RandomSeed(123537);\n\n  constexpr Int n = kPrimes[20];\n  constexpr Int num_modes = 1000;\n  constexpr double sigma = 1e-7;\n\n  IterateOptions opt;\n  opt.bins = 2 * num_modes + 1;\n  opt.window_delta = 1e-6;\n  opt.trials = 3;\n  opt.bin_threshold = 3.0 * sigma / std::sqrt(double(opt.bins));\n  opt.sv_threshold = 1.0 * sigma / std::sqrt(double(opt.bins));\n  opt.window_threshold = 0.1;\n\n  // Generate a list of random coefficients, each of magnitude 1.0.\n  ModeMap mm;\n  for (Int i = 0; i < num_modes; ++i) {\n    Cplex coef(RandomNormal(), RandomNormal());\n    coef /= std::abs(coef);\n    const Int loc = RandomInt() % n;\n    mm[loc] += coef;\n  }\n  CplexArray xh = GenerateXhat(n, mm, sigma);\n  FFTPlan plan(n, FFTW_BACKWARD);\n  CplexArray x(n);\n  plan.Run(xh, &x); // xh is the solution.\n\n  ModeMap found_mm;\n  Iterate(x, opt, &found_mm);\n  auto result = CountGoodBad(found_mm, mm);\n  REQUIRE(result.first >= 250);\n  REQUIRE(result.second <= 30);\n  // LOG(INFO) << result.first;\n  // LOG(INFO) << result.second;\n\n  Iterate(x, opt, &found_mm);\n  result = CountGoodBad(found_mm, mm);\n  REQUIRE(result.first >= 500);\n  REQUIRE(result.second <= 30);\n  // LOG(INFO) << result.first;\n  // LOG(INFO) << result.second;\n\n  Iterate(x, opt, &found_mm);\n  result = CountGoodBad(found_mm, mm);\n  REQUIRE(result.first >= 630);\n  REQUIRE(result.second <= 30);\n  // LOG(INFO) << result.first;\n  // LOG(INFO) << result.second;\n\n  Iterate(x, opt, &found_mm);\n  result = CountGoodBad(found_mm, mm);\n  REQUIRE(result.first >= 730);\n  REQUIRE(result.second <= 30);\n  // LOG(INFO) << result.first;\n  // LOG(INFO) << result.second;\n\n  Iterate(x, opt, &found_mm);\n  result = CountGoodBad(found_mm, mm);\n  REQUIRE(result.first >= 810);\n  REQUIRE(result.second <= 30);\n  // LOG(INFO) << result.first;\n  // LOG(INFO) << result.second;\n}\n\n} // namespace mps",
-			"file": "src/iterate_test.cc",
-			"file_size": 4345,
-			"file_write_time": 131445957957390741,
+			"file": "src/base.h",
 			"settings":
 			{
-				"buffer_size": 4345,
+				"buffer_size": 6476,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "src/.bazelrc",
+			"settings":
+			{
+				"buffer_size": 599,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "README.md",
+			"settings":
+			{
+				"buffer_size": 8214,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "src/binner_bench.cc",
+			"settings":
+			{
+				"buffer_size": 2143,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "src/demo1_bench.cc",
+			"settings":
+			{
+				"buffer_size": 1603,
 				"encoding": "UTF-8",
 				"line_ending": "Unix"
 			}
@@ -231,10 +206,14 @@
 	"build_varint": "",
 	"command_palette":
 	{
-		"height": 152.0,
-		"last_filter": "INSTA",
+		"height": 292.0,
+		"last_filter": "inst",
 		"selected_items":
 		[
+			[
+				"inst",
+				"Package Control: Install Package"
+			],
 			[
 				"INSTA",
 				"Package Control: Install Package"
@@ -268,24 +247,43 @@
 	},
 	"expanded_folders":
 	[
-		"/home/jchiu/projects/mpsft"
+		"/home/jchiu/projects/mpsft/src"
 	],
 	"file_history":
 	[
-		"/home/jchiu/projects/mpsft/src/freqid.h",
-		"/home/jchiu/projects/mpsft/src/freqid.cc",
-		"/home/jchiu/projects/mpsft/src/base.h",
-		"/home/jchiu/projects/mpsft/src/window.h",
-		"/home/jchiu/projects/mpsft/src/BUILD",
+		"/home/jchiu/projects/mpsft/src/iterate.h",
+		"/home/jchiu/projects/mpsft/src/iterate_test.cc",
+		"/home/jchiu/projects/mpsft/src/iterate.cc",
+		"/home/jchiu/projects/mpsft/src/demo1.h",
+		"/home/jchiu/projects/mpsft/src/demo1_main.cc",
+		"/home/jchiu/projects/mpsft/src/binner.h",
 		"/home/jchiu/projects/mpsft/src/binner_test.cc",
-		"/home/jchiu/projects/mpsft/src/window.cc",
-		"/home/jchiu/projects/mpsft/src/catch.cc",
-		"/home/jchiu/projects/mpsft/README.md",
-		"/home/jchiu/projects/mpsft/src/window_test.cc",
-		"/home/jchiu/projects/mpsft/src/base.cc",
-		"/home/jchiu/projects/mpsft/BUILD",
-		"/home/jchiu/projects/mpsft/src/.bazelrc",
+		"/home/jchiu/projects/mpsft/src/binner.cc",
+		"/home/jchiu/projects/mpsft/src/base_bench.cc",
+		"/home/jchiu/libdivide/gen.cc",
+		"/home/jchiu/projects/mpsft/src/magic.cc",
+		"/home/jchiu/projects/mpsft/src/magic.h",
+		"/home/jchiu/projects/mpsft/src/BUILD",
 		"/home/jchiu/projects/mpsft/src/base_test.cc",
+		"/home/jchiu/projects/mpsft/src/vec.txt",
+		"/home/jchiu/projects/mpsft/src/.bazelrc",
+		"/home/jchiu/projects/mpsft/src/demo1.cc",
+		"/home/jchiu/projects/mpsft/src/window.cc",
+		"/home/jchiu/projects/mpsft/README.md",
+		"/home/jchiu/projects/mpsft/src/binner_bench.cc",
+		"/home/jchiu/projects/mpsft/src/base.cc",
+		"/home/jchiu/projects/mpsft/src/fftw_bench.cc",
+		"/home/jchiu/projects/mpsft/src/window.h",
+		"/home/jchiu/projects/mpsft/src/demo1_bench.cc",
+		"/home/jchiu/projects/mpsft/src/base.h",
+		"/home/jchiu/projects/mpsft/src/catch.cc",
+		"/home/jchiu/projects/mpsft/src/window_test.cc",
+		"/home/jchiu/projects/mpsft/src/freqid.cc",
+		"/home/jchiu/projects/mpsft/src/freqid.h",
+		"/home/jchiu/projects/mpsft/src/freqid_test.cc",
+		"/home/jchiu/projects/mpsft/src/benchmark.cc",
+		"/home/jchiu/projects/mpsft/src/benchmark_test.cc",
+		"/home/jchiu/projects/mpsft/BUILD",
 		"/home/jchiu/projects/mpsft/src/perm.cc",
 		"/home/jchiu/projects/mpsft/src/perm_test.cc",
 		"/home/jchiu/projects/mpsft/src/perm.h",
@@ -314,9 +312,73 @@
 	},
 	"find_state":
 	{
-		"case_sensitive": true,
+		"case_sensitive": false,
 		"find_history":
 		[
+			"aligned_allocat",
+			"base_bench.cc:17",
+			"magic",
+			"base.h:23",
+			"kprimesmagic",
+			"omp",
+			"absaininit",
+			"int64_t",
+			"uint64_t",
+			"int64_t",
+			"uint_bits",
+			"sint_bits",
+			"uint",
+			"sint",
+			"uint",
+			"CHAR_BIT",
+			"uint",
+			"SINT_BITS",
+			"multiplier",
+			"compute_signed_magic_info",
+			"compute_unsigned_magic_info",
+			"sintwopi",
+			"base_bench.cc:71",
+			"sinusoid",
+			"idx1",
+			"idx",
+			"-c opt",
+			"malloc",
+			"sinusoid(",
+			"fmod",
+			"run(",
+			"sinusoid",
+			"boost",
+			"sinc",
+			"EvaluateModes",
+			"erf",
+			"sinc",
+			"boost",
+			"demo1_bench",
+			"cc_test",
+			"nn",
+			"RandomNormal",
+			"out",
+			"generatexhat",
+			"GenerateXhat",
+			"unique_ptr",
+			"fftplan",
+			"abssq",
+			"M_PI",
+			"Sinusoid",
+			"sinusoid",
+			"long",
+			"gettau",
+			"BinnerType::Fast",
+			"BinnerType::Simple",
+			"BinnerType::Fast",
+			"Fast",
+			"BinnerType::Fast",
+			"BinnerType::Simple",
+			"m_pi",
+			"range",
+			"transform",
+			"#",
+			"window.",
 			"identifyfreq",
 			"Real",
 			"mpsft",
@@ -380,19 +442,7 @@
 			"}  // namespace",
 			"namespace {",
 			"bins",
-			"int",
-			"double",
-			"int32_t",
-			"int64_t",
-			"int32_t",
-			"int64_t",
-			"int32_t",
-			"FreqID",
-			"bufr",
-			"bufR",
-			"p2",
-			"even",
-			"sleep_duration"
+			"int"
 		],
 		"highlight": true,
 		"in_selection": false,
@@ -410,52 +460,54 @@
 	"groups":
 	[
 		{
-			"selected": 0,
+			"selected": 3,
 			"sheets":
 			[
 				{
 					"buffer": 0,
-					"file": "src/iterate.h",
+					"file": "src/magic.cc",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 1570,
+						"buffer_size": 9099,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								490,
-								490
+								8778,
+								8778
 							]
 						],
 						"settings":
 						{
-							"syntax": "Packages/C++/C++.sublime-syntax"
+							"syntax": "Packages/C++/C++.sublime-syntax",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
 						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
+						"translation.x": -0.0,
+						"translation.y": 3308.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 1,
+					"stack_index": 9,
 					"type": "text"
 				},
 				{
 					"buffer": 1,
-					"file": "src/base.h",
+					"file": "src/base_test.cc",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 3919,
+						"buffer_size": 4114,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								507,
-								507
+								3925,
+								3925
 							]
 						],
 						"settings":
@@ -465,27 +517,156 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 0.0,
+						"translation.y": 1598.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 3,
+					"stack_index": 8,
 					"type": "text"
 				},
 				{
 					"buffer": 2,
-					"file": "src/freqid.h",
+					"file": "src/base_bench.cc",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 305,
+						"buffer_size": 5832,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								305,
-								305
+								1749,
+								1749
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.sublime-syntax",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 360.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 1,
+					"type": "text"
+				},
+				{
+					"buffer": 3,
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 51,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								0,
+								0
+							]
+						],
+						"settings":
+						{
+							"detect_indentation": false,
+							"line_numbers": false,
+							"output_tag": 1,
+							"result_base_dir": "",
+							"result_file_regex": "^([^ \t].*):$",
+							"result_line_regex": "^ +([0-9]+):",
+							"scroll_past_end": true,
+							"syntax": "Packages/Default/Find Results.hidden-tmLanguage",
+							"translate_tabs_to_spaces": false
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 0,
+					"type": "text"
+				}
+			]
+		},
+		{
+			"selected": 5,
+			"sheets":
+			[
+				{
+					"buffer": 4,
+					"file": "src/vec.txt",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 38086,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								36664,
+								36664
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/Text/Plain text.tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 10308.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 6,
+					"type": "text"
+				},
+				{
+					"buffer": 5,
+					"file": "src/base.cc",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 10003,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								926,
+								926
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.sublime-syntax",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": 0.0,
+						"translation.y": 180.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 3,
+					"type": "text"
+				},
+				{
+					"buffer": 6,
+					"file": "src/magic.h",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 1044,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								666,
+								666
 							]
 						],
 						"settings":
@@ -500,20 +681,20 @@
 					"type": "text"
 				},
 				{
-					"buffer": 3,
-					"file": "src/freqid.cc",
+					"buffer": 7,
+					"file": "src/base.h",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 713,
+						"buffer_size": 6476,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								219,
-								219
+								1021,
+								1021
 							]
 						],
 						"settings":
@@ -526,272 +707,86 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 6,
+					"stack_index": 5,
 					"type": "text"
 				},
 				{
-					"buffer": 4,
-					"file": "src/freqid_test.cc",
+					"buffer": 8,
+					"file": "src/.bazelrc",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 967,
+						"buffer_size": 599,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								777,
-								777
+								599,
+								599
 							]
 						],
 						"settings":
 						{
-							"auto_name": "svd",
-							"syntax": "Packages/C++/C++.sublime-syntax"
+							"syntax": "Packages/Text/Plain text.tmLanguage"
 						},
 						"translation.x": 0.0,
 						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 8,
-					"type": "text"
-				},
-				{
-					"buffer": 5,
-					"file": "src/iterate.cc",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 4676,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								554,
-								554
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/C++/C++.sublime-syntax"
-						},
-						"translation.x": 0.0,
-						"translation.y": 115.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 2,
-					"type": "text"
-				},
-				{
-					"buffer": 6,
-					"file": "src/BUILD",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 1218,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								614,
-								614
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/C#/Build.sublime-syntax",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 500.0,
 						"zoom_level": 1.0
 					},
 					"stack_index": 4,
 					"type": "text"
 				},
 				{
-					"buffer": 7,
-					"file": "src/base_test.cc",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 2207,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								2063,
-								2063
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/C++/C++.sublime-syntax",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 904.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 14,
-					"type": "text"
-				},
-				{
-					"buffer": 8,
-					"file": "src/window.h",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 968,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								276,
-								276
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/C++/C++.sublime-syntax",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 12,
-					"type": "text"
-				},
-				{
 					"buffer": 9,
-					"file": "src/window_test.cc",
+					"file": "README.md",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 1302,
+						"buffer_size": 8214,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								222,
-								222
+								8210,
+								8210
 							]
 						],
 						"settings":
 						{
-							"syntax": "Packages/C++/C++.sublime-syntax",
+							"syntax": "Packages/Markdown/Markdown.sublime-syntax",
 							"tab_size": 2,
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 0.0,
+						"translation.y": 2857.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 11,
+					"stack_index": 2,
 					"type": "text"
 				},
 				{
 					"buffer": 10,
-					"file": "src/window.cc",
+					"file": "src/binner_bench.cc",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 1554,
+						"buffer_size": 2143,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								1554,
-								1554
+								0,
+								0
 							]
 						],
 						"settings":
 						{
-							"syntax": "Packages/C++/C++.sublime-syntax",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 13,
-					"type": "text"
-				},
-				{
-					"buffer": 11,
-					"file": "src/binner.cc",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 3344,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								321,
-								321
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/C++/C++.sublime-syntax",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 315.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 5,
-					"type": "text"
-				}
-			]
-		},
-		{
-			"selected": 3,
-			"sheets":
-			[
-				{
-					"buffer": 12,
-					"file": "src/binner.h",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 1098,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								52,
-								52
-							]
-						],
-						"settings":
-						{
-							"auto_name": "",
 							"syntax": "Packages/C++/C++.sublime-syntax",
 							"tab_size": 2,
 							"translate_tabs_to_spaces": true
@@ -804,93 +799,31 @@
 					"type": "text"
 				},
 				{
-					"buffer": 13,
-					"file": "src/base.cc",
+					"buffer": 11,
+					"file": "src/demo1_bench.cc",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 3593,
+						"buffer_size": 1603,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								1327,
-								1327
+								764,
+								764
 							]
 						],
 						"settings":
 						{
-							"syntax": "Packages/C++/C++.sublime-syntax",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 255.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 15,
-					"type": "text"
-				},
-				{
-					"buffer": 14,
-					"file": "src/binner_test.cc",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 2132,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								97,
-								97
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/C++/C++.sublime-syntax",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true
+							"syntax": "Packages/C++/C++.sublime-syntax"
 						},
 						"translation.x": 0.0,
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 9,
-					"type": "text"
-				},
-				{
-					"buffer": 15,
-					"file": "src/iterate_test.cc",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 4345,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								2300,
-								2300
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/C++/C++.sublime-syntax",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 960.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 0,
+					"stack_index": 11,
 					"type": "text"
 				}
 			]
@@ -898,7 +831,7 @@
 	],
 	"incremental_find":
 	{
-		"height": 23.0
+		"height": 34.0
 	},
 	"input":
 	{

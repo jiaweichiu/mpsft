@@ -16,11 +16,24 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
  *
  */
-#include "binner.h"
+#include <boost/align/aligned_allocator.hpp>
+#include <boost/simd/arithmetic.hpp>
+#include <boost/simd/function/aligned_store.hpp>
+#include <boost/simd/function/load.hpp>
+#include <boost/simd/function/sin.hpp>
+#include <boost/simd/function/sincos.hpp>
+#include <boost/simd/function/store.hpp>
+#include <boost/simd/memory/allocator.hpp>
+#include <boost/simd/pack.hpp>
+
 #include "base.h"
+#include "binner.h"
 #include "integer.h"
 #include "sincos.h"
 #include "window.h"
+
+namespace ba = boost::alignment;
+namespace bs = boost::simd;
 
 namespace mps {
 
@@ -175,8 +188,8 @@ void BinInTimeV1::Run(const CplexArray &x, const Transform &tf, int32_t q,
 }
 
 BinInTimeV2::BinInTimeV2(const Window &win, int32_t bits)
-    : BinInTime(win, bits), s1_(win.p()), s2_(win.p()),
-      idx1_(win.p()), idx2_(win.p()), dbl_(win.p()) {}
+    : BinInTime(win, bits), s1_(win.p()), s2_(win.p()), idx1_(win.p()),
+      idx2_(win.p()), dbl_(win.p()) {}
 
 void BinInTimeV2::Run(const CplexArray &x, const Transform &tf, int32_t q,
                       CplexMatrix *out) {
@@ -270,7 +283,7 @@ void BinInTimeV2::Run(const CplexArray &x, const Transform &tf, int32_t q,
 
 BinInTimeV3::BinInTimeV3(const Window &win, int32_t bits)
     : BinInTime(win, bits), s1_(win.p()), s2_(win.p()), idx1_(win.p()),
-      idx2_(win.p()), d1_(win.p()), d2_(win.p()), d3_(win.p()), d4_(win.p()) {}
+      idx2_(win.p()), d1_(win.p()), d2_(win.p()), d3_(win.p()) {}
 
 void BinInTimeV3::Run(const CplexArray &x, const Transform &tf, int32_t q,
                       CplexMatrix *out) {
@@ -281,6 +294,10 @@ void BinInTimeV3::Run(const CplexArray &x, const Transform &tf, int32_t q,
   int32_t *__restrict__ idx1 = idx1_.data();
   int32_t *__restrict__ idx2 = idx2_.data();
   double *__restrict__ d1 = d1_.data();
+  double *__restrict__ d2 = d2_.data();
+  double *__restrict__ d3 = d3_.data();
+  using pack_t = bs::pack<double>;
+  const size_t pack_card = bs::cardinal_of<pack_t>();
 
   CHECK_EQ(out->rows(), 1 + 2 * bits_);
   const int32_t bins = win_.bins();
@@ -327,15 +344,19 @@ void BinInTimeV3::Run(const CplexArray &x, const Transform &tf, int32_t q,
       s2[i] = RotateBackward(0.5 * (x1 - x2));
     }
 
-// CAUTION: Make sure the following is vectorized.
-#pragma omp simd aligned(s1, s2, d1, t, wt : kAlign)
-    for (int32_t i = 0; i < p; ++i) {
-      const double freq = PosModOne(d1[i]);
-      const double cc = wt[i] * CosTwoPiApprox(freq);
-      const double ss = wt[i] * SinTwoPiApprox(freq);
+    // CAUTION: Make sure the following is vectorized.
+    for (int32_t i = 0; i < p; i += pack_card) {
+      pack_t x(bs::aligned_load<pack_t>(d1_.data() + i));
+      auto res = bs::sincos(2.0 * M_PI * x);
+      bs::aligned_store(res.first, d2_.data() + i);
+      bs::aligned_store(res.second, d3_.data() + i);
+    }
 
-      s1[i] *= Cplex(cc, ss);
-      s2[i] *= Cplex(cc, ss);
+#pragma omp simd aligned(s1, s2, d2, d3, wt : kAlign)
+    for (int32_t i = 0; i < p; ++i) {
+      const Cplex factor = Cplex(d3[i], d2[i]) * wt[i];
+      s1[i] *= factor;
+      s2[i] *= factor;
     }
 
     const int32_t folds = p / bins;

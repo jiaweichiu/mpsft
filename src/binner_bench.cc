@@ -45,7 +45,11 @@ static void BM_BinInTime(benchmark::State &state) {
     bin_in_time->Run(x, tf, q, &a);
   }
 }
-BENCHMARK(BM_BinInTime)->Args({0, 22})->Args({1, 22})->Args({2, 22});
+BENCHMARK(BM_BinInTime)
+    ->Args({0, 22})
+    ->Args({1, 22})
+    ->Args({2, 22})
+    ->Args({3, 22});
 
 static void BM_BinInFreq(benchmark::State &state) {
   const int bin_in_freq_type = state.range(0);

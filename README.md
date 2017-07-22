@@ -68,7 +68,7 @@ Make sure CPU scaling is turned off. See miscel section. Make sure everything is
 ## Benchmarks for binning
 
 ```shell
-bazel build -c opt --config=opt :binner_bench
+bazel build --config=opt :binner_bench
 ./bazel-bin/binner_bench
 ```
 
@@ -76,18 +76,22 @@ bazel build -c opt --config=opt :binner_bench
 ---------------------------------------------------------
 Benchmark                  Time           CPU Iterations
 ---------------------------------------------------------
-BM_BinInTime/0/22   43343983 ns   43346872 ns         16
-BM_BinInTime/1/22   31140300 ns   31142036 ns         22
-BM_BinInTime/2/22   21985368 ns   21985125 ns         32
-BM_BinInFreq/0/22      78472 ns      78477 ns       8893
-BM_BinInFreq/1/22      44098 ns      44101 ns      15864
+BM_BinInTime/0/22   51693173 ns   51687596 ns         13
+BM_BinInTime/1/22   34296939 ns   34291219 ns         20
+BM_BinInTime/2/22   16035078 ns   16024006 ns         44
+BM_BinInTime/3/22   15492057 ns   15488898 ns         46
+BM_BinInFreq/0/22     188736 ns     188722 ns       3682
+BM_BinInFreq/1/22      91733 ns      91720 ns       7655
+
 ```
 
 The first parameter selects the binner. The second parameter is `log2(n)`.
 
 From V0 to V1 for both `BinInTime` and `BinInFreq`, we exploit symmetry to roughly halve the number of trigonometric operations. The gain is not as much after we provide our own trigonometric functions.
 
-From V1 to V2 and `BinInTime`, we use smaller loops in hope of better compiler optimization, say vectorization, AVX etc.
+From V1 to V2 and `BinInTime`, we do some vectorization and also some Chebyshev approximation of sines and cosines. However, this introduces some errors which might accumulate and slow down convergence. They are also not the most robust.
+
+From V2 to V3 and `BinInTime`, we switch to using Boost SIMD just for the sines and cosines computation. The speed is the same but the precision is way better.
 
 ## Benchmarks for FFTW
 
@@ -143,7 +147,7 @@ sigma = 1e-2
 Here are the results. We see that the sparsity has to be around 1000 in order for MPSFT to be faster than FFTW.
 
 ```shell
-bazel build -c opt --config=opt :demo1_bench
+bazel build --config=opt :demo1_bench
 ./bazel-bin/demo1_bench
 ```
 
@@ -153,12 +157,12 @@ Results:
 -------------------------------------------------------------
 Benchmark                      Time           CPU Iterations
 -------------------------------------------------------------
-BM_Demo1/4194301/64     48057441 ns   48057968 ns         15
-BM_Demo1/4194301/128    61008096 ns   61012363 ns         11
-BM_Demo1/4194301/256    82409613 ns   82415425 ns          9
-BM_Demo1/4194301/512   128505852 ns  128504101 ns          5
-BM_Demo1/4194301/1024  214738172 ns  214702456 ns          3
-BM_Demo1/4194301/2048  374692767 ns  374709328 ns          2
+BM_Demo1/4194301/64     34115828 ns   34112298 ns         20
+BM_Demo1/4194301/128    44698340 ns   44691912 ns         16
+BM_Demo1/4194301/256    61547564 ns   61530706 ns          9
+BM_Demo1/4194301/512   102622825 ns  102604267 ns          7
+BM_Demo1/4194301/1024  171544542 ns  171496205 ns          4
+BM_Demo1/4194301/2048  307691896 ns  307614594 ns          2
 ```
 
 A couple of parameters are not the most aggressive. For example, `window_delta` can be slightly bigger.
@@ -175,9 +179,11 @@ bazel build --config=opt --linkopt="-lprofiler" :demo1_main
 BIN=./bazel-bin/demo1_main
 
 $BIN
-pprof --svg $BIN /tmp/demo1_main.prof > profile/demo1_main_20170718.svg
-pprof --pdf $BIN /tmp/demo1_main.prof > profile/demo1_main_20170718.pdf
-pprof --text $BIN /tmp/demo1_main.prof > profile/demo1_main_20170718.txt
+
+DATE=20170722
+pprof --svg $BIN /tmp/demo1_main.prof > profile/demo1_main_${DATE}.svg
+pprof --pdf $BIN /tmp/demo1_main.prof > profile/demo1_main_${DATE}.pdf
+pprof --text $BIN /tmp/demo1_main.prof > profile/demo1_main_${DATE}.txt
 
 pprof $BIN /tmp/demo1_main.prof
 ```
@@ -219,6 +225,24 @@ Total: 96 samples
 ```
 
 Here is the [visualization](src/profile/demo1_main_20170718.pdf).
+
+Unfortunately, the sin-cos earlier is not precise or robust enough. We switched to using Boost.SIMD just for this part. The new profile results is:
+
+```
+Total: 79 samples
+      64  81.0%  81.0%       69  87.3% mps::BinInTimeV3::Run
+       8  10.1%  91.1%        8  10.1% sincos
+       2   2.5%  93.7%        2   2.5% Eigen::JacobiSVD::compute
+       1   1.3%  94.9%        1   1.3% __nss_passwd_lookup
+       1   1.3%  96.2%        1   1.3% apply@1b6f0
+       1   1.3%  97.5%        1   1.3% erf
+       1   1.3%  98.7%        1   1.3% gammal
+       1   1.3% 100.0%        1   1.3% n1_12
+       0   0.0% 100.0%       79 100.0% __libc_start_main
+       0   0.0% 100.0%       79 100.0% _start
+```
+
+Here is the [visualization](src/profile/demo1_main_20170722.pdf).
 
 # Miscel
 

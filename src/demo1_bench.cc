@@ -27,8 +27,8 @@ namespace mps {
 // Parameters (n, k): n is size of x and there are k modes.
 // TODO: Allow sigma to be varied.
 static void BM_Demo1(benchmark::State &state) {
-  const Int n = state.range(0);
-  const Int num_modes = state.range(1);
+  const int32_t n = state.range(0);
+  const int32_t num_modes = state.range(1);
   const double sigma = 1e-2;
 
   Demo1Options opt;
