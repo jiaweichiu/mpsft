@@ -52,6 +52,9 @@ BinInTime *BinInTime::Create(int binner_type, const Window &win, int32_t bits) {
   if (binner_type == 2) {
     return new BinInTimeV2(win, bits);
   }
+  if (binner_type == 3) {
+    return new BinInTimeV3(win, bits);
+  }
   LOG(FATAL) << "Unknown binner_type=" << binner_type;
   return nullptr;
 }
@@ -172,15 +175,15 @@ void BinInTimeV1::Run(const CplexArray &x, const Transform &tf, int32_t q,
 }
 
 BinInTimeV2::BinInTimeV2(const Window &win, int32_t bits)
-    : BinInTime(win, bits), scratch_(win.p()), scratch2_(win.p()),
+    : BinInTime(win, bits), s1_(win.p()), s2_(win.p()),
       idx1_(win.p()), idx2_(win.p()), dbl_(win.p()) {}
 
 void BinInTimeV2::Run(const CplexArray &x, const Transform &tf, int32_t q,
                       CplexMatrix *out) {
   int32_t *__restrict__ t = win_.t();
   double *__restrict__ wt = win_.wt();
-  Cplex *__restrict__ s1 = scratch_.data();
-  Cplex *__restrict__ s2 = scratch2_.data();
+  Cplex *__restrict__ s1 = s1_.data();
+  Cplex *__restrict__ s2 = s2_.data();
   int32_t *__restrict__ idx1 = idx1_.data();
   int32_t *__restrict__ idx2 = idx2_.data();
   double *__restrict__ dbl = dbl_.data();
@@ -195,25 +198,24 @@ void BinInTimeV2::Run(const CplexArray &x, const Transform &tf, int32_t q,
   const int32_t p = win_.p();
 
   // Take care of tau=q first. TODO: Optimize this later.
-  scratch_.clear();
+  s1_.clear();
   for (int32_t i = 0; i < p; ++i) {
     const int32_t tt = t[i];
     const int32_t j = MulAddPosMod(tf.a, int64_t(tt) + int64_t(q), tf.c, n);
     const int32_t k = MulMod(tf.b, int64_t(tt) + int64_t(q), n);
     const double freq = double(k) / double(n) + PosModOne(delta * double(tt));
-    scratch_[i % bins] += (x[j] * Sinusoid(freq)) * wt[i];
+    s1[i % bins] += (x[j] * Sinusoid(freq)) * wt[i];
   }
-  plan_->Run(scratch_, &(*out)[0]);
+  plan_->Run(s1_, &(*out)[0]);
 
   // Take care of offsets from q.
   const Cplex bq = Sinusoid(double(MulMod(tf.b, q, n)) / double(n));
-
-  // Initialize t array.
 
   for (int32_t bit = 0; bit < bits_; ++bit) {
     const int32_t offset = bins * (1 << bit);
 
 #pragma omp simd aligned(idx1, idx2, dbl, t : kAlign)
+    // int64 operations are not vectorized in AVX2.
     for (int32_t i = 0; i < p; ++i) {
       const int64_t ts = int64_t(t[i]) + int64_t(offset);
       idx1[i] = MulAddPosMod(tf.a, int64_t(q) + int64_t(ts), tf.c, n);
@@ -223,6 +225,7 @@ void BinInTimeV2::Run(const CplexArray &x, const Transform &tf, int32_t q,
     }
 
 #pragma omp simd aligned(idx1, idx2, s1, s2 : kAlign)
+    // This doesn't seem vectorized either. Splitting into components helps.
     for (int32_t i = 0; i < p; ++i) {
       const Cplex x1 = x[idx1[i]] * bq;
       const Cplex x2 = std::conj(x[idx2[i]] * bq);
@@ -245,14 +248,108 @@ void BinInTimeV2::Run(const CplexArray &x, const Transform &tf, int32_t q,
     for (int32_t i = 1; i < folds; ++i) {
       for (int32_t j = 0; j < bins; ++j) {
         const int32_t k = i * bins + j;
-        scratch_[j] += scratch_[k];
-        scratch2_[j] += scratch2_[k];
+        s1[j] += s1[k];
+        s2[j] += s2[k];
       }
     }
 
     // Do B-point FFT.
-    plan_->Run(scratch_, &(*out)[2 * bit + 1]);
-    plan_->Run(scratch2_, &(*out)[2 * bit + 2]);
+    plan_->Run(s1_, &(*out)[2 * bit + 1]);
+    plan_->Run(s2_, &(*out)[2 * bit + 2]);
+
+    // Combine the bin coefficients.
+    for (int32_t bin = 0; bin < bins; ++bin) {
+      const Cplex coef_r = (*out)[2 * bit + 1][bin];
+      const Cplex coef_i = (*out)[2 * bit + 2][bin];
+      (*out)[2 * bit + 1][bin] = coef_r + RotateForward(coef_i);
+      (*out)[2 * bit + 2][bin] =
+          std::conj(coef_r) + RotateForward(std::conj(coef_i));
+    }
+  }
+}
+
+BinInTimeV3::BinInTimeV3(const Window &win, int32_t bits)
+    : BinInTime(win, bits), s1_(win.p()), s2_(win.p()), idx1_(win.p()),
+      idx2_(win.p()), d1_(win.p()), d2_(win.p()), d3_(win.p()), d4_(win.p()) {}
+
+void BinInTimeV3::Run(const CplexArray &x, const Transform &tf, int32_t q,
+                      CplexMatrix *out) {
+  int32_t *__restrict__ t = win_.t();
+  double *__restrict__ wt = win_.wt();
+  Cplex *__restrict__ s1 = s1_.data();
+  Cplex *__restrict__ s2 = s2_.data();
+  int32_t *__restrict__ idx1 = idx1_.data();
+  int32_t *__restrict__ idx2 = idx2_.data();
+  double *__restrict__ d1 = d1_.data();
+
+  CHECK_EQ(out->rows(), 1 + 2 * bits_);
+  const int32_t bins = win_.bins();
+  const int32_t n = win_.n();
+
+  const double delta = -0.5 / double(bins);
+  DCHECK_EQ(n, x.size());
+
+  const int32_t p = win_.p();
+
+  // Take care of tau=q first. TODO: Optimize this later.
+  s1_.clear();
+  for (int32_t i = 0; i < p; ++i) {
+    const int32_t tt = t[i];
+    const int32_t j = MulAddPosMod(tf.a, int64_t(tt) + int64_t(q), tf.c, n);
+    const int32_t k = MulMod(tf.b, int64_t(tt) + int64_t(q), n);
+    const double freq = double(k) / double(n) + PosModOne(delta * double(tt));
+    s1[i % bins] += (x[j] * Sinusoid(freq)) * wt[i];
+  }
+  plan_->Run(s1_, &(*out)[0]);
+
+  // Take care of offsets from q.
+  const Cplex bq = Sinusoid(double(MulMod(tf.b, q, n)) / double(n));
+
+  for (int32_t bit = 0; bit < bits_; ++bit) {
+    const int32_t offset = bins * (1 << bit);
+
+#pragma omp simd aligned(idx1, idx2, d1, t : kAlign)
+    // int64 operations are not vectorized in AVX2.
+    for (int32_t i = 0; i < p; ++i) {
+      const int64_t ts = int64_t(t[i]) + int64_t(offset);
+      idx1[i] = MulAddPosMod(tf.a, int64_t(q) + int64_t(ts), tf.c, n);
+      idx2[i] = MulAddPosMod(tf.a, int64_t(q) - int64_t(ts), tf.c, n);
+      const int32_t k1 = MulMod(tf.b, ts, n);
+      d1[i] = double(k1) / double(n) + PosModOne(delta * double(t[i]));
+    }
+
+#pragma omp simd aligned(idx1, idx2, s1, s2 : kAlign)
+    // This doesn't seem vectorized either. Splitting into components helps.
+    for (int32_t i = 0; i < p; ++i) {
+      const Cplex x1 = x[idx1[i]] * bq;
+      const Cplex x2 = std::conj(x[idx2[i]] * bq);
+      s1[i] = 0.5 * (x1 + x2);
+      s2[i] = RotateBackward(0.5 * (x1 - x2));
+    }
+
+// CAUTION: Make sure the following is vectorized.
+#pragma omp simd aligned(s1, s2, d1, t, wt : kAlign)
+    for (int32_t i = 0; i < p; ++i) {
+      const double freq = PosModOne(d1[i]);
+      const double cc = wt[i] * CosTwoPiApprox(freq);
+      const double ss = wt[i] * SinTwoPiApprox(freq);
+
+      s1[i] *= Cplex(cc, ss);
+      s2[i] *= Cplex(cc, ss);
+    }
+
+    const int32_t folds = p / bins;
+    for (int32_t i = 1; i < folds; ++i) {
+      for (int32_t j = 0; j < bins; ++j) {
+        const int32_t k = i * bins + j;
+        s1[j] += s1[k];
+        s2[j] += s2[k];
+      }
+    }
+
+    // Do B-point FFT.
+    plan_->Run(s1_, &(*out)[2 * bit + 1]);
+    plan_->Run(s2_, &(*out)[2 * bit + 2]);
 
     // Combine the bin coefficients.
     for (int32_t bin = 0; bin < bins; ++bin) {

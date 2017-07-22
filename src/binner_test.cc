@@ -48,6 +48,7 @@ void BinInTimeMatch(int v0, int v1) {
 }
 TEST_CASE("BinInTimeMatch_0_1", "") { BinInTimeMatch(0, 1); }
 TEST_CASE("BinInTimeMatch_0_2", "") { BinInTimeMatch(0, 2); }
+TEST_CASE("BinInTimeMatch_0_3", "") { BinInTimeMatch(0, 3); }
 
 // Check that BinInTime and BinInFreq has identical results.
 void TimeFreqMatch(int bin_in_time_type, int bin_in_freq_type) {
@@ -104,6 +105,7 @@ TEST_CASE("TimeFreqMatch_0_0", "") { TimeFreqMatch(0, 0); }
 TEST_CASE("TimeFreqMatch_0_1", "") { TimeFreqMatch(0, 1); }
 TEST_CASE("TimeFreqMatch_1_0", "") { TimeFreqMatch(1, 0); }
 TEST_CASE("TimeFreqMatch_2_0", "") { TimeFreqMatch(2, 0); }
+TEST_CASE("TimeFreqMatch_3_0", "") { TimeFreqMatch(3, 0); }
 
 // Same as TimeFreqMatch but using larger sizes.
 void TimeFreqMatchBigger(int bin_in_time_type, int bin_in_freq_type) {
@@ -142,5 +144,6 @@ TEST_CASE("TimeFreqMatchBigger_0_0", "") { TimeFreqMatchBigger(0, 0); }
 TEST_CASE("TimeFreqMatchBigger_0_1", "") { TimeFreqMatchBigger(0, 1); }
 TEST_CASE("TimeFreqMatchBigger_1_0", "") { TimeFreqMatchBigger(1, 0); }
 TEST_CASE("TimeFreqMatchBigger_2_0", "") { TimeFreqMatchBigger(2, 0); }
+TEST_CASE("TimeFreqMatchBigger_3_0", "") { TimeFreqMatchBigger(3, 0); }
 
 } // namespace mps

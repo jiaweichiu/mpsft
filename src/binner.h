@@ -75,8 +75,8 @@ public:
            CplexMatrix *out) override;
 
 private:
-  CplexArray scratch_; // Size p=win.p().
-  CplexArray scratch2_;
+  CplexArray s1_; // Size p=win.p().
+  CplexArray s2_;
   Int32Array idx1_;
   Int32Array idx2_;
   DoubleArray dbl_;
@@ -92,11 +92,14 @@ public:
            CplexMatrix *out) override;
 
 private:
-  CplexArray scratch_; // Size p=win.p().
-  CplexArray scratch2_;
+  CplexArray s1_; // Size p=win.p().
+  CplexArray s2_;
   Int32Array idx1_;
   Int32Array idx2_;
-  DoubleArray dbl_;
+  DoubleArray d1_;
+  DoubleArray d2_;
+  DoubleArray d3_;
+  DoubleArray d4_;
 };
 
 class BinInFreq {
