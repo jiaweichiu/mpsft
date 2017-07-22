@@ -44,12 +44,12 @@ void MainInit(int argc, char *const argv[]) {
   LOG(INFO) << "mps::MainInit";
   // Compute magic for prime. We will keep dividing by these primes.
   // Don't bother about small primes.
-  for (Int i = 1; i < kNumPrimes; ++i) {
+  for (int32_t i = 1; i < kNumPrimes; ++i) {
     kPrimesMagic[i] = compute_signed_magic_info(kPrimes[i]);
   }
 }
 
-void RandomSeed(Int seed) { rng.seed(seed); }
+void RandomSeed(int32_t seed) { rng.seed(seed); }
 int32_t RandomInt32() { return uid32(rng); }
 int64_t RandomInt64() { return uid64(rng); }
 double RandomNormal() { return nd(rng); }
@@ -76,69 +76,6 @@ double SincPi(double x) {
   return result;
 }
 
-// Use cos(x)=sin(pi/2+x). Basically, shift by one quadrant.
-/*Cplex Sinusoid(double x) {
-  if (x >= 1.0) {
-    x -= 1.0;
-  } else if (x < -1.0) {
-    x += 2.0;
-  } else if (x < 0) {
-    x += 1.0;
-  }
-  DCHECK_GE(x, 0);
-  DCHECK_LE(x, 1.0);
-
-  double xb;
-  if (x >= 0.75) {
-    // Fourth quadrant.
-    xb = x - 0.75; // x+0.25-1.0.
-    x = -1.0 + x;  // -0.25 < x < 0.
-  } else if (x >= 0.5) {
-    // Third quadrant.
-    xb = x - 0.75; // -1.0+(x+0.25)=x-0.75.
-    x = 0.5 - x;   // -0.25 < x < 0.
-  } else if (x >= 0.25) {
-    // Second quadrant.
-    xb = 0.25 - x; // 0.5-(x+0.25)=0.25-x.
-    x = 0.5 - x;   // 0 < x < 0.25.
-  } else {
-    // First quadrant.
-    // 0 < x < 0.25.
-    xb = 0.25 - x; // 0.5-(x+0.25)=0.25-x.
-  }
-  x *= 4.0;
-  xb *= 4.0;
-  constexpr double coef1 = 1.1336481778117871;
-  constexpr double coef3 = -0.13807177660048911;
-  constexpr double coef5 = 0.0044907175846143066;
-  constexpr double coef7 = -6.8290405376023045e-05;
-
-  const double z1 = x;
-  const double z1b = xb;
-
-  const double z2 = 2.0 * x * z1 - 1.0;
-  const double z2b = 2.0 * xb * z1b - 1.0;
-
-  const double z3 = 2.0 * x * z2 - z1;
-  const double z3b = 2.0 * xb * z2b - z1b;
-
-  const double z4 = 2.0 * x * z3 - z2;
-  const double z4b = 2.0 * xb * z3b - z2b;
-
-  const double z5 = 2.0 * x * z4 - z3;
-  const double z5b = 2.0 * xb * z4b - z3b;
-
-  const double z6 = 2.0 * x * z5 - z4;
-  const double z6b = 2.0 * xb * z5b - z4b;
-
-  const double z7 = 2.0 * x * z6 - z5;
-  const double z7b = 2.0 * xb * z6b - z5b;
-
-  const double s = coef1 * z1 + coef3 * z3 + coef5 * z5 + coef7 * z7;
-  const double c = coef1 * z1b + coef3 * z3b + coef5 * z5b + coef7 * z7b;
-  return Cplex(c, s);
-}*/
-
 CplexArray::CplexArray(int32_t n) { resize(n); }
 
 CplexArray::CplexArray(std::initializer_list<Cplex> l) {
@@ -156,17 +93,19 @@ void CplexArray::reset() {
 
 double CplexArray::energy() const {
   double ans = 0;
-  Cplex *__restrict__ x = data_;
-#pragma omp simd aligned(x : kAlign) reduction(+ : ans)
-  for (Int i = 0; i < n_; ++i) {
-    ans += AbsSq(RE(x[i]), IM(x[i]));
+  const Cplex *__restrict__ d = data_;
+#pragma omp simd aligned(d : kAlign) reduction(+ : ans)
+  for (int32_t i = 0; i < n_; ++i) {
+    const double x = RE(d[i]);
+    const double y = IM(d[i]);
+    ans += x * x + y * y;
   }
   return ans;
 }
 
 CplexArray::~CplexArray() { reset(); }
 
-void CplexArray::resize(Int n) {
+void CplexArray::resize(int32_t n) {
   reset();
   n_ = n;
   size_t m = n * sizeof(Cplex);
@@ -179,15 +118,15 @@ void CplexArray::fill(Cplex x) { std::fill(data_, data_ + n_, x); }
 
 void CplexArray::clear() { std::memset(data_, 0, sizeof(Cplex) * n_); }
 
-CplexMatrix::CplexMatrix(Int rows, Int cols)
+CplexMatrix::CplexMatrix(int32_t rows, int32_t cols)
     : rows_(rows), cols_(cols), data_(rows) {
-  for (Int i = 0; i < rows; ++i) {
+  for (int32_t i = 0; i < rows; ++i) {
     data_[i].resize(cols);
   }
 }
 
 void CplexMatrix::clear() {
-  for (Int i = 0; i < rows_; ++i) {
+  for (int32_t i = 0; i < rows_; ++i) {
     data_[i].clear();
   }
 }
@@ -205,28 +144,5 @@ void FFTPlan::Run(const CplexArray &u, CplexArray *v) {
   fftw_execute_dft(plan_, reinterpret_cast<fftw_complex *>(u.data()),
                    reinterpret_cast<fftw_complex *>(v->data()));
 }
-
-// std::ostream &operator<<(std::ostream &dest, __int128_t value) {
-//   std::ostream::sentry s(dest);
-//   if (s) {
-//     __uint128_t tmp = value < 0 ? -value : value;
-//     char buffer[128];
-//     char *d = std::end(buffer);
-//     do {
-//       --d;
-//       *d = "0123456789"[tmp % 10];
-//       tmp /= 10;
-//     } while (tmp != 0);
-//     if (value < 0) {
-//       --d;
-//       *d = '-';
-//     }
-//     int len = std::end(buffer) - d;
-//     if (dest.rdbuf()->sputn(d, len) != len) {
-//       dest.setstate(std::ios_base::badbit);
-//     }
-//   }
-//   return dest;
-// }
 
 } // namespace mps

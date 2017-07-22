@@ -38,7 +38,6 @@
 namespace mps {
 
 constexpr size_t kAlign = 64;
-using Int = int64_t;
 using Cplex = std::complex<double>;
 
 using ModeMap = std::unordered_map<int32_t, Cplex>;
@@ -59,7 +58,7 @@ extern magics_info kPrimesMagic[kNumPrimes];
 
 void MainInit(int argc, char *const argv[]);
 
-void RandomSeed(Int seed);
+void RandomSeed(int32_t seed);
 int32_t RandomInt32();
 int64_t RandomInt64();
 double RandomDouble(); // [0, 1).
@@ -78,33 +77,24 @@ double SincPi(double x);
 #define RE std::real
 #define IM std::imag
 
-#pragma omp declare simd
-inline double PosModOne(double x) { return x - std::floor(x); }
+// #pragma omp declare simd
+// inline double PosModOne(double x) { return x - std::floor(x); }
 
-#pragma omp declare simd
-inline Int PosMod(Int x, Int n) { return ((x % n) + n) % n; }
+// #pragma omp declare simd
+// inline double AbsSq(double re, double im) { return re * re + im * im; }
 
-#pragma omp declare simd
-inline Int Mod(Int x, Int n) {
-  // return x % n;  // This cannot be vectorized.
-  return x - ((x / n) * n);
-}
-
-#pragma omp declare simd
-inline double AbsSq(double re, double im) { return re * re + im * im; }
-
-#pragma omp declare simd
-inline double Square(double x) { return x * x; }
+// #pragma omp declare simd
+// inline double Square(double x) { return x * x; }
 
 // Equivalent to multiplying by i: (x+iy)*i = -y+ix.
-inline Cplex RotateForward(Cplex x) { return Cplex(-IM(x), RE(x)); }
+// inline Cplex RotateForward(Cplex x) { return Cplex(-IM(x), RE(x)); }
 
 // Equivalent to multiplying by -i: (x+iy)*(-i) = y-ix.
-inline Cplex RotateBackward(Cplex x) { return Cplex(IM(x), -RE(x)); }
+// inline Cplex RotateBackward(Cplex x) { return Cplex(IM(x), -RE(x)); }
 
 template <class T> class Array {
 public:
-  Array(int n) {
+  Array(int n) : n_(n) {
     size_t m = n * sizeof(T);
     m = ((m + kAlign - 1) / kAlign) * kAlign;
     data_ = reinterpret_cast<T *>(::aligned_alloc(kAlign, m));
@@ -132,15 +122,15 @@ public:
   ~CplexArray();
   CplexArray(std::initializer_list<Cplex> l);
 
-  void resize(Int n);
+  void resize(int32_t n);
   void reset();
   void fill(Cplex x);
   void clear();
   double energy() const;
 
-  inline Int size() const { return n_; }
-  inline Cplex &operator[](Int i) { return data_[i]; }
-  inline const Cplex &operator[](Int i) const { return data_[i]; }
+  inline int32_t size() const { return n_; }
+  inline Cplex &operator[](int32_t i) { return data_[i]; }
+  inline const Cplex &operator[](int32_t i) const { return data_[i]; }
   inline Cplex *data() const { return data_; }
 
 private:
@@ -150,11 +140,11 @@ private:
 
 class CplexMatrix {
 public:
-  CplexMatrix(Int rows, Int cols);
-  inline Int rows() const { return rows_; }
-  inline Int cols() const { return cols_; }
-  inline CplexArray &operator[](Int i) { return data_[i]; }
-  inline const CplexArray &operator[](Int i) const { return data_[i]; }
+  CplexMatrix(int32_t rows, int32_t cols);
+  inline int32_t rows() const { return rows_; }
+  inline int32_t cols() const { return cols_; }
+  inline CplexArray &operator[](int32_t i) { return data_[i]; }
+  inline const CplexArray &operator[](int32_t i) const { return data_[i]; }
   void clear();
 
 private:
@@ -184,14 +174,5 @@ private:
   CplexArray dummy1_, dummy2_;
   fftw_plan plan_;
 };
-
-// Divide n by d. Associated with d is a precomputed <multiplier, shift>.
-// #pragma omp declare simd
-inline Int ApplyMagic(Int n, Int multiplier, int shift) {
-  __int128 x = __int128(n) * __int128(multiplier);
-  x >>= 64;
-  const Int y = (multiplier < 0) ? (x + n) : x;
-  return Int(y >> shift);
-}
 
 } // namespace mps
