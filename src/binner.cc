@@ -308,9 +308,9 @@ BinInFreq *BinInFreq::Create(int binner_type, const Window &win, int32_t bits) {
   if (binner_type == 0) {
     return new BinInFreqV0(win, bits);
   }
-  // if (binner_type == 1) {
-  //   return new BinInFreqV1(win, bits);
-  // }
+  if (binner_type == 1) {
+    return new BinInFreqV1(win, bits);
+  }
   LOG(FATAL) << "Unknown binner_type=" << binner_type;
   return nullptr;
 }
@@ -325,50 +325,50 @@ void BinInFreqV0::Run(const ModeMap &mm, const Transform &tf, int32_t q,
   const int32_t n = win_.n();
 
   for (const auto &kv : mm) {
-    const int32_t k = kv.first;
-    const int32_t l = MulAddPosMod(tf.a, k, tf.b, n); // 0 to n-1.
-    const int32_t bin = int32_t(l * bins / n);
+    const int32_t k0 = kv.first;
+    const int32_t k1 = MulAddPosMod(tf.a, k0, tf.b, n); // 0 to n-1.
+    const int32_t bin = int32_t(int64_t(k1) * int64_t(bins) / int64_t(n));
     const double xi =
-        (double(bin) + 0.5) / double(bins) - double(l) / double(n);
+        (double(bin) + 0.5) / double(bins) - double(k1) / double(n);
     const double wf = win_.SampleInFreq(xi);
     const Cplex base = kv.second * wf;
     for (int32_t u = 0; u < out->rows(); ++u) {
       const int32_t tau = GetTau(q, bins, u);
-      const int32_t s = MulAddMod(tf.c, k, int64_t(l) * int64_t(tau), n);
+      const int32_t s = MulAddMod(tf.c, k0, int64_t(k1) * int64_t(tau), n);
       (*out)[u][bin] -= base * Sinusoid(double(s) / double(n));
     }
   }
 }
 
-// BinInFreqV1::BinInFreqV1(const Window &win, int32_t bits) : BinInFreq(win,
-// bits) {}
+BinInFreqV1::BinInFreqV1(const Window &win, int32_t bits)
+    : BinInFreq(win, bits) {}
 
-// void BinInFreqV1::Run(const ModeMap &mm, const Transform &tf, int32_t q,
-//                       CplexMatrix *out) {
-//   CHECK_EQ(out->rows(), 1 + 2 * bits_);
-//   const int32_t bins = win_.bins();
-//   const int32_t n = win_.n();
+void BinInFreqV1::Run(const ModeMap &mm, const Transform &tf, int32_t q,
+                      CplexMatrix *out) {
+  CHECK_EQ(out->rows(), 1 + 2 * bits_);
+  const int32_t bins = win_.bins();
+  const int32_t n = win_.n();
 
-//   for (const auto &kv : mm) {
-//     const int32_t k0 = kv.first;
-//     const int32_t k1 = PosMod(tf.a * k0 + tf.b, n); // 0 to n-1.
-//     const int32_t bin = int32_t(k1 * bins / n);
-//     const double xi =
-//         (double(bin) + 0.5) / double(bins) - double(k1) / double(n);
-//     const double wf = win_.SampleInFreq(xi);
+  for (const auto &kv : mm) {
+    const int32_t k0 = kv.first;
+    const int32_t k1 = MulAddPosMod(tf.a, k0, tf.b, n);
+    const int32_t bin = int32_t(int64_t(k1) * int64_t(bins) / int64_t(n));
+    const double xi =
+        (double(bin) + 0.5) / double(bins) - double(k1) / double(n);
+    const double wf = win_.SampleInFreq(xi);
 
-//     const double freq = double(Mod(q * k1 + tf.c * k0, n)) / double(n);
-//     const Cplex base = wf * kv.second * Sinusoid(freq);
-//     (*out)[0][bin] -= base;
+    const double freq =
+        double(MulAddMod(q, k1, int64_t(tf.c) * int64_t(k0), n)) / double(n);
+    const Cplex base = wf * kv.second * Sinusoid(freq);
+    (*out)[0][bin] -= base;
 
-//     for (int32_t bit = 0; bit < bits_; ++bit) {
-//       const int32_t offset = bins * (1 << bit);
-//       const Cplex factor = Sinusoid(double(Mod(offset * k1, n)) / double(n));
-//       (*out)[bit * 2 + 1][bin] -= base * factor;
-//       (*out)[bit * 2 + 2][bin] -= base * std::conj(factor); // Divide by
-//       factor.
-//     }
-//   }
-// }
+    for (int32_t bit = 0; bit < bits_; ++bit) {
+      const int32_t offset = bins * (1 << bit);
+      const Cplex factor = Sinusoid(double(MulMod(offset, k1, n)) / double(n));
+      (*out)[bit * 2 + 1][bin] -= base * factor;
+      (*out)[bit * 2 + 2][bin] -= base * std::conj(factor); // Divide by factor.
+    }
+  }
+}
 
 } // namespace mps

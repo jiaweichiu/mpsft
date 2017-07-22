@@ -109,6 +109,7 @@ void TimeFreqMatch(int bin_in_time_type, int bin_in_freq_type) {
 }
 
 TEST_CASE("TimeFreqMatch_0_0", "") { TimeFreqMatch(0, 0); }
+TEST_CASE("TimeFreqMatch_0_1", "") { TimeFreqMatch(0, 1); }
 // TEST_CASE("TimeFreqMatch_1_1", "") { TimeFreqMatch(1, 1); }
 // TEST_CASE("TimeFreqMatch_2_1", "") { TimeFreqMatch(2, 1); }
 
@@ -146,6 +147,7 @@ void TimeFreqMatchBigger(int bin_in_time_type, int bin_in_freq_type) {
 }
 
 TEST_CASE("TimeFreqMatchBigger_0_0", "") { TimeFreqMatchBigger(0, 0); }
+TEST_CASE("TimeFreqMatchBigger_0_1", "") { TimeFreqMatchBigger(0, 1); }
 // TEST_CASE("TimeFreqMatchBigger_1_1", "") { TimeFreqMatchBigger(1, 1); }
 // TEST_CASE("TimeFreqMatchBigger_2_1", "") { TimeFreqMatchBigger(2, 1); }
 
