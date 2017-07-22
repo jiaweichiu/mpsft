@@ -49,9 +49,9 @@ BinInTime *BinInTime::Create(int binner_type, const Window &win, int32_t bits) {
   if (binner_type == 1) {
     return new BinInTimeV1(win, bits);
   }
-  // if (binner_type == 2) {
-  //   return new BinInTimeV2(win, bits);
-  // }
+  if (binner_type == 2) {
+    return new BinInTimeV2(win, bits);
+  }
   LOG(FATAL) << "Unknown binner_type=" << binner_type;
   return nullptr;
 }
@@ -178,127 +178,122 @@ void BinInTimeV1::Run(const CplexArray &x, const Transform &tf, int32_t q,
   }
 }
 
-// BinInTimeV2::BinInTimeV2(const Window &win, int32_t bits)
-//     : BinInTime(win, bits), scratch_(win.p()), scratch2_(win.p()),
-//       idx_(win.p()), idx2_(win.p()) {}
+BinInTimeV2::BinInTimeV2(const Window &win, int32_t bits)
+    : BinInTime(win, bits), scratch_(win.p()), scratch2_(win.p()),
+      idx_(win.p()), idx2_(win.p()) {}
 
-// inline void BinInTimeV2Helper1(int32_t i, int32_t t, const Transform &tf,
-// int32_t offset,
-//                                int32_t q, int32_t n, int32_t *idx, int32_t
-//                                *idx2) {
-//   const int32_t ts = t + offset;
-//   idx[i] = PosMod(tf.a * (q + ts) + tf.c, n);
-//   idx2[i] = PosMod(tf.a * (q - ts) + tf.c, n);
-// }
+inline void BinInTimeV2Helper1(int32_t i, int32_t t, const Transform &tf,
+                               int32_t offset, int32_t q, int32_t n,
+                               int32_t *idx, int32_t *idx2) {
+  const int32_t ts = t + offset;
+  idx[i] = MulAddPosMod(tf.a, int64_t(q) + int64_t(ts), tf.c, n);
+  idx2[i] = MulAddPosMod(tf.a, int64_t(q) - int64_t(ts), tf.c, n);
+}
 
-// inline void BinInTimeV2Helper2(int32_t i, Cplex bq, const CplexArray &x,
-// int32_t *idx,
-//                                int32_t *idx2, Cplex *out, Cplex *out2) {
-//   const Cplex x1 = x[idx[i]] * bq;
-//   const Cplex x2 = std::conj(x[idx2[i]] * bq);
-//   out[i] = 0.5 * (x1 + x2);
-//   out2[i] = RotateBackward(0.5 * (x1 - x2));
-// }
+inline void BinInTimeV2Helper2(int32_t i, Cplex bq, const CplexArray &x,
+                               int32_t *idx, int32_t *idx2, Cplex *out,
+                               Cplex *out2) {
+  const Cplex x1 = x[idx[i]] * bq;
+  const Cplex x2 = std::conj(x[idx2[i]] * bq);
+  out[i] = 0.5 * (x1 + x2);
+  out2[i] = RotateBackward(0.5 * (x1 - x2));
+}
 
-// inline void BinInTimeV2Helper3(int32_t i, int32_t t, const Transform &tf,
-// int32_t offset,
-//                                double wt, int32_t n, double delta, Cplex
-//                                *out,
-//                                Cplex *out2) {
-//   const int32_t ts = t + offset;
-//   const int32_t k = Mod(tf.b * ts, n);
-//   // Do mods for better accuracy. Note fmod can be negative, but it is ok.
-//   const double freq = double(k) / double(n) + std::fmod(delta * double(t),
-//   1.0);
-//   const Cplex factor = Sinusoid(freq) * wt;
-//   out[i] *= factor;
-//   out2[i] *= factor;
-// }
+inline void BinInTimeV2Helper3(int32_t i, int32_t t, const Transform &tf,
+                               int32_t offset, double wt, int32_t n,
+                               double delta, Cplex *out, Cplex *out2) {
+  const int32_t ts = t + offset;
+  const int32_t k = MulMod(tf.b, ts, n);
+  // Do mods for better accuracy. Note fmod can be negative, but it is ok.
+  const double freq = double(k) / double(n) + std::fmod(delta * double(t), 1.0);
+  const Cplex factor = Sinusoid(freq) * wt;
+  out[i] *= factor;
+  out2[i] *= factor;
+}
 
-// void BinInTimeV2::Run(const CplexArray &x, const Transform &tf, int32_t q,
-//                       CplexMatrix *out) {
-//   CHECK_EQ(out->rows(), 1 + 2 * bits_);
-//   const int32_t bins = win_.bins();
-//   const int32_t n = win_.n();
+void BinInTimeV2::Run(const CplexArray &x, const Transform &tf, int32_t q,
+                      CplexMatrix *out) {
+  CHECK_EQ(out->rows(), 1 + 2 * bits_);
+  const int32_t bins = win_.bins();
+  const int32_t n = win_.n();
 
-//   const double delta = -0.5 / double(bins);
-//   DCHECK_EQ(n, x.size());
+  const double delta = -0.5 / double(bins);
+  DCHECK_EQ(n, x.size());
 
-//   const int32_t p = win_.p();
-//   const int32_t p2 = (p - 1) / 2;
+  const int32_t p = win_.p();
+  const int32_t p2 = (p - 1) / 2;
 
-//   // Take care of tau=q first. Treat this case simply.
-//   scratch_.Clear();
-//   for (int32_t i = 0; i < p; ++i) {
-//     const int32_t t = i <= p2 ? i : i - p;
-//     const double wt = win_.wt(i <= p2 ? i : p - i);
-//     const int32_t j = PosMod(tf.a * (t + q) + tf.c, n);
-//     const int32_t k = Mod(tf.b * (t + q), n);
-//     const double freq =
-//         double(k) / double(n) + std::fmod(delta * double(t), 1.0);
-//     scratch_[i % bins] += (x[j] * Sinusoid(freq)) * wt;
-//   }
-//   plan_->Run(scratch_, &(*out)[0]);
+  // Take care of tau=q first. TODO: Optimize this later.
+  scratch_.clear();
+  for (int32_t i = 0; i < p; ++i) {
+    const int32_t t = i <= p2 ? i : i - p;
+    const double wt = win_.wt(i <= p2 ? i : p - i);
+    const int32_t j = MulAddPosMod(tf.a, int64_t(t) + int64_t(q), tf.c, n);
+    const int32_t k = MulMod(tf.b, int64_t(t) + int64_t(q), n);
+    const double freq = double(k) / double(n) + PosModOne(delta * double(t));
+    scratch_[i % bins] += (x[j] * Sinusoid(freq)) * wt;
+  }
+  plan_->Run(scratch_, &(*out)[0]);
 
-//   // Take care of offsets from q.
-//   const Cplex bq = Sinusoid(double(Mod(tf.b * q, n)) / double(n));
+  // Take care of offsets from q.
+  const Cplex bq = Sinusoid(double(MulMod(tf.b, q, n)) / double(n));
 
-//   for (int32_t bit = 0; bit < bits_; ++bit) {
-//     const int32_t offset = bins * (1 << bit);
-//     Cplex *__restrict__ s1 = scratch_.data();
-//     Cplex *__restrict__ s2 = scratch2_.data();
-//     int32_t *__restrict__ idx1 = idx_.data();
-//     int32_t *__restrict__ idx2 = idx2_.data();
+  for (int32_t bit = 0; bit < bits_; ++bit) {
+    const int32_t offset = bins * (1 << bit);
+    Cplex *__restrict__ s1 = scratch_.data();
+    Cplex *__restrict__ s2 = scratch2_.data();
+    int32_t *__restrict__ idx1 = idx_.data();
+    int32_t *__restrict__ idx2 = idx2_.data();
 
-// #pragma omp simd aligned(idx1, idx2 : kAlign)
-//     for (int32_t i = 0; i <= p2; ++i) {
-//       BinInTimeV2Helper1(i, i, tf, offset, q, n, idx1, idx2);
-//     }
+#pragma omp simd aligned(idx1, idx2 : kAlign)
+    for (int32_t i = 0; i <= p2; ++i) {
+      BinInTimeV2Helper1(i, i, tf, offset, q, n, idx1, idx2);
+    }
 
-// #pragma omp simd aligned(idx1, idx2 : kAlign)
-//     for (int32_t i = p2 + 1; i < p; ++i) {
-//       BinInTimeV2Helper1(i, i - p, tf, offset, q, n, idx1, idx2);
-//     }
+#pragma omp simd aligned(idx1, idx2 : kAlign)
+    for (int32_t i = p2 + 1; i < p; ++i) {
+      BinInTimeV2Helper1(i, i - p, tf, offset, q, n, idx1, idx2);
+    }
 
-// #pragma omp simd aligned(idx1, idx2, s1, s2 : kAlign)
-//     for (int32_t i = 0; i < p; ++i) {
-//       BinInTimeV2Helper2(i, bq, x, idx1, idx2, s1, s2);
-//     }
+#pragma omp simd aligned(idx1, idx2, s1, s2 : kAlign)
+    for (int32_t i = 0; i < p; ++i) {
+      BinInTimeV2Helper2(i, bq, x, idx1, idx2, s1, s2);
+    }
 
-// #pragma omp simd aligned(s1, s2 : kAlign)
-//     for (int32_t i = 0; i <= p2; ++i) {
-//       BinInTimeV2Helper3(i, i, tf, offset, win_.wt(i), n, delta, s1, s2);
-//     }
+#pragma omp simd aligned(s1, s2 : kAlign)
+    for (int32_t i = 0; i <= p2; ++i) {
+      BinInTimeV2Helper3(i, i, tf, offset, win_.wt(i), n, delta, s1, s2);
+    }
 
-// #pragma omp simd aligned(s1, s2 : kAlign)
-//     for (int32_t i = p2 + 1; i < p; ++i) {
-//       BinInTimeV2Helper3(i, i - p, tf, offset, win_.wt(p - i), n, delta, s1,
-//                          s2);
-//     }
+#pragma omp simd aligned(s1, s2 : kAlign)
+    for (int32_t i = p2 + 1; i < p; ++i) {
+      BinInTimeV2Helper3(i, i - p, tf, offset, win_.wt(p - i), n, delta, s1,
+                         s2);
+    }
 
-//     const int32_t folds = p / bins;
-//     for (int32_t i = 1; i < folds; ++i) {
-//       for (int32_t j = 0; j < bins; ++j) {
-//         const int32_t k = i * bins + j;
-//         scratch_[j] += scratch_[k];
-//         scratch2_[j] += scratch2_[k];
-//       }
-//     }
+    const int32_t folds = p / bins;
+    for (int32_t i = 1; i < folds; ++i) {
+      for (int32_t j = 0; j < bins; ++j) {
+        const int32_t k = i * bins + j;
+        scratch_[j] += scratch_[k];
+        scratch2_[j] += scratch2_[k];
+      }
+    }
 
-//     // Do B-point FFT.
-//     plan_->Run(scratch_, &(*out)[2 * bit + 1]);
-//     plan_->Run(scratch2_, &(*out)[2 * bit + 2]);
+    // Do B-point FFT.
+    plan_->Run(scratch_, &(*out)[2 * bit + 1]);
+    plan_->Run(scratch2_, &(*out)[2 * bit + 2]);
 
-//     // Combine the bin coefficients.
-//     for (int32_t bin = 0; bin < bins; ++bin) {
-//       const Cplex coef_r = (*out)[2 * bit + 1][bin];
-//       const Cplex coef_i = (*out)[2 * bit + 2][bin];
-//       (*out)[2 * bit + 1][bin] = coef_r + RotateForward(coef_i);
-//       (*out)[2 * bit + 2][bin] =
-//           std::conj(coef_r) + RotateForward(std::conj(coef_i));
-//     }
-//   }
-// }
+    // Combine the bin coefficients.
+    for (int32_t bin = 0; bin < bins; ++bin) {
+      const Cplex coef_r = (*out)[2 * bit + 1][bin];
+      const Cplex coef_i = (*out)[2 * bit + 2][bin];
+      (*out)[2 * bit + 1][bin] = coef_r + RotateForward(coef_i);
+      (*out)[2 * bit + 2][bin] =
+          std::conj(coef_r) + RotateForward(std::conj(coef_i));
+    }
+  }
+}
 
 BinInFreq::BinInFreq(const Window &win, int32_t bits)
     : win_(win), bits_(bits) {}
