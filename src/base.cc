@@ -55,27 +55,6 @@ int64_t RandomInt64() { return uid64(rng); }
 double RandomNormal() { return nd(rng); }
 double RandomDouble() { return ud(rng); }
 
-double SincPi(double x) {
-  constexpr double taylor_0_bound = std::numeric_limits<double>::epsilon();
-  constexpr double taylor_2_bound = std::sqrt(taylor_0_bound);
-  constexpr double taylor_n_bound = std::sqrt(taylor_2_bound);
-  if (x < 0) {
-    x = -x;
-  }
-  if (x >= taylor_n_bound) {
-    return std::sin(x) / x;
-  }
-  double result = 1.0;
-  if (x >= taylor_0_bound) {
-    const double x2 = x * x;
-    result -= x2 / 6.0;
-    if (x >= taylor_2_bound) {
-      result += (x2 * x2) / 120.0;
-    }
-  }
-  return result;
-}
-
 CplexArray::CplexArray(std::initializer_list<Cplex> l) {
   resize(l.size());
   std::copy(l.begin(), l.end(), data_);
