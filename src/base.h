@@ -41,7 +41,7 @@ constexpr size_t kAlign = 64;
 using Int = int64_t;
 using Cplex = std::complex<double>;
 
-using ModeMap = std::unordered_map<Int, Cplex>;
+using ModeMap = std::unordered_map<int32_t, Cplex>;
 
 using std::string;
 using std::vector;
@@ -67,18 +67,6 @@ double RandomNormal();
 
 // SincPi(x) = sin(x) / x.
 double SincPi(double x);
-
-// Returns sin(2*pi*x). CAUTION: Assume 0 <= x <= 1.
-#pragma omp declare simd
-double SinTwoPi(double x);
-
-// Returns cos(2*pi*x). CAUTION: Assume 0 <= x <= 1.
-#pragma omp declare simd
-double CosTwoPi(double x);
-
-// Returns Cplex(cos(2*pi*x), sin(2*pi*x))
-// CAUTION: Assume -2 < x < 2
-#define Sinusoid(x) Cplex(CosTwoPi(x), SinTwoPi(x))
 
 // inline Cplex Sinusoid(double freq) {
 //   double s, c;
@@ -139,16 +127,16 @@ using Int64Array = Array<int64_t>;
 
 class CplexArray {
 public:
-  CplexArray();
-  CplexArray(Int n);
+  CplexArray() = default;
+  CplexArray(int32_t n);
   ~CplexArray();
   CplexArray(std::initializer_list<Cplex> l);
 
-  void Resize(Int n);
-  void Reset();
-  void Fill(Cplex x);
-  void Clear();
-  double Energy() const;
+  void resize(Int n);
+  void reset();
+  void fill(Cplex x);
+  void clear();
+  double energy() const;
 
   inline Int size() const { return n_; }
   inline Cplex &operator[](Int i) { return data_[i]; }
@@ -156,20 +144,9 @@ public:
   inline Cplex *data() const { return data_; }
 
 private:
-  Int n_ = 0;
+  int32_t n_ = 0;
   Cplex *data_ = nullptr;
 };
-
-// Generate ModeMap with k unique modes, each of magnitude one.
-void GenerateModeMap(Int n, Int k, ModeMap *mm);
-
-void EvaluateModes(Int n, const ModeMap &mm, CplexArray *out);
-
-// Add ambience noise such that in the *time domain*, each sample point is
-// contaminated by N(0, sigma).
-// Note: x(t) = sum_k xh[k] exp(2*pi*i*k*t). This is unnormalized.
-// If xh[k] ~ N(0, s*s), then x(t) ~ N(0, s*s*n) where s*s*n=sigma*sigma.
-void GenerateXhat(Int n, const ModeMap &mm, double sigma, CplexArray *out);
 
 class CplexMatrix {
 public:
@@ -178,11 +155,11 @@ public:
   inline Int cols() const { return cols_; }
   inline CplexArray &operator[](Int i) { return data_[i]; }
   inline const CplexArray &operator[](Int i) const { return data_[i]; }
-  void Clear();
+  void clear();
 
 private:
-  Int rows_;
-  Int cols_;
+  int32_t rows_;
+  int32_t cols_;
   vector<CplexArray> data_;
 };
 
@@ -191,10 +168,10 @@ public:
   // For sign:
   // #define FFTW_FORWARD (-1)
   // #define FFTW_BACKWARD (+1)
-  FFTPlan(Int n, char sign);
+  FFTPlan(int32_t n, char sign);
   ~FFTPlan();
 
-  inline Int n() const { return n_; }
+  inline int32_t n() const { return n_; }
   inline char sign() const { return sign_; }
 
   // If in-place, u, v should be the same.
@@ -202,7 +179,7 @@ public:
   void Run(const CplexArray &u, CplexArray *v);
 
 private:
-  Int n_;
+  int32_t n_;
   char sign_;
   CplexArray dummy1_, dummy2_;
   fftw_plan plan_;

@@ -34,6 +34,29 @@ cc_library(
   ],
 )
 
+cc_library(
+  name = "gen",
+  srcs = ["gen.cc"],
+  hdrs = ["gen.h"],
+  deps = [
+    ":base",
+    ":integer",
+    ":sincos",
+  ],
+)
+
+cc_test(
+  name = "gen_test",
+  srcs = ["gen_test.cc"],
+  deps = [
+    ":catch",
+    ":base",
+    ":gen",
+    ":integer",
+  ],
+)
+
+
 cc_binary(
   name = "base_bench",
   srcs = ["base_bench.cc"],
@@ -43,11 +66,20 @@ cc_binary(
   ],
 )
 
+cc_library(
+  name = "sincos",
+  srcs = ["sincos.cc"],
+  hdrs = ["sincos.h"],
+  deps = [
+    ":base",
+  ],
+)
+
 cc_binary(
   name = "sincos_bench",
   srcs = ["sincos_bench.cc"],
   deps = [
-    ":base",
+    ":sincos",
     ":benchmark",
   ],
 )

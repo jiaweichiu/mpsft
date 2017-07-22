@@ -40,14 +40,16 @@ takes the same amount of time.
 #include <boost/simd/pack.hpp>
 
 #include "base.h"
+#include "sincos.h"
 
 namespace ba = boost::alignment;
 namespace bs = boost::simd;
 
 namespace mps {
 
+constexpr int n = 8192;
+
 static void BM_SinTwoPi(benchmark::State &state) {
-  const Int n = 4096;
   vector<double> out(n);
   for (int i = 0; i < n; ++i) {
     out[i] = RandomDouble();
@@ -61,7 +63,6 @@ static void BM_SinTwoPi(benchmark::State &state) {
 BENCHMARK(BM_SinTwoPi);
 
 static void BM_SinTwoPi_Eigen(benchmark::State &state) {
-  const Int n = 4096;
   Eigen::Array<double, n, 1> out;
   for (int i = 0; i < n; ++i) {
     out[i] = RandomDouble();
@@ -74,7 +75,6 @@ static void BM_SinTwoPi_Eigen(benchmark::State &state) {
 BENCHMARK(BM_SinTwoPi_Eigen);
 
 static void BM_SinTwoPiApprox(benchmark::State &state) {
-  const Int n = 4096;
   DoubleArray out(n);
   for (int i = 0; i < n; ++i) {
     out[i] = RandomDouble();
@@ -82,14 +82,14 @@ static void BM_SinTwoPiApprox(benchmark::State &state) {
   double *data = out.data();
   while (state.KeepRunning()) {
     for (int i = 0; i < n; ++i) {
-      data[i] = SinTwoPi(data[i]);
+      data[i] = SinTwoPiApprox(data[i]);
     }
   }
 }
 BENCHMARK(BM_SinTwoPiApprox);
 
+// Add some OMP pragmas to encourage vectorization.
 static void BM_SinTwoPiApprox_OMP(benchmark::State &state) {
-  const Int n = 4096;
   DoubleArray out(n);
   for (int i = 0; i < n; ++i) {
     out[i] = RandomDouble();
@@ -98,14 +98,13 @@ static void BM_SinTwoPiApprox_OMP(benchmark::State &state) {
   while (state.KeepRunning()) {
 #pragma omp simd aligned(data : kAlign)
     for (int i = 0; i < n; ++i) {
-      data[i] = SinTwoPi(data[i]);
+      data[i] = SinTwoPiApprox(data[i]);
     }
   }
 }
 BENCHMARK(BM_SinTwoPiApprox_OMP);
 
 static void BM_SinTwoPi_BS(benchmark::State &state) {
-  constexpr int n = 4096;
   using pack_t = bs::pack<double>;
   std::vector<double, ba::aligned_allocator<double, pack_t::alignment>> out(n);
   for (int i = 0; i < n; ++i) {
@@ -122,5 +121,25 @@ static void BM_SinTwoPi_BS(benchmark::State &state) {
   }
 }
 BENCHMARK(BM_SinTwoPi_BS);
+
+static void BM_SinCosTwoPi_BS(benchmark::State &state) {
+  using pack_t = bs::pack<double>;
+  std::vector<double, ba::aligned_allocator<double, pack_t::alignment>> in(n);
+  std::vector<double, ba::aligned_allocator<double, pack_t::alignment>> out1(n);
+  std::vector<double, ba::aligned_allocator<double, pack_t::alignment>> out2(n);
+  for (int i = 0; i < n; ++i) {
+    in[i] = RandomDouble();
+  }
+  const size_t pack_card = bs::cardinal_of<pack_t>();
+  while (state.KeepRunning()) {
+    for (size_t i = 0; i < n; i += pack_card) {
+      pack_t x(bs::aligned_load<pack_t>(in.data() + i));
+      auto res = bs::sincos(2.0 * M_PI * x);
+      bs::aligned_store(res.first, out1.data() + i);
+      bs::aligned_store(res.second, out2.data() + i);
+    }
+  }
+}
+BENCHMARK(BM_SinCosTwoPi_BS);
 
 } // namespace mps

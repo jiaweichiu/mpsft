@@ -16,38 +16,26 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
  *
  */
-#include "catch.hpp"
+#pragma once
+
+/*
+Used for generating test cases. No need to be too efficient. No need to
+vectorize. Precision is more important.
+*/
 
 #include "base.h"
-#include "integer.h"
 
 namespace mps {
 
-TEST_CASE("MulMod", "") {
-  const int64_t divisor = kPrimes[15];
-  for (int i = 0; i < 1000; ++i) {
-    const int64_t a = RandomInt32();
-    const int64_t b = RandomInt32();
-    REQUIRE(MulMod(a, b, divisor) == (a * b) % divisor);
-  }
-}
+// Generate ModeMap with k unique modes, each of magnitude one.
+void GenerateModeMap(int32_t n, int32_t k, ModeMap *mm);
 
-// Check if we have overflow issues.
-TEST_CASE("Transform", "") {
-  constexpr int32_t n = 536870909; // Prime.
-  Transform tf(n, 10000000, 10000001, 10000002);
-  REQUIRE(tf.a == 10000000);
-  REQUIRE(tf.b == 10000001);
-  REQUIRE(tf.c == 10000002);
-  REQUIRE(MulPosMod(tf.a_inv, tf.a, n) == 1);
-}
+void EvaluateModes(int32_t n, const ModeMap &mm, CplexArray *out);
 
-TEST_CASE("TransformMore", "") {
-  constexpr int32_t n = 536870909; // Prime.
-  for (int i = 0; i < 10000; ++i) {
-    Transform tf(n);
-    REQUIRE(MulPosMod(tf.a_inv, tf.a, n) == 1);
-  }
-}
+// Add ambience noise such that in the *time domain*, each sample point is
+// contaminated by N(0, sigma).
+// Note: x(t) = sum_k xh[k] exp(2*pi*i*k*t). This is unnormalized.
+// If xh[k] ~ N(0, s*s), then x(t) ~ N(0, s*s*n) where s*s*n=sigma*sigma.
+void GenerateXhat(int32_t n, const ModeMap &mm, double sigma, CplexArray *out);
 
 } // namespace mps

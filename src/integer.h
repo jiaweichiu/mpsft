@@ -44,6 +44,12 @@ inline int32_t MulMod(int32_t a, int32_t b, int32_t divisor) {
   return (int64_t(a) * int64_t(b)) % divisor;
 }
 
+// Multiply two int32's and take mod. Do it the direct way.
+inline int32_t MulPosMod(int32_t a, int32_t b, int32_t divisor) {
+  const int32_t x = (int64_t(a) * int64_t(b)) % divisor;
+  return x >= 0 ? x : x + divisor;
+}
+
 // Return a * (b+c) modulo divisor.
 inline int32_t MulAddMod(int32_t a, int32_t b, int32_t c, int32_t divisor) {
   return (int64_t(a) * (int64_t(b) + int64_t(c))) % divisor;

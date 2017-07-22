@@ -19,35 +19,36 @@
 #include "catch.hpp"
 
 #include "base.h"
-#include "integer.h"
+#include "gen.h"
 
 namespace mps {
 
-TEST_CASE("MulMod", "") {
-  const int64_t divisor = kPrimes[15];
-  for (int i = 0; i < 1000; ++i) {
-    const int64_t a = RandomInt32();
-    const int64_t b = RandomInt32();
-    REQUIRE(MulMod(a, b, divisor) == (a * b) % divisor);
-  }
+TEST_CASE("GenerateXhatBasic", "") {
+  constexpr int32_t n = 5; // Prime.
+  constexpr double sigma = 8.0;
+  constexpr Cplex coef(0.5, 0.6);
+  const ModeMap mm = {{2, coef}};
+
+  CplexArray xh(n);
+  GenerateXhat(n, mm, sigma, &xh);
+  xh[2] = 0;
+  REQUIRE(std::sqrt(xh.energy()) == Approx(sigma));
 }
 
-// Check if we have overflow issues.
-TEST_CASE("Transform", "") {
-  constexpr int32_t n = 536870909; // Prime.
-  Transform tf(n, 10000000, 10000001, 10000002);
-  REQUIRE(tf.a == 10000000);
-  REQUIRE(tf.b == 10000001);
-  REQUIRE(tf.c == 10000002);
-  REQUIRE(MulPosMod(tf.a_inv, tf.a, n) == 1);
-}
+TEST_CASE("GenerateXhatFFT", "") {
+  constexpr int32_t n = 10000; // Prime.
+  constexpr double sigma = 5.5;
+  const ModeMap mm;
 
-TEST_CASE("TransformMore", "") {
-  constexpr int32_t n = 536870909; // Prime.
-  for (int i = 0; i < 10000; ++i) {
-    Transform tf(n);
-    REQUIRE(MulPosMod(tf.a_inv, tf.a, n) == 1);
-  }
+  CplexArray xh(n);
+  GenerateXhat(n, mm, sigma, &xh);
+  CplexArray x(n);
+  FFTPlan plan(n, FFTW_BACKWARD);
+  plan.Run(xh, &x);
+
+  // Mean square error in time domain.
+  const double mse = std::sqrt(x.energy() / x.size());
+  REQUIRE(mse == Approx(sigma));
 }
 
 } // namespace mps
