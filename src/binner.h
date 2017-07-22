@@ -51,6 +51,9 @@ private:
 };
 
 // Make use of symmetry in tau's to half number of sinusoids.
+// NOTE: Focus is on correctness not efficiency.
+// Code is already made more complicated than V0 due to the trick to halve the
+// number of Sinusoids. Do not complicate it further.
 class BinInTimeV1 : public BinInTime {
 public:
   BinInTimeV1(const Window &win, int32_t bits);
@@ -62,8 +65,7 @@ private:
   CplexArray scratch2_;
 };
 
-// Make use of symmetry in tau's to half number of sinusoids.
-// Split big loop into multiple small loops.
+// Extend from V1. Do vectorization!
 class BinInTimeV2 : public BinInTime {
 public:
   BinInTimeV2(const Window &win, int32_t bits);

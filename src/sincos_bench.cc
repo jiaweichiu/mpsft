@@ -18,13 +18,18 @@
  */
 
 /*
-2017-07-22:
+2017-07-21:
 Trigonometric operations take up most of the time of binning.
 My own sin-cos routine that uses Chebyshev approximation seems fast.
 Somehow, the compiler is not SIMD-ing the loops to compute sin-cos.
 Hence, my vectorized sin-cos is >10X faster, but it has a ~1e-6 error.
 However, Boost-SIMD seems to be the best. It has machine-precision error but
 takes the same amount of time.
+
+2017-07-22:
+Prefer working with CplexArrays. With that constraint, Boost-SIMD requires
+splicing of results back and becomes slightly slower. Somehow, gcc can vectorize
+the approx functions properly, without having to splice. Code will look simpler.
 */
 #include <benchmark/benchmark.h>
 #include <eigen3/Eigen/Dense>
@@ -122,7 +127,22 @@ static void BM_SinTwoPi_BS(benchmark::State &state) {
 }
 BENCHMARK(BM_SinTwoPi_BS);
 
-// Add some OMP pragmas to encourage vectorization.
+static void BM_SinCosTwoPi(benchmark::State &state) {
+  DoubleArray in(n);
+  CplexArray out(n);
+  for (int i = 0; i < n; ++i) {
+    in[i] = RandomDouble();
+  }
+  while (state.KeepRunning()) {
+    for (int i = 0; i < n; ++i) {
+      out[i] =
+          Cplex(std::cos(in[i] * (2.0 * M_PI)), std::sin(in[i] * (2.0 * M_PI)));
+    }
+  }
+}
+BENCHMARK(BM_SinCosTwoPi);
+
+// OMP SIMD. Two separate output arrays.
 static void BM_SinCosTwoPiApprox_OMP(benchmark::State &state) {
   DoubleArray in(n);
   DoubleArray a_out1(n);
@@ -143,11 +163,33 @@ static void BM_SinCosTwoPiApprox_OMP(benchmark::State &state) {
 }
 BENCHMARK(BM_SinCosTwoPiApprox_OMP);
 
+// OMP SIMD. One single output array.
+static void BM_SinCosTwoPiApproxCplex_OMP(benchmark::State &state) {
+  DoubleArray in(n);
+  CplexArray a_out(n);
+  for (int i = 0; i < n; ++i) {
+    in[i] = RandomDouble();
+  }
+  double *__restrict__ data = in.data();
+  Cplex *__restrict__ out = a_out.data();
+  while (state.KeepRunning()) {
+#pragma omp simd aligned(data : kAlign)
+    for (int i = 0; i < n; ++i) {
+      out[i] = Cplex(CosTwoPiApprox(data[i]), SinTwoPiApprox(data[i]));
+    }
+  }
+}
+BENCHMARK(BM_SinCosTwoPiApproxCplex_OMP);
+
+// Boost SIMD sincos is very fast but it produces two arrays instead of one
+// CplexArray. Let's also measure time to merge them back.
 static void BM_SinCosTwoPi_BS(benchmark::State &state) {
+  const int splice_back = state.range(0);
   using pack_t = bs::pack<double>;
   std::vector<double, ba::aligned_allocator<double, pack_t::alignment>> in(n);
   std::vector<double, ba::aligned_allocator<double, pack_t::alignment>> out1(n);
   std::vector<double, ba::aligned_allocator<double, pack_t::alignment>> out2(n);
+  CplexArray out(n);
   for (int i = 0; i < n; ++i) {
     in[i] = RandomDouble();
   }
@@ -159,8 +201,13 @@ static void BM_SinCosTwoPi_BS(benchmark::State &state) {
       bs::aligned_store(res.first, out1.data() + i);
       bs::aligned_store(res.second, out2.data() + i);
     }
+    if (splice_back) {
+      for (size_t i = 0; i < n; ++i) {
+        out[i] = Cplex(out1[i], out2[i]);
+      }
+    }
   }
 }
-BENCHMARK(BM_SinCosTwoPi_BS);
+BENCHMARK(BM_SinCosTwoPi_BS)->Arg(0)->Arg(1);
 
 } // namespace mps

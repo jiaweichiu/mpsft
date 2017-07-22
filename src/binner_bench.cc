@@ -20,15 +20,16 @@
 
 #include "base.h"
 #include "binner.h"
+#include "gen.h"
 #include "window.h"
 
 namespace mps {
 
 static void BM_BinInTime(benchmark::State &state) {
   const int bin_in_time_type = state.range(0);
-  const Int n = kPrimes[state.range(1)];
-  const Int bins = 501;
-  const Int bits = 15;
+  const int32_t n = kPrimes[state.range(1)];
+  const int32_t bins = 501;
+  const int32_t bits = 15;
   Window win(n, bins, 1e-6);
   CplexMatrix a(1 + 2 * bits, bins);
   std::unique_ptr<BinInTime> bin_in_time(
@@ -39,18 +40,19 @@ static void BM_BinInTime(benchmark::State &state) {
   EvaluateModes(n, mm, &x);
 
   while (state.KeepRunning()) {
-    const Int q = RandomInt() % n;
+    const int32_t q = RandomInt32() % n;
     Transform tf(n);
     bin_in_time->Run(x, tf, q, &a);
   }
 }
-BENCHMARK(BM_BinInTime)->Args({0, 22})->Args({1, 22})->Args({2, 22});
+// BENCHMARK(BM_BinInTime)->Args({0, 22})->Args({1, 22})->Args({2, 22});
+BENCHMARK(BM_BinInTime)->Args({0, 22})->Args({1, 22});
 
 static void BM_BinInFreq(benchmark::State &state) {
   const int bin_in_freq_type = state.range(0);
-  const Int n = kPrimes[state.range(1)];
-  const Int bins = 501;
-  const Int bits = 15;
+  const int32_t n = kPrimes[state.range(1)];
+  const int32_t bins = 501;
+  const int32_t bits = 15;
   Window win(n, bins, 1e-6);
   CplexMatrix a(1 + 2 * bits, bins);
   std::unique_ptr<BinInFreq> bin_in_freq(
@@ -61,7 +63,7 @@ static void BM_BinInFreq(benchmark::State &state) {
   GenerateModeMap(n, 100, &mm);
 
   while (state.KeepRunning()) {
-    const Int q = RandomInt() % n;
+    const int32_t q = RandomInt32() % n;
     Transform tf(n);
     bin_in_freq->Run(mm, tf, q, &a);
   }

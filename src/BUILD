@@ -188,6 +188,7 @@ cc_binary(
   srcs = ["binner_bench.cc"],
   deps = [
     ":binner",
+    ":gen",
     ":benchmark",
   ],
 )

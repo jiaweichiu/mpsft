@@ -74,14 +74,11 @@ inline double PosModOne(double x) { return x - std::floor(x); }
 #pragma omp declare simd
 inline double AbsSq(double re, double im) { return re * re + im * im; }
 
-// #pragma omp declare simd
-// inline double Square(double x) { return x * x; }
-
 // Equivalent to multiplying by i: (x+iy)*i = -y+ix.
-// inline Cplex RotateForward(Cplex x) { return Cplex(-IM(x), RE(x)); }
+inline Cplex RotateForward(Cplex x) { return Cplex(-IM(x), RE(x)); }
 
 // Equivalent to multiplying by -i: (x+iy)*(-i) = y-ix.
-// inline Cplex RotateBackward(Cplex x) { return Cplex(IM(x), -RE(x)); }
+inline Cplex RotateBackward(Cplex x) { return Cplex(IM(x), -RE(x)); }
 
 template <class T> class Array {
 public:
