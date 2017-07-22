@@ -85,6 +85,15 @@ cc_binary(
 )
 
 cc_binary(
+  name = "sincos_test",
+  srcs = ["sincos_test.cc"],
+  deps = [
+    ":sincos",
+    ":catch",
+  ],
+)
+
+cc_binary(
   name = "integer_bench",
   srcs = ["integer_bench.cc"],
   deps = [

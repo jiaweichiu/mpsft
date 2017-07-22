@@ -122,6 +122,27 @@ static void BM_SinTwoPi_BS(benchmark::State &state) {
 }
 BENCHMARK(BM_SinTwoPi_BS);
 
+// Add some OMP pragmas to encourage vectorization.
+static void BM_SinCosTwoPiApprox_OMP(benchmark::State &state) {
+  DoubleArray in(n);
+  DoubleArray a_out1(n);
+  DoubleArray a_out2(n);
+  for (int i = 0; i < n; ++i) {
+    in[i] = RandomDouble();
+  }
+  double *__restrict__ data = in.data();
+  double *__restrict__ out1 = a_out1.data();
+  double *__restrict__ out2 = a_out2.data();
+  while (state.KeepRunning()) {
+#pragma omp simd aligned(data : kAlign)
+    for (int i = 0; i < n; ++i) {
+      out1[i] = SinTwoPiApprox(data[i]);
+      out2[i] = CosTwoPiApprox(data[i]);
+    }
+  }
+}
+BENCHMARK(BM_SinCosTwoPiApprox_OMP);
+
 static void BM_SinCosTwoPi_BS(benchmark::State &state) {
   using pack_t = bs::pack<double>;
   std::vector<double, ba::aligned_allocator<double, pack_t::alignment>> in(n);
