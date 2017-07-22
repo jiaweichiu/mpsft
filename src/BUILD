@@ -209,6 +209,7 @@ cc_test(
   srcs = ["iterate_test.cc"],
   deps = [
     ":catch",
+    ":gen",
     ":iterate",
   ],
 )

@@ -26,17 +26,12 @@ class Window {
 public:
   Window(int32_t n, int32_t bins, double delta);
 
-  // Assume 0 <= t <= p2 where p2=(p-1)/2. Assume p is odd.
-  inline double wt(int32_t t) const {
-    DCHECK_GE(t, 0);
-    DCHECK_LT(t, p_);
-    return wt_[t];
-  }
-
   inline int32_t n() const { return n_; }
   inline int32_t p() const { return p_; }
   inline int32_t p2() const { return (p_ - 1) / 2; }
   inline int32_t bins() const { return bins_; }
+  inline int32_t *t() const { return t_.data(); }
+  inline double *wt() const { return wt_.data(); }
 
   double SampleInTime(int32_t i) const;
   double SampleInFreq(double xi) const;
@@ -55,6 +50,8 @@ private:
   // TODO: It might be more efficient not to store this. Instead, for each t, we
   // can compute the window at t and then iterate over tau's.
   DoubleArray wt_; // Size is p.
+
+  Int32Array t_; // [-p2:p2]. Size is p.
 };
 
 } // namespace mps

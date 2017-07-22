@@ -20,15 +20,17 @@
 
 #include "base.h"
 #include "binner.h"
+#include "gen.h"
 #include "iterate.h"
 
 namespace mps {
 
 namespace {
 
-std::pair<Int, Int> CountGoodBad(const ModeMap &found, const ModeMap &ans) {
-  Int bad = 0;
-  Int good = 0;
+std::pair<int32_t, int32_t> CountGoodBad(const ModeMap &found,
+                                         const ModeMap &ans) {
+  int32_t bad = 0;
+  int32_t good = 0;
   for (const auto &kv : found) {
     auto it = ans.find(kv.first);
     if (it == ans.end()) {
@@ -45,7 +47,7 @@ std::pair<Int, Int> CountGoodBad(const ModeMap &found, const ModeMap &ans) {
 TEST_CASE("IterateOnce", "") {
   RandomSeed(123537);
 
-  constexpr Int n = kPrimes[12];
+  constexpr int32_t n = kPrimes[12];
   constexpr double sigma = 0.1;
 
   IterateOptions opt;
@@ -82,8 +84,8 @@ TEST_CASE("IterateOnce", "") {
 TEST_CASE("IterateMore", "") {
   RandomSeed(123537);
 
-  constexpr Int n = kPrimes[20];
-  constexpr Int num_modes = 1000;
+  constexpr int32_t n = kPrimes[20];
+  constexpr int32_t num_modes = 1000;
   constexpr double sigma = 1e-2;
 
   IterateOptions opt;
@@ -106,12 +108,14 @@ TEST_CASE("IterateMore", "") {
   ModeMap found_mm;
   Iterate(x, opt, &found_mm);
   auto result = CountGoodBad(found_mm, mm);
+  LOG(INFO) << "Good:" << result.first << " Bad:" << result.second;
   REQUIRE(result.first >= 300);
   REQUIRE(result.second <= 100);
 
   opt.bins = (num_modes - 300) * 2 + 1;
   Iterate(x, opt, &found_mm);
   result = CountGoodBad(found_mm, mm);
+  LOG(INFO) << "Good:" << result.first << " Bad:" << result.second;
   REQUIRE(result.first >= 600);
   REQUIRE(result.second <= 100);
 }
@@ -122,8 +126,8 @@ TEST_CASE("IterateMore", "") {
 TEST_CASE("IterateFull", "") {
   RandomSeed(123537);
 
-  constexpr Int n = kPrimes[20];
-  constexpr Int num_modes = 1000;
+  constexpr int32_t n = kPrimes[20];
+  constexpr int32_t num_modes = 1000;
   constexpr double sigma = 1e-7;
 
   IterateOptions opt;
@@ -133,6 +137,7 @@ TEST_CASE("IterateFull", "") {
   opt.bin_threshold = 3.0 * sigma / std::sqrt(double(opt.bins));
   opt.sv_threshold = 1.0 * sigma / std::sqrt(double(opt.bins));
   opt.window_threshold = 0.1;
+  opt.bin_in_time_type = 2;
 
   // Generate a list of random coefficients, each of magnitude 1.0.
   ModeMap mm;
@@ -147,31 +152,27 @@ TEST_CASE("IterateFull", "") {
   ModeMap found_mm;
   Iterate(x, opt, &found_mm);
   auto result = CountGoodBad(found_mm, mm);
+  LOG(INFO) << "Good:" << result.first << " Bad:" << result.second;
   REQUIRE(result.first >= 250);
   REQUIRE(result.second <= 30);
-  LOG(INFO) << "Modes found: " << result.first << " good " << result.second
-            << " bad";
 
   Iterate(x, opt, &found_mm);
   result = CountGoodBad(found_mm, mm);
+  LOG(INFO) << "Good:" << result.first << " Bad:" << result.second;
   REQUIRE(result.first >= 450);
   REQUIRE(result.second <= 30);
-  LOG(INFO) << "Modes found: " << result.first << " good " << result.second
-            << " bad";
 
   Iterate(x, opt, &found_mm);
   result = CountGoodBad(found_mm, mm);
+  LOG(INFO) << "Good:" << result.first << " Bad:" << result.second;
   REQUIRE(result.first >= 600);
   REQUIRE(result.second <= 30);
-  LOG(INFO) << "Modes found: " << result.first << " good " << result.second
-            << " bad";
 
   Iterate(x, opt, &found_mm);
   result = CountGoodBad(found_mm, mm);
+  LOG(INFO) << "Good:" << result.first << " Bad:" << result.second;
   REQUIRE(result.first >= 700);
   REQUIRE(result.second <= 30);
-  LOG(INFO) << "Modes found: " << result.first << " good " << result.second
-            << " bad";
 }
 
 } // namespace mps

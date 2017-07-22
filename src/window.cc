@@ -51,13 +51,20 @@ Window::Window(int32_t n, int32_t bins, double delta)
   CHECK_EQ(1, p_ % 2) << "Odd p expected";
 
   const int32_t p2 = (p_ - 1) / 2;
-  wt_.resize(p_);
-  wt_[0] = width_;
+
+  t_.resize(p_);
+  t_[0] = 0;
   for (int32_t i = 1; i <= p2; ++i) {
-    wt_[i] = SampleInTime(i);
+    t_[i] = i;
   }
   for (int32_t i = p2 + 1; i < p_; ++i) {
-    wt_[i] = SampleInTime(i - p_);
+    t_[i] = i - p_;
+  }
+
+  wt_.resize(p_);
+  wt_[0] = width_;
+  for (int32_t i = 1; i < p_; ++i) {
+    wt_[i] = SampleInTime(t_[i]);
   }
 }
 

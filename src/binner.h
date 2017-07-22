@@ -65,7 +65,9 @@ private:
   CplexArray scratch2_;
 };
 
-// Extend from V1. Do vectorization!
+// Extend from V1. Do vectorization! We use SinCos approximation.
+// :binner_test pass, but this is failing :iterate_test.
+// BinInTimeV3 shall use boost::SIMD instead for better precision.
 class BinInTimeV2 : public BinInTime {
 public:
   BinInTimeV2(const Window &win, int32_t bits);
@@ -75,8 +77,26 @@ public:
 private:
   CplexArray scratch_; // Size p=win.p().
   CplexArray scratch2_;
-  Int32Array idx_;
+  Int32Array idx1_;
   Int32Array idx2_;
+  DoubleArray dbl_;
+};
+
+// Extend from V1. Do vectorization! We use SinCos approximation.
+// :binner_test pass, but this is failing :iterate_test.
+// BinInTimeV3 shall use boost::SIMD instead for better precision.
+class BinInTimeV3 : public BinInTime {
+public:
+  BinInTimeV3(const Window &win, int32_t bits);
+  void Run(const CplexArray &x, const Transform &tf, int32_t q,
+           CplexMatrix *out) override;
+
+private:
+  CplexArray scratch_; // Size p=win.p().
+  CplexArray scratch2_;
+  Int32Array idx1_;
+  Int32Array idx2_;
+  DoubleArray dbl_;
 };
 
 class BinInFreq {

@@ -76,7 +76,7 @@ void BinInTimeV0::Run(const CplexArray &x, const Transform &tf, int32_t q,
     scratch_.clear();
     for (int32_t i = 0; i < p; ++i) {
       const int32_t t = i <= p2 ? i : i - p;
-      const double wt = win_.wt(i);
+      const double wt = win_.wt()[i];
       const int32_t j = MulAddPosMod(tf.a, int64_t(t) + int64_t(tau), tf.c, n);
       const int32_t k = MulMod(tf.b, int64_t(t) + int64_t(tau), n);
       // Do mods for better accuracy. Note fmod can be negative, but it is ok.
@@ -128,13 +128,12 @@ void BinInTimeV1::Run(const CplexArray &x, const Transform &tf, int32_t q,
   DCHECK_EQ(n, x.size());
 
   const int32_t p = win_.p();
-  const int32_t p2 = (p - 1) / 2;
 
   // Take care of tau=q first.
   scratch_.clear();
   for (int32_t i = 0; i < p; ++i) {
-    const int32_t t = i <= p2 ? i : i - p;
-    const double wt = win_.wt(i <= p2 ? i : p - i);
+    const int32_t t = win_.t()[i];
+    const double wt = win_.wt()[i];
     const int32_t j = MulAddPosMod(tf.a, int64_t(t) + int64_t(q), tf.c, n);
     const int32_t k = MulMod(tf.b, int64_t(t) + int64_t(q), n);
     const double freq =
@@ -150,15 +149,9 @@ void BinInTimeV1::Run(const CplexArray &x, const Transform &tf, int32_t q,
     const int32_t offset = bins * (1 << bit);
     scratch_.clear();
     scratch2_.clear();
-    for (int32_t i = 0; i <= p2; ++i) {
-      const int32_t t = i;
-      const double wt = win_.wt(i);
-      BinInTimeV1Helper(i, t, wt, offset, q, n, bins, bq, delta, tf, x,
-                        &scratch_, &scratch2_);
-    }
-    for (int32_t i = p2 + 1; i < p; ++i) {
-      const int32_t t = i - p;
-      const double wt = win_.wt(p - i);
+    for (int32_t i = 0; i < p; ++i) {
+      const int32_t t = win_.t()[i];
+      const double wt = win_.wt()[i];
       BinInTimeV1Helper(i, t, wt, offset, q, n, bins, bq, delta, tf, x,
                         &scratch_, &scratch2_);
     }
@@ -180,39 +173,18 @@ void BinInTimeV1::Run(const CplexArray &x, const Transform &tf, int32_t q,
 
 BinInTimeV2::BinInTimeV2(const Window &win, int32_t bits)
     : BinInTime(win, bits), scratch_(win.p()), scratch2_(win.p()),
-      idx_(win.p()), idx2_(win.p()) {}
-
-inline void BinInTimeV2Helper1(int32_t i, int32_t t, const Transform &tf,
-                               int32_t offset, int32_t q, int32_t n,
-                               int32_t *idx, int32_t *idx2) {
-  const int32_t ts = t + offset;
-  idx[i] = MulAddPosMod(tf.a, int64_t(q) + int64_t(ts), tf.c, n);
-  idx2[i] = MulAddPosMod(tf.a, int64_t(q) - int64_t(ts), tf.c, n);
-}
-
-inline void BinInTimeV2Helper2(int32_t i, Cplex bq, const CplexArray &x,
-                               int32_t *idx, int32_t *idx2, Cplex *out,
-                               Cplex *out2) {
-  const Cplex x1 = x[idx[i]] * bq;
-  const Cplex x2 = std::conj(x[idx2[i]] * bq);
-  out[i] = 0.5 * (x1 + x2);
-  out2[i] = RotateBackward(0.5 * (x1 - x2));
-}
-
-inline void BinInTimeV2Helper3(int32_t i, int32_t t, const Transform &tf,
-                               int32_t offset, double wt, int32_t n,
-                               double delta, Cplex *out, Cplex *out2) {
-  const int32_t ts = t + offset;
-  const int32_t k = MulMod(tf.b, ts, n);
-  // Do mods for better accuracy. Note fmod can be negative, but it is ok.
-  const double freq = double(k) / double(n) + std::fmod(delta * double(t), 1.0);
-  const Cplex factor = Sinusoid(freq) * wt;
-  out[i] *= factor;
-  out2[i] *= factor;
-}
+      idx1_(win.p()), idx2_(win.p()), dbl_(win.p()) {}
 
 void BinInTimeV2::Run(const CplexArray &x, const Transform &tf, int32_t q,
                       CplexMatrix *out) {
+  int32_t *__restrict__ t = win_.t();
+  double *__restrict__ wt = win_.wt();
+  Cplex *__restrict__ s1 = scratch_.data();
+  Cplex *__restrict__ s2 = scratch2_.data();
+  int32_t *__restrict__ idx1 = idx1_.data();
+  int32_t *__restrict__ idx2 = idx2_.data();
+  double *__restrict__ dbl = dbl_.data();
+
   CHECK_EQ(out->rows(), 1 + 2 * bits_);
   const int32_t bins = win_.bins();
   const int32_t n = win_.n();
@@ -221,54 +193,52 @@ void BinInTimeV2::Run(const CplexArray &x, const Transform &tf, int32_t q,
   DCHECK_EQ(n, x.size());
 
   const int32_t p = win_.p();
-  const int32_t p2 = (p - 1) / 2;
 
   // Take care of tau=q first. TODO: Optimize this later.
   scratch_.clear();
   for (int32_t i = 0; i < p; ++i) {
-    const int32_t t = i <= p2 ? i : i - p;
-    const double wt = win_.wt(i <= p2 ? i : p - i);
-    const int32_t j = MulAddPosMod(tf.a, int64_t(t) + int64_t(q), tf.c, n);
-    const int32_t k = MulMod(tf.b, int64_t(t) + int64_t(q), n);
-    const double freq = double(k) / double(n) + PosModOne(delta * double(t));
-    scratch_[i % bins] += (x[j] * Sinusoid(freq)) * wt;
+    const int32_t tt = t[i];
+    const int32_t j = MulAddPosMod(tf.a, int64_t(tt) + int64_t(q), tf.c, n);
+    const int32_t k = MulMod(tf.b, int64_t(tt) + int64_t(q), n);
+    const double freq = double(k) / double(n) + PosModOne(delta * double(tt));
+    scratch_[i % bins] += (x[j] * Sinusoid(freq)) * wt[i];
   }
   plan_->Run(scratch_, &(*out)[0]);
 
   // Take care of offsets from q.
   const Cplex bq = Sinusoid(double(MulMod(tf.b, q, n)) / double(n));
 
+  // Initialize t array.
+
   for (int32_t bit = 0; bit < bits_; ++bit) {
     const int32_t offset = bins * (1 << bit);
-    Cplex *__restrict__ s1 = scratch_.data();
-    Cplex *__restrict__ s2 = scratch2_.data();
-    int32_t *__restrict__ idx1 = idx_.data();
-    int32_t *__restrict__ idx2 = idx2_.data();
 
-#pragma omp simd aligned(idx1, idx2 : kAlign)
-    for (int32_t i = 0; i <= p2; ++i) {
-      BinInTimeV2Helper1(i, i, tf, offset, q, n, idx1, idx2);
-    }
-
-#pragma omp simd aligned(idx1, idx2 : kAlign)
-    for (int32_t i = p2 + 1; i < p; ++i) {
-      BinInTimeV2Helper1(i, i - p, tf, offset, q, n, idx1, idx2);
+#pragma omp simd aligned(idx1, idx2, dbl, t : kAlign)
+    for (int32_t i = 0; i < p; ++i) {
+      const int64_t ts = int64_t(t[i]) + int64_t(offset);
+      idx1[i] = MulAddPosMod(tf.a, int64_t(q) + int64_t(ts), tf.c, n);
+      idx2[i] = MulAddPosMod(tf.a, int64_t(q) - int64_t(ts), tf.c, n);
+      const int32_t k1 = MulMod(tf.b, ts, n);
+      dbl[i] = double(k1) / double(n) + PosModOne(delta * double(t[i]));
     }
 
 #pragma omp simd aligned(idx1, idx2, s1, s2 : kAlign)
     for (int32_t i = 0; i < p; ++i) {
-      BinInTimeV2Helper2(i, bq, x, idx1, idx2, s1, s2);
+      const Cplex x1 = x[idx1[i]] * bq;
+      const Cplex x2 = std::conj(x[idx2[i]] * bq);
+      s1[i] = 0.5 * (x1 + x2);
+      s2[i] = RotateBackward(0.5 * (x1 - x2));
     }
 
-#pragma omp simd aligned(s1, s2 : kAlign)
-    for (int32_t i = 0; i <= p2; ++i) {
-      BinInTimeV2Helper3(i, i, tf, offset, win_.wt(i), n, delta, s1, s2);
-    }
+// CAUTION: Make sure the following is vectorized.
+#pragma omp simd aligned(s1, s2, dbl, t, wt : kAlign)
+    for (int32_t i = 0; i < p; ++i) {
+      const double freq = PosModOne(dbl[i]);
+      const double cc = wt[i] * CosTwoPiApprox(freq);
+      const double ss = wt[i] * SinTwoPiApprox(freq);
 
-#pragma omp simd aligned(s1, s2 : kAlign)
-    for (int32_t i = p2 + 1; i < p; ++i) {
-      BinInTimeV2Helper3(i, i - p, tf, offset, win_.wt(p - i), n, delta, s1,
-                         s2);
+      s1[i] *= Cplex(cc, ss);
+      s2[i] *= Cplex(cc, ss);
     }
 
     const int32_t folds = p / bins;

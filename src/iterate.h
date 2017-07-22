@@ -27,7 +27,7 @@ struct IterateOptions {
   // bins should scale with number of modes we want to recover, which should
   // decrease exponentially.
   // To reduce error in coefficient estimation, more bins help a lot.
-  Int bins = 0;
+  int32_t bins = 0;
 
   // window_delta controls the window. Smaller delta means a more "accurate"
   // window. However, it also means more work for BinInTime.
@@ -35,7 +35,7 @@ struct IterateOptions {
 
   // Increase trials to improve chance of mode identification.
   // Does not help so much with coefficient estimation.
-  Int trials = 1;
+  int32_t trials = 1;
 
   // To speed things up, we do not want to process every bin.
   // If the bin coefficient is too small, we want to skip.

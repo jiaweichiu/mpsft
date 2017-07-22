@@ -16,19 +16,22 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
  *
  */
+
 #include "iterate.h"
+#include "base.h"
 #include "freqid.h"
+#include "sincos.h"
 
 namespace mps {
 
 namespace {
 
 // Returns 1 + floor(log2(n / bins))
-Int NumBits(Int n, Int bins) {
+int32_t NumBits(int32_t n, int32_t bins) {
   if (n < bins) {
     return 1;
   }
-  Int out = 0;
+  int32_t out = 0;
   // n=2*bins should return 2.
   // n=2*bins+1 should return 2.
   while (n >= bins) {
@@ -39,15 +42,15 @@ Int NumBits(Int n, Int bins) {
 }
 
 std::pair<double, bool>
-IdentifyFreq(const IterateOptions &opt, Int b, Int bits,
+IdentifyFreq(const IterateOptions &opt, int32_t b, int32_t bits,
              const vector<std::unique_ptr<CplexMatrix>> &bin_coefs) {
-  const Int trials = opt.trials;
+  const int32_t trials = opt.trials;
   double sigma[2];
 
-  Int xi_sum = 0;
-  for (Int bit = 0; bit < bits; ++bit) {
-    Int count = 0;
-    for (Int trial = 0; trial < trials; ++trial) {
+  int32_t xi_sum = 0;
+  for (int32_t bit = 0; bit < bits; ++bit) {
+    int32_t count = 0;
+    for (int32_t trial = 0; trial < trials; ++trial) {
       CplexMatrix &a = *bin_coefs[trial]; // Bin coefficients.
       const Cplex u1 = a[2 * bit + 1][b];
       const Cplex u2 = a[2 * bit + 2][b];
@@ -76,15 +79,15 @@ IdentifyFreq(const IterateOptions &opt, Int b, Int bits,
 
 bool Iterate(const CplexArray &x, const IterateOptions &opt, ModeMap *mm) {
   bool found = false; // Whether we found anything new.
-  const Int trials = opt.trials;
-  const Int bins = opt.bins;
+  const int32_t trials = opt.trials;
+  const int32_t bins = opt.bins;
   CHECK_GT(opt.window_threshold, 0);
 
   CHECK_EQ(1, trials % 2) << "Odd number of trials expected";
 
-  const Int n = x.size();
+  const int32_t n = x.size();
   Window win(n, bins, opt.window_delta);
-  const Int bits = NumBits(n, bins);
+  const int32_t bits = NumBits(n, bins);
 
   Transform tf(n);
   std::unique_ptr<BinInTime> bin_in_time(
@@ -96,8 +99,8 @@ bool Iterate(const CplexArray &x, const IterateOptions &opt, ModeMap *mm) {
   vector<std::unique_ptr<CplexMatrix>> bin_coefs(trials);
 
   // Repeat "trials" number of times.
-  for (Int trial = 0; trial < trials; ++trial) {
-    const Int q = RandomInt() % n;
+  for (int32_t trial = 0; trial < trials; ++trial) {
+    const int32_t q = RandomInt32() % n;
     list_q.push_back(q);
 
     bin_coefs[trial].reset(new CplexMatrix(1 + 2 * bits, bins));
@@ -107,11 +110,12 @@ bool Iterate(const CplexArray &x, const IterateOptions &opt, ModeMap *mm) {
     bin_in_freq->Run(*mm, tf, q, a);
   }
 
-  for (Int b = 0; b < bins; ++b) {
+  for (int32_t b = 0; b < bins; ++b) {
     if (opt.bin_threshold > 0) {
       double bin_energy = 0;
-      for (Int trial = 0; trial < trials; ++trial) {
-        bin_energy += AbsSq((*bin_coefs[trial])[0][b]);
+      for (int32_t trial = 0; trial < trials; ++trial) {
+        const Cplex coef = (*bin_coefs[trial])[0][b];
+        bin_energy += AbsSq(RE(coef), IM(coef));
       }
       bin_energy /= trials;
       if (bin_energy < opt.bin_threshold * opt.bin_threshold) {
@@ -127,7 +131,7 @@ bool Iterate(const CplexArray &x, const IterateOptions &opt, ModeMap *mm) {
     const double xi1 = res.first;
 
     // k1 is mode location after random permutation.
-    const Int k1 = std::round(double(n) * (double(b) + xi1) / double(bins));
+    const int32_t k1 = std::round(double(n) * (double(b) + xi1) / double(bins));
     DCHECK_GE(k1, 0);
     DCHECK_LT(k1, n);
 
@@ -141,16 +145,16 @@ bool Iterate(const CplexArray &x, const IterateOptions &opt, ModeMap *mm) {
 
     // Estimate coefficient in transformed signal.
     Cplex coef_sum = 0;
-    for (Int trial = 0; trial < trials; ++trial) {
+    for (int32_t trial = 0; trial < trials; ++trial) {
       const CplexMatrix &a = *bin_coefs[trial];
-      const double freq = -double(Mod(list_q[trial] * k1, n)) / double(n);
+      const double freq = -double(MulMod(list_q[trial], k1, n)) / double(n);
       const Cplex factor = Sinusoid(freq);
       coef_sum += a[0][b] * factor;
 
-      for (Int bit = 0; bit < bits; ++bit) {
+      for (int32_t bit = 0; bit < bits; ++bit) {
         // Try to do only one Sinusoid here instead of two, using symmetry.
         const double freq2 =
-            -double(Mod(bins * (1 << bit) * k1, n)) / double(n);
+            -double(MulMod(bins * (1 << bit), k1, n)) / double(n);
         const Cplex factor2 = Sinusoid(freq2);
         const Cplex f1 = factor * factor2;
         const Cplex f2 = factor * std::conj(factor2); // Divide by factor2.
@@ -162,8 +166,8 @@ bool Iterate(const CplexArray &x, const IterateOptions &opt, ModeMap *mm) {
 
     // Undo the transform.
     // k0 is original mode location.
-    const Int k0 = PosMod(tf.a_inv * (k1 - tf.b), n);
-    coef *= Sinusoid(-double(Mod(tf.c * k0, n)) / double(n));
+    const int32_t k0 = MulPosMod(tf.a_inv, int64_t(k1) - int64_t(tf.b), n);
+    coef *= Sinusoid(-double(MulMod(tf.c, k0, n)) / double(n));
     coef /= wf;
 
     (*mm)[k0] += coef;
