@@ -87,7 +87,7 @@ BM_BinInFreq/1/22      91830 ns      91742 ns       7624
 
 The first parameter selects the binner. The second parameter is `log2(n)`.
 
-From V0 to V1 for both `BinInTime` and `BinInFreq`, we exploit symmetry to roughly halve the number of trigonometric operations. The gain is not as much after we provide our own trigonometric functions.
+From V0 to V1 for both `BinInTime` and `BinInFreq`, we exploit symmetry to roughly halve the number of trigonometric operations.
 
 From V1 to V2 and `BinInTime`, we do some vectorization and also some Chebyshev approximation of sines and cosines. However, this introduces some errors which might accumulate and slow down convergence. They are also not the most robust.
 
