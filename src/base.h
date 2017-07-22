@@ -71,8 +71,8 @@ double RandomNormal();
 #pragma omp declare simd
 inline double PosModOne(double x) { return x - std::floor(x); }
 
-// #pragma omp declare simd
-// inline double AbsSq(double re, double im) { return re * re + im * im; }
+#pragma omp declare simd
+inline double AbsSq(double re, double im) { return re * re + im * im; }
 
 // #pragma omp declare simd
 // inline double Square(double x) { return x * x; }

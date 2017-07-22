@@ -118,6 +118,7 @@ cc_binary(
   srcs = ["fftw_bench.cc"],
   deps = [
     ":base",
+    ":gen",
     ":benchmark",
   ],
 )

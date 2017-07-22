@@ -19,12 +19,13 @@
 #include <benchmark/benchmark.h>
 
 #include "base.h"
+#include "gen.h"
 
 namespace mps {
 
 static void BM_FFTW(benchmark::State &state) {
-  const Int n = state.range(0);
-  const Int num_modes = 100; // Shouldn't matter.
+  const int32_t n = state.range(0);
+  const int32_t num_modes = 100; // Shouldn't matter.
   const double sigma = 0.1;
 
   ModeMap mm;

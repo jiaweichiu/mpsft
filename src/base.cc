@@ -96,9 +96,7 @@ double CplexArray::energy() const {
   const Cplex *__restrict__ d = data_;
 #pragma omp simd aligned(d : kAlign) reduction(+ : ans)
   for (int32_t i = 0; i < n_; ++i) {
-    const double x = RE(d[i]);
-    const double y = IM(d[i]);
-    ans += x * x + y * y;
+    ans += AbsSq(RE(d[i]), IM(d[i]));
   }
   return ans;
 }
