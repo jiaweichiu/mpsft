@@ -25,11 +25,15 @@
 
 namespace mps {
 
+magics_info kPrimesMagic[kNumPrimes];
+
 namespace {
 
 std::mt19937 rng;
-std::uniform_int_distribution<Int> uid;
+std::uniform_int_distribution<int32_t> uid32;
+std::uniform_int_distribution<int64_t> uid64;
 std::normal_distribution<double> nd;
+std::uniform_real_distribution<double> ud;
 
 // PowMod returns mod(b^e, m).
 // b=base, e=exponent, m=modulus.
@@ -55,11 +59,18 @@ void MainInit(int argc, char *const argv[]) {
   google::InstallFailureSignalHandler();
   rng.seed(123534);
   LOG(INFO) << "mps::MainInit";
+  // Compute magic for prime. We will keep dividing by these primes.
+  // Don't bother about small primes.
+  for (Int i = 1; i < kNumPrimes; ++i) {
+    kPrimesMagic[i] = compute_signed_magic_info(kPrimes[i]);
+  }
 }
 
 void RandomSeed(Int seed) { rng.seed(seed); }
-Int RandomInt() { return uid(rng); }
+int32_t RandomInt32() { return uid32(rng); }
+int64_t RandomInt64() { return uid64(rng); }
 double RandomNormal() { return nd(rng); }
+double RandomDouble() { return ud(rng); }
 
 double SincPi(double x) {
   constexpr double taylor_0_bound = std::numeric_limits<double>::epsilon();
@@ -204,8 +215,10 @@ void CplexArray::Reset() {
 
 double CplexArray::Energy() const {
   double ans = 0;
+  Cplex *__restrict__ x = data_;
+#pragma omp simd aligned(x : kAlign) reduction(+ : ans)
   for (Int i = 0; i < n_; ++i) {
-    ans += AbsSq(data_[i]);
+    ans += AbsSq(RE(x[i]), IM(x[i]));
   }
   return ans;
 }
@@ -215,7 +228,6 @@ CplexArray::~CplexArray() { Reset(); }
 void CplexArray::Resize(Int n) {
   Reset();
   n_ = n;
-  // data_ = reinterpret_cast<Cplex *>(fftw_alloc_complex(n));
   size_t m = n * sizeof(Cplex);
   m = ((m + kAlign - 1) / kAlign) * kAlign;
   data_ = reinterpret_cast<Cplex *>(::aligned_alloc(kAlign, m));
@@ -230,7 +242,7 @@ void GenerateModeMap(Int n, Int k, ModeMap *mm) {
   mm->clear();
   const size_t kk = k;
   while (mm->size() < kk) {
-    const Int idx = PosMod(RandomInt(), n);
+    const Int idx = PosMod(RandomInt32(), n);
     if (mm->find(idx) != mm->end()) {
       continue;
     }
@@ -264,10 +276,11 @@ void GenerateXhat(Int n, const ModeMap &mm, double sigma,
 #pragma omp simd aligned(data : kAlign) reduction(+ : noise_energy)
   for (Int i = 0; i < n; ++i) {
     data[i] = Cplex(RandomNormal(), RandomNormal());
-    noise_energy += AbsSq(data[i]);
+    noise_energy += AbsSq(RE(data[i]), IM(data[i]));
   }
   for (const auto &kv : mm) {
-    noise_energy -= AbsSq((*out)[kv.first]);
+    Cplex x = (*out)[kv.first];
+    noise_energy -= AbsSq(RE(x), IM(x));
   }
   // Rescale noise by this factor.
   const double factor = sigma / std::sqrt(noise_energy);
@@ -294,24 +307,6 @@ void CplexMatrix::Clear() {
   }
 }
 
-IntArray::IntArray(Int n) : n_(n) {
-  size_t m = n * sizeof(Int);
-  m = ((m + kAlign - 1) / kAlign) * kAlign;
-  data_ = reinterpret_cast<Int *>(::aligned_alloc(kAlign, m));
-  CHECK(data_);
-}
-
-IntArray::~IntArray() { ::free(data_); }
-
-DoubleArray::DoubleArray(Int n) : n_(n) {
-  size_t m = n * sizeof(double);
-  m = ((m + kAlign - 1) / kAlign) * kAlign;
-  data_ = reinterpret_cast<double *>(::aligned_alloc(kAlign, m));
-  CHECK(data_);
-}
-
-DoubleArray::~DoubleArray() { ::free(data_); }
-
 FFTPlan::FFTPlan(Int n, char sign)
     : n_(n), sign_(sign), dummy1_(1), dummy2_(1) {
   fftw_complex *x = reinterpret_cast<fftw_complex *>(dummy1_.data());
@@ -326,18 +321,27 @@ void FFTPlan::Run(const CplexArray &u, CplexArray *v) {
                    reinterpret_cast<fftw_complex *>(v->data()));
 }
 
-Transform::Transform(Int n) {
-  a = (RandomInt() % (n - 1)) + 1;
-  b = RandomInt() % n;
-  c = RandomInt() % n;
-  a_inv = InvMod(a, n);
-}
-
-Transform::Transform(Int n, Int a, Int b, Int c) {
-  this->a = a;
-  this->b = b;
-  this->c = c;
-  this->a_inv = InvMod(a, n);
+std::ostream &operator<<(std::ostream &dest, __int128_t value) {
+  std::ostream::sentry s(dest);
+  if (s) {
+    __uint128_t tmp = value < 0 ? -value : value;
+    char buffer[128];
+    char *d = std::end(buffer);
+    do {
+      --d;
+      *d = "0123456789"[tmp % 10];
+      tmp /= 10;
+    } while (tmp != 0);
+    if (value < 0) {
+      --d;
+      *d = '-';
+    }
+    int len = std::end(buffer) - d;
+    if (dest.rdbuf()->sputn(d, len) != len) {
+      dest.setstate(std::ios_base::badbit);
+    }
+  }
+  return dest;
 }
 
 } // namespace mps

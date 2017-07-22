@@ -16,15 +16,20 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
  *
  */
-#pragma once
+#include "catch.hpp"
 
 #include "base.h"
+#include "integer.h"
 
 namespace mps {
 
-// u2 is u[-1], u1 is u[1], u0 is u[0].
-// Returns true if we think the angle is in the second half.
-// Assume sigma is an array of size >= 2.
-bool MatPencil(Cplex u0, Cplex u1, Cplex u2, double *sigma);
+TEST_CASE("MulMod", "") {
+  const int64_t divisor = kPrimes[15];
+  for (int i = 0; i < 1000; ++i) {
+    const int64_t a = RandomInt32();
+    const int64_t b = RandomInt32();
+    REQUIRE(MulMod(a, b, divisor) == (a * b) % divisor);
+  }
+}
 
 } // namespace mps

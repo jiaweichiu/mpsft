@@ -10,13 +10,12 @@ build:opt \
 --copt="-march=native" \
 --copt="-O3" \
 --copt="-ffast-math" \
---copt="-fno-exceptions" \
---copt="-mavx" \
+--copt="-mavx2" \
 --copt="-fopenmp-simd" \
 --copt="-ftree-vectorize" \
 --copt="-fopt-info-vec-optimized"
 
-
+#--copt="-mavx" \
 #--copt="-march=corei7" \
 #--copt="-march=native" \
 #--copt="-mtune=native" \
@@ -26,3 +25,4 @@ build:opt \
 #--copt="-fopt-info-vec-optimized" \
 #--copt="-fopt-info-vec-all" \
 
+#--copt="-fno-exceptions" \

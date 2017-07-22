@@ -33,6 +33,8 @@
 #include <unordered_map>
 #include <vector>
 
+#include "magic.h"
+
 namespace mps {
 
 constexpr size_t kAlign = 64;
@@ -45,17 +47,22 @@ using std::string;
 using std::vector;
 
 // List of primes close to powers of 2.
-constexpr Int kPrimes[] = {2,        3,        5,         7,         17,
-                           31,       67,       127,       257,       509,
-                           1021,     2053,     4099,      8191,      16381,
-                           32771,    65537,    131071,    262147,    524287,
-                           1048573,  2097143,  4194301,   8388617,   16777213,
-                           33554467, 67108859, 134217757, 268435459, 536870909};
+constexpr int kNumPrimes = 30;
+constexpr int32_t kPrimes[kNumPrimes] = {
+    2,        3,        5,        7,         17,        31,
+    67,       127,      257,      509,       1021,      2053,
+    4099,     8191,     16381,    32771,     65537,     131071,
+    262147,   524287,   1048573,  2097143,   4194301,   8388617,
+    16777213, 33554467, 67108859, 134217757, 268435459, 536870909};
+
+extern magics_info kPrimesMagic[kNumPrimes];
 
 void MainInit(int argc, char *const argv[]);
 
 void RandomSeed(Int seed);
-Int RandomInt();
+int32_t RandomInt32();
+int64_t RandomInt64();
+double RandomDouble(); // [0, 1).
 double RandomNormal();
 
 // SincPi(x) = sin(x) / x.
@@ -84,21 +91,19 @@ double CosTwoPi(double x);
 #define IM std::imag
 
 #pragma omp declare simd
-inline double PosModOne(double x) {
-  return x - std::floor(x);
-}
+inline double PosModOne(double x) { return x - std::floor(x); }
 
 #pragma omp declare simd
 inline Int PosMod(Int x, Int n) { return ((x % n) + n) % n; }
 
 #pragma omp declare simd
 inline Int Mod(Int x, Int n) {
-  //return x % n;  // This cannot be vectorized.
+  // return x % n;  // This cannot be vectorized.
   return x - ((x / n) * n);
 }
 
 #pragma omp declare simd
-inline double AbsSq(Cplex x) { return RE(x) * RE(x) + IM(x) * IM(x); }
+inline double AbsSq(double re, double im) { return re * re + im * im; }
 
 #pragma omp declare simd
 inline double Square(double x) { return x * x; }
@@ -108,6 +113,29 @@ inline Cplex RotateForward(Cplex x) { return Cplex(-IM(x), RE(x)); }
 
 // Equivalent to multiplying by -i: (x+iy)*(-i) = y-ix.
 inline Cplex RotateBackward(Cplex x) { return Cplex(IM(x), -RE(x)); }
+
+template <class T> class Array {
+public:
+  Array(int n) {
+    size_t m = n * sizeof(T);
+    m = ((m + kAlign - 1) / kAlign) * kAlign;
+    data_ = reinterpret_cast<T *>(::aligned_alloc(kAlign, m));
+    CHECK(data_);
+  }
+  ~Array() { ::free(data_); }
+
+  inline int size() const { return n_; }
+  inline T &operator[](int i) { return data_[i]; }
+  inline const double &operator[](int i) const { return data_[i]; }
+  inline T *data() const { return data_; }
+
+private:
+  int n_ = 0;
+  T *data_ = nullptr;
+};
+using DoubleArray = Array<double>;
+using Int32Array = Array<int32_t>;
+using Int64Array = Array<int64_t>;
 
 class CplexArray {
 public:
@@ -158,37 +186,6 @@ private:
   vector<CplexArray> data_;
 };
 
-class IntArray {
-public:
-  IntArray(Int n);
-  ~IntArray();
-
-  inline Int size() const { return n_; }
-  inline Int &operator[](Int i) { return data_[i]; }
-  inline const Int &operator[](Int i) const { return data_[i]; }
-  inline Int *data() const { return data_; }
-
-private:
-  Int n_ = 0;
-  Int *data_ = nullptr;
-};
-
-// No templates... KISS.
-class DoubleArray {
-public:
-  DoubleArray(Int n);
-  ~DoubleArray();
-
-  inline Int size() const { return n_; }
-  inline double &operator[](Int i) { return data_[i]; }
-  inline const double &operator[](Int i) const { return data_[i]; }
-  inline double *data() const { return data_; }
-
-private:
-  Int n_ = 0;
-  double *data_ = nullptr;
-};
-
 class FFTPlan {
 public:
   // For sign:
@@ -211,20 +208,13 @@ private:
   fftw_plan plan_;
 };
 
-// y[t] = x[a*t+c] exp(2*pi*i*b*t/n).
-// yh[a*k+b] = xh[k] exp(2*pi*i*c*k/n).
-// Mode permutation: a, b
-// Mode modulation: c
-// Forward: a*k+b.
-// Backward: a_inv*(k-b).
-// Very lightweight class. Keep logic in the other code.
-struct Transform {
-  Transform(Int n);
-  Transform(Int n, Int a, Int b, Int c);
-  Int a;
-  Int b;
-  Int c;
-  Int a_inv;
-};
+// Divide n by d. Associated with d is a precomputed <multiplier, shift>.
+// #pragma omp declare simd
+inline Int ApplyMagic(Int n, Int multiplier, int shift) {
+  __int128 x = __int128(n) * __int128(multiplier);
+  x >>= 64;
+  const Int y = (multiplier < 0) ? (x + n) : x;
+  return Int(y >> shift);
+}
 
 } // namespace mps

@@ -11,6 +11,9 @@ cc_library(
   name = "base",
   srcs = ["base.cc"],
   hdrs = ["base.h"],
+  deps = [
+    ":magic",
+  ],
 )
 
 cc_test(
@@ -22,12 +25,50 @@ cc_test(
   ],
 )
 
+cc_library(
+  name = "integer",
+  srcs = ["integer.cc"],
+  hdrs = ["integer.h"],
+  deps = [
+    ":base",
+  ],
+)
+
 cc_binary(
   name = "base_bench",
   srcs = ["base_bench.cc"],
   deps = [
     ":base",
     ":benchmark",
+  ],
+)
+
+cc_binary(
+  name = "sincos_bench",
+  srcs = ["sincos_bench.cc"],
+  deps = [
+    ":base",
+    ":benchmark",
+  ],
+)
+
+cc_binary(
+  name = "integer_bench",
+  srcs = ["integer_bench.cc"],
+  deps = [
+    ":base",
+    ":integer",
+    ":benchmark",
+  ],
+)
+
+cc_test(
+  name = "integer_test",
+  srcs = ["integer_test.cc"],
+  deps = [
+    ":base",
+    ":integer",
+    ":catch",
   ],
 )
 
@@ -169,4 +210,10 @@ cc_binary(
     ":demo1",
     ":benchmark",
   ],
+)
+
+cc_library(
+  name = "magic",
+  srcs = ["magic.cc"],
+  hdrs = ["magic.h"],
 )

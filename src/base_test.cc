@@ -97,8 +97,11 @@ TEST_CASE("GenerateXhatBasic", "") {
 
   CplexArray xh(n);
   GenerateXhat(n, mm, sigma, &xh);
-  const double noise_energy =
-      AbsSq(xh[0]) + AbsSq(xh[1]) + AbsSq(xh[3]) + AbsSq(xh[4]);
+  double noise_energy = 0;
+  noise_energy += AbsSq(RE(xh[0]), IM(xh[0]));
+  noise_energy += AbsSq(RE(xh[1]), IM(xh[1]));
+  noise_energy += AbsSq(RE(xh[3]), IM(xh[3]));
+  noise_energy += AbsSq(RE(xh[4]), IM(xh[4]));
   REQUIRE(std::sqrt(noise_energy) == Approx(sigma));
 }
 
@@ -135,5 +138,19 @@ TEST_CASE("SinTwoPiBasic", "") {
     REQUIRE(RE(z) == Approx(std::cos(2 * M_PI * x)));
   }
 }*/
+
+TEST_CASE("DivideBasic", "") {
+  // idx selects the prime.
+  for (int idx = 10; idx < 25; ++idx) {
+    const Int d = kPrimes[idx];
+    const Int multiplier = kPrimesMagic[idx].multiplier;
+    const int shift = kPrimesMagic[idx].shift;
+    for (int i = 0; i < 100; ++i) {
+      const Int n = RandomInt();
+      const Int ans = ApplyMagic(n, multiplier, shift);
+      REQUIRE(ans == (n / d));
+    }
+  }
+}
 
 } // namespace mps
