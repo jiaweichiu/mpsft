@@ -68,6 +68,9 @@ BinInTime *BinInTime::Create(int binner_type, const Window &win, int32_t bits) {
   if (binner_type == 3) {
     return new BinInTimeV3(win, bits);
   }
+  if (binner_type == 4) {
+    return new BinInTimeV4(win, bits);
+  }
   LOG(FATAL) << "Unknown binner_type=" << binner_type;
   return nullptr;
 }
@@ -357,6 +360,140 @@ void BinInTimeV3::Run(const CplexArray &x, const Transform &tf, int32_t q,
       const Cplex factor = Cplex(d3[i], d2[i]) * wt[i];
       s1[i] *= factor;
       s2[i] *= factor;
+    }
+
+    const int32_t folds = p / bins;
+    for (int32_t i = 1; i < folds; ++i) {
+      for (int32_t j = 0; j < bins; ++j) {
+        const int32_t k = i * bins + j;
+        s1[j] += s1[k];
+        s2[j] += s2[k];
+      }
+    }
+
+    // Do B-point FFT.
+    plan_->Run(s1_, &(*out)[2 * bit + 1]);
+    plan_->Run(s2_, &(*out)[2 * bit + 2]);
+
+    // Combine the bin coefficients.
+    for (int32_t bin = 0; bin < bins; ++bin) {
+      const Cplex coef_r = (*out)[2 * bit + 1][bin];
+      const Cplex coef_i = (*out)[2 * bit + 2][bin];
+      (*out)[2 * bit + 1][bin] = coef_r + RotateForward(coef_i);
+      (*out)[2 * bit + 2][bin] =
+          std::conj(coef_r) + RotateForward(std::conj(coef_i));
+    }
+  }
+}
+
+BinInTimeV4::BinInTimeV4(const Window &win, int32_t bits)
+    : BinInTime(win, bits), s1_(win.p()), s2_(win.p()), idx1_(win.p()),
+      idx2_(win.p()), d1_(win.p()), d2_(win.p()), d3_(win.p()), d4_(win.p()),
+      d5_(win.p()) {}
+
+void BinInTimeV4::Run(const CplexArray &x, const Transform &tf, int32_t q,
+                      CplexMatrix *out) {
+  int32_t *__restrict__ t = win_.t();
+  double *__restrict__ wt = win_.wt();
+  Cplex *__restrict__ s1 = s1_.data();
+  Cplex *__restrict__ s2 = s2_.data();
+  int32_t *__restrict__ idx1 = idx1_.data();
+  int32_t *__restrict__ idx2 = idx2_.data();
+  double *__restrict__ d1 = d1_.data();
+  double *__restrict__ d2 = d2_.data();
+  double *__restrict__ d3 = d3_.data();
+  double *__restrict__ d4 = d4_.data();
+  double *__restrict__ d5 = d5_.data();
+  using pack_t = bs::pack<double>;
+  const size_t pack_card = bs::cardinal_of<pack_t>();
+
+  CHECK_EQ(out->rows(), 1 + 2 * bits_);
+  const int32_t bins = win_.bins();
+  const int32_t n = win_.n();
+
+  const double delta = -0.5 / double(bins);
+  DCHECK_EQ(n, x.size());
+
+  const int32_t p = win_.p();
+
+  // Take care of tau=q first. TODO: Optimize this later.
+  s1_.clear();
+  for (int32_t i = 0; i < p; ++i) {
+    const int32_t tt = t[i];
+    const int32_t j = MulAddPosMod(tf.a, int64_t(tt) + int64_t(q), tf.c, n);
+    const int32_t k = MulMod(tf.b, int64_t(tt) + int64_t(q), n);
+    const double freq = double(k) / double(n) + PosModOne(delta * double(tt));
+    s1[i % bins] += (x[j] * Sinusoid(freq)) * wt[i];
+  }
+  plan_->Run(s1_, &(*out)[0]);
+
+  // Take care of offsets from q.
+  const Cplex bq = Sinusoid(double(MulMod(tf.b, q, n)) / double(n));
+  const double bq_re = RE(bq);
+  const double bq_im = IM(bq);
+
+  for (int32_t bit = 0; bit < bits_; ++bit) {
+    const int32_t offset = bins * (1 << bit);
+
+#pragma omp simd aligned(idx1, idx2, d1, t : kAlign)
+    // int64 operations are not vectorized in AVX2.
+    for (int32_t i = 0; i < p; ++i) {
+      const int64_t ts = int64_t(t[i]) + int64_t(offset);
+      idx1[i] = MulAddPosMod(tf.a, int64_t(q) + int64_t(ts), tf.c, n);
+      idx2[i] = MulAddPosMod(tf.a, int64_t(q) - int64_t(ts), tf.c, n);
+      const int32_t k1 = MulMod(tf.b, ts, n);
+      d1[i] = double(k1) / double(n) + PosModOne(delta * double(t[i]));
+    }
+
+#pragma omp simd aligned(idx1, idx2, d2, d3, d4, d5 : kAlign)
+    for (int32_t i = 0; i < p; ++i) {
+      const Cplex x1 = x[idx1[i]];
+      const Cplex x2 = x[idx2[i]];
+      d2[i] = RE(x1);
+      d3[i] = IM(x1);
+      d4[i] = RE(x2);
+      d5[i] = IM(x2);
+    }
+
+    // Explicitly vectorized!
+    for (int32_t i = 0; i < p; i += pack_card) {
+      pack_t x(bs::aligned_load<pack_t>(d1_.data() + i));
+      pack_t x1r(bs::aligned_load<pack_t>(d2_.data() + i));
+      pack_t x1i(bs::aligned_load<pack_t>(d3_.data() + i));
+      pack_t x2r(bs::aligned_load<pack_t>(d4_.data() + i));
+      pack_t x2i(bs::aligned_load<pack_t>(d5_.data() + i));
+      pack_t e2(bq_re * x1r - bq_im * x1i);  // x1 multiplied by bq, real
+      pack_t e3(bq_re * x1i + bq_im * x1r);  // x1 multiplied by bq, imag
+      pack_t e4(bq_re * x2r - bq_im * x2i);  // x2 multiplied by bq, conj, real
+      pack_t e5(-bq_re * x2i - bq_im * x2r); // x2 multiplied by bq, conj, imag
+
+      pack_t f2 = 0.5 * (e2 + e4); // 0.5(x1+x2), real
+      pack_t f3 = 0.5 * (e3 + e5); // 0.5(x1+x2), imag
+      pack_t f4 = 0.5 * (e3 - e5); // -0.5i(x1-x2), real
+      pack_t f5 = 0.5 * (e4 - e2); // -0.5i(x1-x2), imag
+
+      auto res = bs::sincos(2.0 * M_PI * x);
+      pack_t ss = res.first;
+      pack_t cc = res.second;
+
+      pack_t g2 = f2 * cc - f3 * ss; // Multiply with (cc, ss), real
+      pack_t g3 = f2 * ss + f3 * cc; // Multiply with (cc, ss), imag
+      pack_t g4 = f4 * cc - f5 * ss; // Multiply with (cc, ss), real
+      pack_t g5 = f4 * ss + f5 * cc; // Multiply with (cc, ss), imag
+
+      bs::aligned_store(g2, d2_.data() + i);
+      bs::aligned_store(g3, d3_.data() + i);
+      bs::aligned_store(g4, d4_.data() + i);
+      bs::aligned_store(g5, d5_.data() + i);
+    }
+
+#pragma omp simd aligned(s1, s2, d2, d3, d4, d5, wt : kAlign)
+    // Splice back to get complex values.
+    for (int32_t i = 0; i < p; ++i) {
+      s1[i] = Cplex(d2[i], d3[i]);
+      s2[i] = Cplex(d4[i], d5[i]);
+      s1[i] *= wt[i];
+      s2[i] *= wt[i];
     }
 
     const int32_t folds = p / bins;

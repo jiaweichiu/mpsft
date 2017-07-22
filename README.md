@@ -76,13 +76,13 @@ bazel build --config=opt :binner_bench
 ---------------------------------------------------------
 Benchmark                  Time           CPU Iterations
 ---------------------------------------------------------
-BM_BinInTime/0/22   51693173 ns   51687596 ns         13
-BM_BinInTime/1/22   34296939 ns   34291219 ns         20
-BM_BinInTime/2/22   16035078 ns   16024006 ns         44
-BM_BinInTime/3/22   15492057 ns   15488898 ns         46
-BM_BinInFreq/0/22     188736 ns     188722 ns       3682
-BM_BinInFreq/1/22      91733 ns      91720 ns       7655
-
+BM_BinInTime/0/22   51322353 ns   51313717 ns         14
+BM_BinInTime/1/22   34020450 ns   33825153 ns         21
+BM_BinInTime/2/22   15582897 ns   15464899 ns         45
+BM_BinInTime/3/22   15502842 ns   15498434 ns         46
+BM_BinInTime/4/22   13180163 ns   13177513 ns         53
+BM_BinInFreq/0/22     189558 ns     189515 ns       3693
+BM_BinInFreq/1/22      91830 ns      91742 ns       7624
 ```
 
 The first parameter selects the binner. The second parameter is `log2(n)`.
@@ -92,6 +92,8 @@ From V0 to V1 for both `BinInTime` and `BinInFreq`, we exploit symmetry to rough
 From V1 to V2 and `BinInTime`, we do some vectorization and also some Chebyshev approximation of sines and cosines. However, this introduces some errors which might accumulate and slow down convergence. They are also not the most robust.
 
 From V2 to V3 and `BinInTime`, we switch to using Boost SIMD just for the sines and cosines computation. The speed is the same but the precision is way better.
+
+From V3 to V4 and `BinInTime`, we vectorize more by splitting early into real and imaginary components.
 
 ## Benchmarks for FFTW
 
@@ -157,12 +159,12 @@ Results:
 -------------------------------------------------------------
 Benchmark                      Time           CPU Iterations
 -------------------------------------------------------------
-BM_Demo1/4194301/64     34115828 ns   34112298 ns         20
-BM_Demo1/4194301/128    44698340 ns   44691912 ns         16
-BM_Demo1/4194301/256    61547564 ns   61530706 ns          9
-BM_Demo1/4194301/512   102622825 ns  102604267 ns          7
-BM_Demo1/4194301/1024  171544542 ns  171496205 ns          4
-BM_Demo1/4194301/2048  307691896 ns  307614594 ns          2
+BM_Demo1/4194301/64     29435038 ns   29433899 ns         23
+BM_Demo1/4194301/128    37364854 ns   37358244 ns         18
+BM_Demo1/4194301/256    51984590 ns   51972162 ns         12
+BM_Demo1/4194301/512    88579692 ns   88562375 ns          9
+BM_Demo1/4194301/1024  148947289 ns  148927532 ns          5
+BM_Demo1/4194301/2048  270542767 ns  270479943 ns          2
 ```
 
 A couple of parameters are not the most aggressive. For example, `window_delta` can be slightly bigger.
@@ -229,17 +231,17 @@ Here is the [visualization](src/profile/demo1_main_20170718.pdf).
 Unfortunately, the sin-cos earlier is not precise or robust enough. We switched to using Boost.SIMD just for this part. The new profile results is:
 
 ```
-Total: 79 samples
-      64  81.0%  81.0%       69  87.3% mps::BinInTimeV3::Run
-       8  10.1%  91.1%        8  10.1% sincos
-       2   2.5%  93.7%        2   2.5% Eigen::JacobiSVD::compute
-       1   1.3%  94.9%        1   1.3% __nss_passwd_lookup
-       1   1.3%  96.2%        1   1.3% apply@1b6f0
-       1   1.3%  97.5%        1   1.3% erf
-       1   1.3%  98.7%        1   1.3% gammal
-       1   1.3% 100.0%        1   1.3% n1_12
-       0   0.0% 100.0%       79 100.0% __libc_start_main
-       0   0.0% 100.0%       79 100.0% _start
+Total: 69 samples
+      48  69.6%  69.6%       55  79.7% mps::BinInTimeV4::Run
+      12  17.4%  87.0%       12  17.4% sincos
+       4   5.8%  92.8%       12  17.4% mps::BinInFreqV1::Run
+       2   2.9%  95.7%        2   2.9% gammal
+       2   2.9%  98.6%        2   2.9% t2_25
+       1   1.4% 100.0%        1   1.4% erf
+       0   0.0% 100.0%       69 100.0% __libc_start_main
+       0   0.0% 100.0%       69 100.0% _start
+       0   0.0% 100.0%        2   2.9% apply@1b6f0
+       0   0.0% 100.0%        2   2.9% apply@1cad0
 ```
 
 Here is the [visualization](src/profile/demo1_main_20170722.pdf).

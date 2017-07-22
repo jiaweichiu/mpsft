@@ -82,9 +82,7 @@ private:
   DoubleArray dbl_;
 };
 
-// Extend from V1. Do vectorization! We use SinCos approximation.
-// :binner_test pass, but this is failing :iterate_test.
-// BinInTimeV3 shall use boost::SIMD instead for better precision.
+// Extend from V2. Use boost::SIMD instead for better precision.
 class BinInTimeV3 : public BinInTime {
 public:
   BinInTimeV3(const Window &win, int32_t bits);
@@ -99,6 +97,27 @@ private:
   DoubleArray d1_;
   DoubleArray d2_;
   DoubleArray d3_;
+};
+
+// Extend from V3. Split early into real and imag components, so as to vectorize
+// more. Right now, the complex arithmetic doesn't seem vectorized and is taking
+// up most of the time.
+class BinInTimeV4 : public BinInTime {
+public:
+  BinInTimeV4(const Window &win, int32_t bits);
+  void Run(const CplexArray &x, const Transform &tf, int32_t q,
+           CplexMatrix *out) override;
+
+private:
+  CplexArray s1_; // Size p=win.p().
+  CplexArray s2_;
+  Int32Array idx1_;
+  Int32Array idx2_;
+  DoubleArray d1_;
+  DoubleArray d2_;
+  DoubleArray d3_;
+  DoubleArray d4_;
+  DoubleArray d5_;
 };
 
 class BinInFreq {

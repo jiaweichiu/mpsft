@@ -49,7 +49,8 @@ BENCHMARK(BM_BinInTime)
     ->Args({0, 22})
     ->Args({1, 22})
     ->Args({2, 22})
-    ->Args({3, 22});
+    ->Args({3, 22})
+    ->Args({4, 22});
 
 static void BM_BinInFreq(benchmark::State &state) {
   const int bin_in_freq_type = state.range(0);
