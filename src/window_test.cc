@@ -23,20 +23,20 @@
 
 namespace mps {
 
-constexpr Int n = 1109;
-constexpr Int bins = 5;
+constexpr int32_t n = 1109;
+constexpr int32_t bins = 5;
 constexpr double delta = 1e-6;
 
 TEST_CASE("WindowBasic", "") {
   Window window(n, bins, delta);
 
-  const Int p = window.p();
-  const Int p2 = window.p2();
+  const int32_t p = window.p();
+  const int32_t p2 = window.p2();
 
   CplexArray a(n);
-  a.Clear();
+  a.clear();
   a[0] = window.wt(0);
-  for (Int i = 1; i <= p2; ++i) {
+  for (int32_t i = 1; i <= p2; ++i) {
     a[i] = a[n - i] = window.wt(i);
   }
 
@@ -44,7 +44,7 @@ TEST_CASE("WindowBasic", "") {
   FFTPlan plan(n, -1);
   plan.Run(a, &ah);
 
-  for (Int i = 0; i < n; ++i) {
+  for (int32_t i = 0; i < n; ++i) {
     REQUIRE(IM(ah[i]) == Approx(0));
   }
 
@@ -54,20 +54,20 @@ TEST_CASE("WindowBasic", "") {
   REQUIRE(RE(ah[2]) == Approx(1));
   REQUIRE(RE(ah[n - 2]) == Approx(1));
 
-  for (Int i = 1; i < n / (4 * bins); ++i) {
+  for (int32_t i = 1; i < n / (4 * bins); ++i) {
     REQUIRE(RE(ah[i]) > 0.5);
     REQUIRE(RE(ah[n - i]) > 0.5);
   }
 
-  const Int w = n / (2 * bins);
-  for (Int i = w; i < n - w; ++i) {
+  const int32_t w = n / (2 * bins);
+  for (int32_t i = w; i < n - w; ++i) {
     REQUIRE(std::abs(RE(ah[i])) < delta);
   }
 
   // Check against SampleInFreq.
   REQUIRE(window.SampleInFreq(0) == Approx(RE(ah[0])));
-  const Int n2 = (n - 1) / 2;
-  for (Int i = 1; i <= n2; ++i) {
+  const int32_t n2 = (n - 1) / 2;
+  for (int32_t i = 1; i <= n2; ++i) {
     const double xi = double(i) / n;
     REQUIRE(window.SampleInFreq(xi) == Approx(RE(ah[i])));
     REQUIRE(window.SampleInFreq(-xi) == Approx(RE(ah[n - i])));

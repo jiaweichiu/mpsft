@@ -20,11 +20,12 @@
 #include <glog/logging.h>
 
 #include "base.h"
+#include "sincos.h"
 #include "window.h"
 
 namespace mps {
 
-Window::Window(Int n, Int bins, double delta)
+Window::Window(int32_t n, int32_t bins, double delta)
     : n_(n), bins_(bins), delta_(delta) {
   CHECK_GT(n_, 0);
   CHECK_GT(bins_, 0);
@@ -40,7 +41,7 @@ Window::Window(Int n, Int bins, double delta)
     // Decide p, the size of support.
     // p has to be sufficiently large.
     double tmp = 2.0 * M_SQRT2 * sigma_t_ * sqrt_c_delta + 1;
-    Int factor = Int(std::ceil(tmp / double(bins_)));
+    int32_t factor = int32_t(std::ceil(tmp / double(bins_)));
     if ((factor % 2) == 0) {
       ++factor;
     }
@@ -49,15 +50,18 @@ Window::Window(Int n, Int bins, double delta)
   }
   CHECK_EQ(1, p_ % 2) << "Odd p expected";
 
-  const Int p2 = (p_ - 1) / 2;
-  wt_.resize(p2 + 1);
+  const int32_t p2 = (p_ - 1) / 2;
+  wt_.resize(p_);
   wt_[0] = width_;
-  for (Int i = 1; i <= p2; ++i) {
+  for (int32_t i = 1; i <= p2; ++i) {
     wt_[i] = SampleInTime(i);
+  }
+  for (int32_t i = p2 + 1; i < p_; ++i) {
+    wt_[i] = SampleInTime(i - p_);
   }
 }
 
-double Window::SampleInTime(Int i) const {
+double Window::SampleInTime(int32_t i) const {
   const double t = double(i);
   const double u = t * M_PI * sigma_f_;
   return width_ * SincPi(t * M_PI * width_) * std::exp(-2.0 * u * u);

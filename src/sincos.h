@@ -30,4 +30,8 @@ double SinTwoPiApprox(double x);
 #pragma omp declare simd
 double CosTwoPiApprox(double x);
 
+// Optimize later. Not much impact on running time.
+// Returns sin(x)/x.
+double SincPi(double x);
+
 } // namespace mps

@@ -85,48 +85,49 @@ inline double AbsSq(double re, double im) { return re * re + im * im; }
 
 template <class T> class Array {
 public:
-  Array(int n) : n_(n) {
-    size_t m = n * sizeof(T);
-    m = ((m + kAlign - 1) / kAlign) * kAlign;
-    data_ = reinterpret_cast<T *>(::aligned_alloc(kAlign, m));
-    CHECK(data_);
-  }
-  ~Array() { ::free(data_); }
+  Array() = default;
+  Array(int n) : n_(n) { resize(n); }
+  ~Array() { reset(); }
 
   inline int size() const { return n_; }
   inline T &operator[](int i) { return data_[i]; }
   inline const double &operator[](int i) const { return data_[i]; }
   inline T *data() const { return data_; }
 
-private:
+  void clear() { ::memset(data_, 0, sizeof(T) * n_); }
+  void resize(int32_t n) {
+    reset();
+    n_ = n;
+    size_t m = n * sizeof(T);
+    m = ((m + kAlign - 1) / kAlign) * kAlign;
+    data_ = reinterpret_cast<T *>(::aligned_alloc(kAlign, m));
+    CHECK(data_);
+  }
+  void reset() {
+    if (data_) {
+      ::free(data_);
+      n_ = 0;
+      data_ = nullptr;
+    }
+  }
+  void fill(T x) { std::fill(data_, data_ + n_, x); }
+
+protected:
   int n_ = 0;
   T *data_ = nullptr;
 };
+
 using DoubleArray = Array<double>;
 using Int32Array = Array<int32_t>;
 using Int64Array = Array<int64_t>;
 
-class CplexArray {
+class CplexArray : public Array<Cplex> {
 public:
   CplexArray() = default;
-  CplexArray(int32_t n);
-  ~CplexArray();
+  CplexArray(int32_t n) : Array<Cplex>(n) {}
+  ~CplexArray() = default;
   CplexArray(std::initializer_list<Cplex> l);
-
-  void resize(int32_t n);
-  void reset();
-  void fill(Cplex x);
-  void clear();
   double energy() const;
-
-  inline int32_t size() const { return n_; }
-  inline Cplex &operator[](int32_t i) { return data_[i]; }
-  inline const Cplex &operator[](int32_t i) const { return data_[i]; }
-  inline Cplex *data() const { return data_; }
-
-private:
-  int32_t n_ = 0;
-  Cplex *data_ = nullptr;
 };
 
 class CplexMatrix {

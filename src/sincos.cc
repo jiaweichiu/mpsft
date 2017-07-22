@@ -16,6 +16,10 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
  *
  */
+#include <cmath>
+#include <cstdlib>
+
+#include "base.h"
 #include "sincos.h"
 
 namespace mps {
@@ -60,6 +64,27 @@ double CosTwoPiApprox(double a) {
   const double z6 = 2.0 * x * z5 - z4;
   const double z7 = 2.0 * x * z6 - z5;
   return coef1 * z1 + coef3 * z3 + coef5 * z5 + coef7 * z7;
+}
+
+double SincPi(double x) {
+  constexpr double taylor_0_bound = std::numeric_limits<double>::epsilon();
+  constexpr double taylor_2_bound = std::sqrt(taylor_0_bound);
+  constexpr double taylor_n_bound = std::sqrt(taylor_2_bound);
+  if (x < 0) {
+    x = -x;
+  }
+  if (x >= taylor_n_bound) {
+    return std::sin(x) / x;
+  }
+  double result = 1.0;
+  if (x >= taylor_0_bound) {
+    const double x2 = x * x;
+    result -= x2 / 6.0;
+    if (x >= taylor_2_bound) {
+      result += (x2 * x2) / 120.0;
+    }
+  }
+  return result;
 }
 
 } // namespace mps

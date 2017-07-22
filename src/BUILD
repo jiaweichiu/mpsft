@@ -147,6 +147,7 @@ cc_library(
   hdrs = ["window.h"],
   deps = [
     ":base",
+    ":sincos",
   ],
 )
 

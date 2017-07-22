@@ -76,19 +76,9 @@ double SincPi(double x) {
   return result;
 }
 
-CplexArray::CplexArray(int32_t n) { resize(n); }
-
 CplexArray::CplexArray(std::initializer_list<Cplex> l) {
   resize(l.size());
   std::copy(l.begin(), l.end(), data_);
-}
-
-void CplexArray::reset() {
-  if (data_) {
-    ::free(data_);
-    n_ = 0;
-    data_ = nullptr;
-  }
 }
 
 double CplexArray::energy() const {
@@ -100,21 +90,6 @@ double CplexArray::energy() const {
   }
   return ans;
 }
-
-CplexArray::~CplexArray() { reset(); }
-
-void CplexArray::resize(int32_t n) {
-  reset();
-  n_ = n;
-  size_t m = n * sizeof(Cplex);
-  m = ((m + kAlign - 1) / kAlign) * kAlign;
-  data_ = reinterpret_cast<Cplex *>(::aligned_alloc(kAlign, m));
-  CHECK(data_);
-}
-
-void CplexArray::fill(Cplex x) { std::fill(data_, data_ + n_, x); }
-
-void CplexArray::clear() { std::memset(data_, 0, sizeof(Cplex) * n_); }
 
 CplexMatrix::CplexMatrix(int32_t rows, int32_t cols)
     : rows_(rows), cols_(cols), data_(rows) {
