@@ -167,7 +167,9 @@ cc_library(
 	hdrs = ["binner.h"],
   deps = [
     ":base",
+    ":integer",
     ":window",
+    ":sincos",
   ],
 )
 
@@ -176,6 +178,7 @@ cc_test(
   srcs = ["binner_test.cc"],
   deps = [
     ":binner",
+    ":gen",
     ":catch",
   ],
 )

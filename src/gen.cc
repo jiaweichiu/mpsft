@@ -9,7 +9,7 @@ void GenerateModeMap(int32_t n, int32_t k, ModeMap *mm) {
   mm->clear();
   const size_t kk = k;
   while (mm->size() < kk) {
-    const int32_t idx = PosMod(RandomInt32(), n);
+    const int32_t idx = UnsafePosMod(RandomInt32(), n);
     if (mm->find(idx) != mm->end()) {
       continue;
     }

@@ -19,6 +19,7 @@
 #pragma once
 
 #include "base.h"
+#include "integer.h"
 #include "window.h"
 
 namespace mps {
@@ -28,21 +29,21 @@ namespace mps {
 
 class BinInTime {
 public:
-  BinInTime(const Window &win, Int bits);
-  virtual void Run(const CplexArray &x, const Transform &tf, Int q,
+  BinInTime(const Window &win, int32_t bits);
+  virtual void Run(const CplexArray &x, const Transform &tf, int32_t q,
                    CplexMatrix *out) = 0;
-  static BinInTime *Create(int binner_type, const Window &win, Int bits);
+  static BinInTime *Create(int binner_type, const Window &win, int32_t bits);
 
 protected:
   const Window &win_;
-  Int bits_;
+  int32_t bits_;
   std::unique_ptr<FFTPlan> plan_;
 };
 
 class BinInTimeV0 : public BinInTime {
 public:
-  BinInTimeV0(const Window &win, Int bits);
-  void Run(const CplexArray &x, const Transform &tf, Int q,
+  BinInTimeV0(const Window &win, int32_t bits);
+  void Run(const CplexArray &x, const Transform &tf, int32_t q,
            CplexMatrix *out) override;
 
 private:
@@ -52,8 +53,8 @@ private:
 // Make use of symmetry in tau's to half number of sinusoids.
 class BinInTimeV1 : public BinInTime {
 public:
-  BinInTimeV1(const Window &win, Int bits);
-  void Run(const CplexArray &x, const Transform &tf, Int q,
+  BinInTimeV1(const Window &win, int32_t bits);
+  void Run(const CplexArray &x, const Transform &tf, int32_t q,
            CplexMatrix *out) override;
 
 private:
@@ -65,40 +66,40 @@ private:
 // Split big loop into multiple small loops.
 class BinInTimeV2 : public BinInTime {
 public:
-  BinInTimeV2(const Window &win, Int bits);
-  void Run(const CplexArray &x, const Transform &tf, Int q,
+  BinInTimeV2(const Window &win, int32_t bits);
+  void Run(const CplexArray &x, const Transform &tf, int32_t q,
            CplexMatrix *out) override;
 
 private:
   CplexArray scratch_; // Size p=win.p().
   CplexArray scratch2_;
-  IntArray idx_;
-  IntArray idx2_;
+  Int32Array idx_;
+  Int32Array idx2_;
 };
 
 class BinInFreq {
 public:
-  BinInFreq(const Window &win, Int bits);
-  virtual void Run(const ModeMap &mm, const Transform &tf, Int q,
+  BinInFreq(const Window &win, int32_t bits);
+  virtual void Run(const ModeMap &mm, const Transform &tf, int32_t q,
                    CplexMatrix *out) = 0;
-  static BinInFreq *Create(int binner_type, const Window &win, Int bits);
+  static BinInFreq *Create(int binner_type, const Window &win, int32_t bits);
 
 protected:
   const Window &win_;
-  Int bits_;
+  int bits_;
 };
 
 class BinInFreqV0 : public BinInFreq {
 public:
-  BinInFreqV0(const Window &win, Int bits);
-  void Run(const ModeMap &mm, const Transform &tf, Int q,
+  BinInFreqV0(const Window &win, int32_t bits);
+  void Run(const ModeMap &mm, const Transform &tf, int32_t q,
            CplexMatrix *out) override;
 };
 
 class BinInFreqV1 : public BinInFreq {
 public:
-  BinInFreqV1(const Window &win, Int bits);
-  void Run(const ModeMap &mm, const Transform &tf, Int q,
+  BinInFreqV1(const Window &win, int32_t bits);
+  void Run(const ModeMap &mm, const Transform &tf, int32_t q,
            CplexMatrix *out) override;
 };
 

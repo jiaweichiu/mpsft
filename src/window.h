@@ -29,7 +29,7 @@ public:
   // Assume 0 <= t <= p2 where p2=(p-1)/2. Assume p is odd.
   inline double wt(int32_t t) const {
     DCHECK_GE(t, 0);
-    DCHECK_LE(t, p2());
+    DCHECK_LT(t, p_);
     return wt_[t];
   }
 

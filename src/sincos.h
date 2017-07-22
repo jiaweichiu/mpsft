@@ -18,6 +18,10 @@
  */
 #pragma once
 
+#include <cmath>
+
+#include "base.h"
+
 namespace mps {
 
 // NOTE: Approximate result.
@@ -33,5 +37,11 @@ double CosTwoPiApprox(double x);
 // Optimize later. Not much impact on running time.
 // Returns sin(x)/x.
 double SincPi(double x);
+
+// Slow form. Mainly for tests.
+inline Cplex Sinusoid(double freq) {
+  freq *= (2.0 * M_PI);
+  return Cplex(::cos(freq), ::sin(freq));
+}
 
 } // namespace mps

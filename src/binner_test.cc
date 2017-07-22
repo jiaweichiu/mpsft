@@ -20,48 +20,49 @@
 
 #include "base.h"
 #include "binner.h"
+#include "gen.h"
 #include "window.h"
 
 namespace mps {
 
 // Check that different versions of BinInTime matches up.
-TEST_CASE("BinInTime", "") {
-  const Int n = 1109;
-  const Int bins = 1;
-  const Int bits = 2;
-  const Int q = 100;
+// TEST_CASE("BinInTime", "") {
+//   const Int n = 1109;
+//   const Int bins = 1;
+//   const Int bits = 2;
+//   const Int q = 100;
 
-  const ModeMap mm = {{500, Cplex(1.0, 0)}};
-  CplexArray x(n);
-  EvaluateModes(n, mm, &x);
+//   const ModeMap mm = {{500, Cplex(1.0, 0)}};
+//   CplexArray x(n);
+//   EvaluateModes(n, mm, &x);
 
-  Window win(n, bins, 1e-6);
-  Transform tf(n, 1, 0, 0);
+//   Window win(n, bins, 1e-6);
+//   Transform tf(n, 1, 0, 0);
 
-  BinInTimeV0 binner0(win, bits);
-  CplexMatrix out_time0(1 + 2 * bits, bins);
-  binner0.Run(x, tf, q, &out_time0);
+//   BinInTimeV0 binner0(win, bits);
+//   CplexMatrix out_time0(1 + 2 * bits, bins);
+//   binner0.Run(x, tf, q, &out_time0);
 
-  BinInTimeV1 binner1(win, bits);
-  CplexMatrix out_time1(1 + 2 * bits, bins);
-  binner1.Run(x, tf, q, &out_time1);
+//   BinInTimeV1 binner1(win, bits);
+//   CplexMatrix out_time1(1 + 2 * bits, bins);
+//   binner1.Run(x, tf, q, &out_time1);
 
-  BinInTimeV2 binner2(win, bits);
-  CplexMatrix out_time2(1 + 2 * bits, bins);
-  binner2.Run(x, tf, q, &out_time2);
+//   BinInTimeV2 binner2(win, bits);
+//   CplexMatrix out_time2(1 + 2 * bits, bins);
+//   binner2.Run(x, tf, q, &out_time2);
 
-  for (Int i = 0; i < 1 + 2 * bits; ++i) {
-    REQUIRE(std::abs(out_time0[i][0] - out_time1[i][0]) == Approx(0));
-    REQUIRE(std::abs(out_time0[i][0] - out_time2[i][0]) == Approx(0));
-  }
-}
+//   for (Int i = 0; i < 1 + 2 * bits; ++i) {
+//     REQUIRE(std::abs(out_time0[i][0] - out_time1[i][0]) == Approx(0));
+//     REQUIRE(std::abs(out_time0[i][0] - out_time2[i][0]) == Approx(0));
+//   }
+// }
 
 // Check that BinInTime and BinInFreq has identical results.
 void TimeFreqMatch(int bin_in_time_type, int bin_in_freq_type) {
-  const Int n = 1109;
-  const Int bins = 5;
-  const Int bits = 2;
-  const Int q = 106;
+  const int32_t n = 1109;
+  const int32_t bins = 5;
+  const int32_t bits = 2;
+  const int32_t q = 106;
   Window win(n, bins, 1e-6);
 
   // Prepare x_hat and x.
@@ -78,7 +79,7 @@ void TimeFreqMatch(int bin_in_time_type, int bin_in_freq_type) {
 
   REQUIRE(RE(out_time[0][1]) == Approx(1.12652));
   REQUIRE(IM(out_time[0][1]) == Approx(-0.108838));
-  for (Int i = 0; i < bins; ++i) {
+  for (int32_t i = 0; i < bins; ++i) {
     if (i != 1) {
       REQUIRE(std::abs((out_time[0])[i]) == Approx(0));
     }
@@ -88,35 +89,35 @@ void TimeFreqMatch(int bin_in_time_type, int bin_in_freq_type) {
   std::unique_ptr<BinInFreq> bin_in_freq(
       BinInFreq::Create(bin_in_freq_type, win, bits));
   CplexMatrix out_freq(1 + 2 * bits, bins);
-  out_freq.Clear();
+  out_freq.clear();
   bin_in_freq->Run(mm, tf, q, &out_freq); // Subtract.
 
   REQUIRE(RE(out_freq[0][1]) == Approx(-1.12652));
   REQUIRE(IM(out_freq[0][1]) == Approx(0.108838));
-  for (Int i = 0; i < bins; ++i) {
+  for (int32_t i = 0; i < bins; ++i) {
     if (i != 1) {
       REQUIRE(std::abs(out_freq[0][i]) == Approx(0));
     }
   }
 
   // Compare out_time and out_freq.
-  for (Int i = 0; i < 1 + 2 * bits; ++i) {
-    for (Int j = 0; j < bins; ++j) {
+  for (int32_t i = 0; i < 1 + 2 * bits; ++i) {
+    for (int32_t j = 0; j < bins; ++j) {
       REQUIRE(std::abs(out_time[i][j] + out_freq[i][j]) == Approx(0));
     }
   }
 }
 
 TEST_CASE("TimeFreqMatch_0_0", "") { TimeFreqMatch(0, 0); }
-TEST_CASE("TimeFreqMatch_1_1", "") { TimeFreqMatch(1, 1); }
-TEST_CASE("TimeFreqMatch_2_1", "") { TimeFreqMatch(2, 1); }
+// TEST_CASE("TimeFreqMatch_1_1", "") { TimeFreqMatch(1, 1); }
+// TEST_CASE("TimeFreqMatch_2_1", "") { TimeFreqMatch(2, 1); }
 
 // Same as TimeFreqMatch but using larger sizes.
 void TimeFreqMatchBigger(int bin_in_time_type, int bin_in_freq_type) {
-  const Int n = kPrimes[20];
-  const Int bins = 5;
-  const Int bits = 2;
-  const Int q = 0xFFFFFF;
+  const int32_t n = kPrimes[20];
+  const int32_t bins = 5;
+  const int32_t bits = 2;
+  const int32_t q = 0xFFFFFF;
   Window win(n, bins, 1e-6);
 
   // Prepare x_hat and x.
@@ -135,17 +136,17 @@ void TimeFreqMatchBigger(int bin_in_time_type, int bin_in_freq_type) {
   std::unique_ptr<BinInFreq> bin_in_freq(
       BinInFreq::Create(bin_in_freq_type, win, bits));
   CplexMatrix out_freq(1 + 2 * bits, bins);
-  out_freq.Clear();
+  out_freq.clear();
   bin_in_freq->Run(mm, tf, q, &out_freq); // Subtract.
 
   // Compare.
-  for (Int i = 0; i < bins; ++i) {
+  for (int32_t i = 0; i < bins; ++i) {
     REQUIRE(std::abs(out_time[0][i] + out_freq[0][i]) == Approx(0));
   }
 }
 
 TEST_CASE("TimeFreqMatchBigger_0_0", "") { TimeFreqMatchBigger(0, 0); }
-TEST_CASE("TimeFreqMatchBigger_1_1", "") { TimeFreqMatchBigger(1, 1); }
-TEST_CASE("TimeFreqMatchBigger_2_1", "") { TimeFreqMatchBigger(2, 1); }
+// TEST_CASE("TimeFreqMatchBigger_1_1", "") { TimeFreqMatchBigger(1, 1); }
+// TEST_CASE("TimeFreqMatchBigger_2_1", "") { TimeFreqMatchBigger(2, 1); }
 
 } // namespace mps

@@ -115,7 +115,7 @@ static void BM_PosMod1(benchmark::State &state) {
   while (state.KeepRunning()) {
 #pragma omp simd aligned(data : kAlign)
     for (int i = 0; i < n; ++i) {
-      data[i] = PosMod1(data[i], divisor);
+      data[i] = UnsafePosMod1(data[i], divisor);
     }
   }
 }
@@ -131,7 +131,7 @@ static void BM_PosMod2(benchmark::State &state) {
   while (state.KeepRunning()) {
 #pragma omp simd aligned(data : kAlign)
     for (int i = 0; i < n; ++i) {
-      data[i] = PosMod2(data[i], divisor);
+      data[i] = UnsafePosMod2(data[i], divisor);
     }
   }
 }
@@ -147,7 +147,7 @@ static void BM_PosMod(benchmark::State &state) {
   while (state.KeepRunning()) {
 #pragma omp simd aligned(data : kAlign)
     for (int i = 0; i < n; ++i) {
-      data[i] = PosMod(data[i], divisor);
+      data[i] = UnsafePosMod(data[i], divisor);
     }
   }
 }

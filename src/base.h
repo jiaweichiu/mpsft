@@ -91,7 +91,7 @@ public:
 
   inline int size() const { return n_; }
   inline T &operator[](int i) { return data_[i]; }
-  inline const double &operator[](int i) const { return data_[i]; }
+  inline const T &operator[](int i) const { return data_[i]; }
   inline T *data() const { return data_; }
 
   void clear() { ::memset(data_, 0, sizeof(T) * n_); }
