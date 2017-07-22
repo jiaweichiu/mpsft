@@ -26,36 +26,27 @@
 namespace mps {
 
 // Check that different versions of BinInTime matches up.
-// TEST_CASE("BinInTime", "") {
-//   const Int n = 1109;
-//   const Int bins = 1;
-//   const Int bits = 2;
-//   const Int q = 100;
-
-//   const ModeMap mm = {{500, Cplex(1.0, 0)}};
-//   CplexArray x(n);
-//   EvaluateModes(n, mm, &x);
-
-//   Window win(n, bins, 1e-6);
-//   Transform tf(n, 1, 0, 0);
-
-//   BinInTimeV0 binner0(win, bits);
-//   CplexMatrix out_time0(1 + 2 * bits, bins);
-//   binner0.Run(x, tf, q, &out_time0);
-
-//   BinInTimeV1 binner1(win, bits);
-//   CplexMatrix out_time1(1 + 2 * bits, bins);
-//   binner1.Run(x, tf, q, &out_time1);
-
-//   BinInTimeV2 binner2(win, bits);
-//   CplexMatrix out_time2(1 + 2 * bits, bins);
-//   binner2.Run(x, tf, q, &out_time2);
-
-//   for (Int i = 0; i < 1 + 2 * bits; ++i) {
-//     REQUIRE(std::abs(out_time0[i][0] - out_time1[i][0]) == Approx(0));
-//     REQUIRE(std::abs(out_time0[i][0] - out_time2[i][0]) == Approx(0));
-//   }
-// }
+void BinInTimeMatch(int v0, int v1) {
+  const int32_t n = 1109;
+  const int32_t bins = 1;
+  const int32_t bits = 2;
+  const int32_t q = 100;
+  const ModeMap mm = {{500, Cplex(1.0, 0)}};
+  CplexArray x(n);
+  EvaluateModes(n, mm, &x);
+  Window win(n, bins, 1e-6);
+  Transform tf(n, 1, 0, 0);
+  std::unique_ptr<BinInTime> binner0(BinInTime::Create(v0, win, bits));
+  CplexMatrix out_time0(1 + 2 * bits, bins);
+  binner0->Run(x, tf, q, &out_time0);
+  std::unique_ptr<BinInTime> binner1(BinInTime::Create(v1, win, bits));
+  CplexMatrix out_time1(1 + 2 * bits, bins);
+  binner1->Run(x, tf, q, &out_time1);
+  for (int32_t i = 0; i < 1 + 2 * bits; ++i) {
+    REQUIRE(std::abs(out_time0[i][0] - out_time1[i][0]) == Approx(0));
+  }
+}
+TEST_CASE("BinInTimeMatch_0_1", "") { BinInTimeMatch(0, 1); }
 
 // Check that BinInTime and BinInFreq has identical results.
 void TimeFreqMatch(int bin_in_time_type, int bin_in_freq_type) {
