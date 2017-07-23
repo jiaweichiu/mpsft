@@ -92,7 +92,7 @@ Say we want to bin a signal $y$. Let $B$ be number of bins. The basic idea is we
 
 Let $\delta>0$ be a small value controlling the accuracy of our window. Let $c_{\delta} = \log (1/\delta)$. Let $\sigma_f = \frac{1}{4B\sqrt{2c_{\delta}}}$ and $\sigma_t = \frac{1}{2\pi \sigma_f}$. Let $w=\frac{1}{2B}$ be the desired halfwidth of the window in frequency space. In the time domain, we want to first \textbf{multiply} our input signal with $e^{-2\pi i t/2B}W_t$ where the window function is 
 $$W_t = e^{-t^2/2\sigma_t^2} F_{w,t} \text{Indicator}\left(|t|\leq \frac{P-1}{2}\right)$$
-where $F_{w,t} = \frac{\sin(\pi t w)}{\pi t}$ is the sinc function, and $P$ decides the support of our window, and is an odd integer satisfying $P \geq 2\sigma_t \sqrt{2c_{\delta}} + 1$. This first step takes $O(P)=O(B c_{\delta})$ time. (Do not worry about the $e^{-2\pi i t/2B}$ term. It is just to shift us by $0.5/B$ in the frequency space so that bin edges are $0, 1/B, 2/B, \ldots$ instead of $0.5/B, 1.5/B, 2.5/B, \ldots$.)
+where $F_{w,t} = \frac{\sin(\pi t w)}{\pi t}$ is the sinc function, and $P$ decides the support of our window, and is an odd integer satisfying $P \geq 2\sigma_t \sqrt{2c_{\delta}} + 1$. This first step takes $O(P)=O(B c_{\delta})$ time. (Do not worry about the $e^{-2\pi i t/2B}$ term. It is just to shift by $0.5/B$ in the frequency space so that bin edges are $0, 1/B, 2/B, \ldots$ instead of $0.5/B, 1.5/B, 2.5/B, \ldots$.)
 
 The second step is to \textbf{fold} our $P$ vector into a $B$-vector, which corresponds to subsampling the convolution of $\hat{x}$ with our boxcar filter, at $B$ points. Recall Poisson summation formula if interested.
 
@@ -102,7 +102,7 @@ In practice, almost all of the time is taken up by the first step, because of th
 
 \subsection{Binning in frequency domain}
 
-SFT is an iterative algorithms. As modes are found, they have to be implicitly removed from the original input signal. This means when we bin a signal, we need to \textbf{subtract contributions} to bin coeffcients due to found modes.
+SFT is an iterative algorithm. As modes are found, they have to be implicitly removed from the original input signal. This means when we bin a signal, we need to \textbf{subtract contributions} to bin coeffcients due to found modes.
 
 Binning in frequency domain is much easier than binning in time. Say our input signal is $y$. For each mode $k_*$ in the input signal, we first find the bin it is in by $b = \lfloor k_* B/N \rfloor$. Then multiply $\hat{y}_{k_*}$ by
 $$\hat{W}_{b,k_*} = \hat{W}\left(\frac{b+0.5}{B}-\frac{k_*}{N}\right)$$
@@ -259,7 +259,7 @@ where $\sigma$ is user-provided. By the way, this means that in the time domain,
 \subsection{Setup details}
 Our CPU is a I7-6700K 4GHz. We disable CPU scaling and run Google Benchmarks with the flags \texttt{--benchmark\_repetitions=10} to obtain confidence intervals.
 
-FFTW-3.3.6-pl2 is compiled locally with all the optimization turned on, e.g., \texttt{-O3} \texttt{-mtune-native} \texttt{-ffast-math}.
+FFTW-3.3.6-pl2 is compiled locally with all the optimization turned on, for example \texttt{-O3} \texttt{-mtune-native} \texttt{-ffast-math}. We also run FFTW with $N$ being powers of $2$ only.
 
 MPSFT is also compiled locally with \texttt{-O3} \texttt{-mtune=native} \texttt{-ffast-math} \texttt{-fopenmp-simd}. Note that we are using only OpenMP SIMD, and the program is \textbf{single-threaded}.
 
@@ -297,6 +297,25 @@ Use the same parameters as the previous section. The only difference is that $\s
 \includegraphics[scale=0.6]{./graph/noise}
 \caption{Loglog plot of mean $L_1$ error versus $\sigma$. The mean $L_1$ error grows roughly linearly with $\sigma$. Errorbars are very small. \label{fig:noise}}
 \end{figure}
+
+\subsection{Binning benchmarks}
+It is satisfying to see how binning speeds up as we make various code optimizations.
+
+\begin{center}
+\begin{tabular}{|c|c|c|}
+\hline
+Version & Running time/ns & Remarks \\
+\hline
+BinInTimeV0 & 51313717 & Reference implementation \\
+BinInTimeV1 & 33825153 & Exploit symmetry \\
+BinInTimeV2 & 15464899 & Chebyshev approximation \\
+BinInTimeV3 & 15498434 & Boost.SIMD \\
+BinInTimeV4 & 13177513 & Work with double instead of complex arrays \\
+BinInFreqV0 & 189515 & Reference implementation \\
+BinInFreqV1 & 91742 & Exploit symmetry\\
+\hline
+\end{tabular}
+\end{center}
 
 \bibliographystyle{abbrv}
 \bibliography{references}
