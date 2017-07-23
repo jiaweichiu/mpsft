@@ -15,9 +15,9 @@ This is not a formal publication. We try to be brief.
 \section{Introduction}
 Given a $N$-vector $x$, we like to perform the forward FFT to obtain $\hat{x}$. This is typically done in $O(N \log N)$ time. However, suppose we know that $\hat{x}$ is $S$-sparse plus some noise. Then it is possible to recover these $S$ modes in $\tilde{O}(S)$ time where $\tilde{O}(\cdot)$ is $O(\cdot)$ notation ignoring log factors. We call such algorithms SFT algorithms.
 
-SFT is not new. Existing work includes AAFFT\cite{iwen2007empirical}, sFFT3.0 \cite{hassanieh2012simple, hassanieh2012nearly}. However, these algorithms have seen little use because $n$ has to be very large relative to $S$ in order to justify its use.
+SFT is not new. Existing work includes AAFFT\cite{iwen2007empirical}, sFFT3.0\cite{hassanieh2012simple, hassanieh2012nearly}. However, these algorithms have seen little use because $n$ has to be very large relative to $S$ in order to justify its use.
 
-In a study done by creators of sFFT3.0, where noiseless inputs are assumed, AAFFT is faster than FFTW only when $k\lesssim 2^8$. In our benchmarks, MPSFT, our new SFT algorithm, is faster than FFTW when $k \lesssim 1800$, when we consider rather noisy inputs. We believe there is \textbf{at least a 5X improvement} over AAFFT. Note that we do not consider sFFT3.0 because it works only for noiseless inputs.
+In a study done by creators of sFFT3.0, where noiseless inputs are assumed, AAFFT is faster than FFTW\cite{FFTW05} only when $k\lesssim 2^8$. In our benchmarks, MPSFT, our new SFT algorithm, is faster than FFTW when $k \lesssim 1800$, when we consider rather noisy inputs. We believe there is \textbf{at least a 5X improvement} over AAFFT. Note that we do not consider sFFT3.0 because it works only for noiseless inputs.
 
 Before proceeding, we set up some notation. We use the following convention:
 $$x_t = \sum_k \hat{x}_k e^{2\pi i kt/N}; \quad \hat{x}_k =\frac{1}{n} \sum_t x_t e^{-2\pi i k t/N}.$$

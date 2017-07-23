@@ -6,6 +6,13 @@ P.~Est{\'e}rie, J.~Falcou, M.~Gaunard, and J.-T. Laprest{\'e}.
 \newblock In {\em Proceedings of the 2014 Workshop on Programming Models for
   SIMD/Vector Processing}, WPMVP '14, pages 1--8, New York, NY, USA, 2014. ACM.
 
+\bibitem{FFTW05}
+M.~Frigo and S.~G. Johnson.
+\newblock The design and implementation of {FFTW3}.
+\newblock {\em Proceedings of the IEEE}, 93(2):216--231, 2005.
+\newblock Special issue on ``Program Generation, Optimization, and Platform
+  Adaptation''.
+
 \bibitem{hassanieh2012nearly}
 H.~Hassanieh, P.~Indyk, D.~Katabi, and E.~Price.
 \newblock Nearly optimal sparse {F}ourier transform.
