@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.16 (TeX Live 2015/Debian) (preloaded format=pdflatex 2017.7.16)  23 JUL 2017 22:29
+This is pdfTeX, Version 3.14159265-2.6-1.40.16 (TeX Live 2015/Debian) (preloaded format=pdflatex 2017.7.16)  23 JUL 2017 22:37
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -502,44 +502,44 @@ LaTeX Font Info:    Try loading font information for U+msb on input line 16.
 (/usr/share/texlive/texmf-dist/tex/latex/amsfonts/umsb.fd
 File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 )
-LaTeX Font Info:    Try loading font information for OMS+cmr on input line 42.
+LaTeX Font Info:    Try loading font information for OMS+cmr on input line 44.
 
 (/usr/share/texlive/texmf-dist/tex/latex/base/omscmr.fd
 File: omscmr.fd 2014/09/29 v2.5h Standard LaTeX font definitions
 )
 LaTeX Font Info:    Font shape `OMS/cmr/m/n' in size <10> not available
-(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 42.
+(Font)              Font shape `OMS/cmsy/m/n' tried instead on input line 44.
  [1
 
 {/var/lib/texmf/fonts/map/pdftex/updmap/pdftex.map}] [2] [3]
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 124.
+(hyperref)                removing `math shift' on input line 126.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\tau' on input line 124.
+(hyperref)                removing `\tau' on input line 126.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 124.
+(hyperref)                removing `math shift' on input line 126.
 
 [4] [5] [6] [7]
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 266.
+(hyperref)                removing `math shift' on input line 268.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 266.
+(hyperref)                removing `math shift' on input line 268.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 266.
+(hyperref)                removing `math shift' on input line 268.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 266.
+(hyperref)                removing `math shift' on input line 268.
 
 Package epstopdf Info: Source file: <./graph/runtime.eps>
 (epstopdf)                    date: 2017-07-23 21:50:18
@@ -549,14 +549,14 @@ Package epstopdf Info: Source file: <./graph/runtime.eps>
 (epstopdf)                    size: 13086 bytes
 (epstopdf)             Command: <repstopdf --outfile=./graph/runtime-eps-conver
 ted-to.pdf ./graph/runtime.eps>
-(epstopdf)             \includegraphics on input line 286.
+(epstopdf)             \includegraphics on input line 288.
 Package epstopdf Info: Output file is already uptodate.
 <./graph/runtime-eps-converted-to.pdf, id=141, 578.16pt x 397.485pt>
 File: ./graph/runtime-eps-converted-to.pdf Graphic file (type pdf)
 
 <use ./graph/runtime-eps-converted-to.pdf>
 Package pdftex.def Info: ./graph/runtime-eps-converted-to.pdf used on input lin
-e 286.
+e 288.
 (pdftex.def)             Requested size: 346.89867pt x 238.49283pt.
  [8 <./graph/runtime-eps-converted-to.pdf>]
 Package epstopdf Info: Source file: <./graph/noise.eps>
@@ -567,25 +567,25 @@ Package epstopdf Info: Source file: <./graph/noise.eps>
 (epstopdf)                    size: 18669 bytes
 (epstopdf)             Command: <repstopdf --outfile=./graph/noise-eps-converte
 d-to.pdf ./graph/noise.eps>
-(epstopdf)             \includegraphics on input line 297.
+(epstopdf)             \includegraphics on input line 299.
 Package epstopdf Info: Output file is already uptodate.
  <./graph/noise-eps-converted-to.pdf, id=163, 578.16pt x 397.485pt>
 File: ./graph/noise-eps-converted-to.pdf Graphic file (type pdf)
 
 <use ./graph/noise-eps-converted-to.pdf>
 Package pdftex.def Info: ./graph/noise-eps-converted-to.pdf used on input line 
-297.
+299.
 (pdftex.def)             Requested size: 346.89867pt x 238.49283pt.
  (./report.bbl [9 <./graph/noise-eps-converted-to.pdf>])
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 323.
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 325.
  [10]
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 323.
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 325.
  (./report.aux)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 323.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 323.
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 325.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 325.
 Package rerunfilecheck Info: File `report.out' has not changed.
 (rerunfilecheck)             Checksum: 303F4E2A7C117E5E94C939D3FD1E8E0C;1352.
-Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 323.
+Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 325.
  ) 
 Here is how much of TeX's memory you used:
  9214 strings out of 494910
@@ -612,7 +612,7 @@ exlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy7.pfb></usr/share/texlive/
 texmf-dist/fonts/type1/public/amsfonts/cm/cmti10.pfb></usr/share/texlive/texmf-
 dist/fonts/type1/public/amsfonts/cm/cmtt10.pfb></usr/share/texlive/texmf-dist/f
 onts/type1/public/amsfonts/symbols/msam10.pfb>
-Output written on report.pdf (10 pages, 278001 bytes).
+Output written on report.pdf (10 pages, 277967 bytes).
 PDF statistics:
  269 PDF objects out of 1000 (max. 8388607)
  204 compressed objects within 3 object streams

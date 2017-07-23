@@ -19,17 +19,19 @@ SFT is not new. Existing work includes AAFFT\cite{iwen2007empirical}, sFFT3.0 \c
 
 In a study done by creators of sFFT3.0, where noiseless inputs are assumed, AAFFT is faster than FFTW only when $k\lesssim 2^8$. In our benchmarks, MPSFT, our new SFT algorithm, is faster than FFTW when $k \lesssim 1800$, when we consider rather noisy inputs. We believe there is \textbf{at least a 5X improvement} over AAFFT. Note that we do not consider sFFT3.0 because it works only for noiseless inputs.
 
-There are several new ingredients here. Before proceeding, we set up some notation. We use the following convention:
+Before proceeding, we set up some notation. We use the following convention:
 $$x_t = \sum_k \hat{x}_k e^{2\pi i kt/N}; \quad \hat{x}_k =\frac{1}{n} \sum_t x_t e^{-2\pi i k t/N}.$$
 
 In the noiseless case, the support of $\hat{x}$ are integers and we call them \textbf{mode locations}. When these are divided by $n$ and mapped into $[0,1)$, we call them \textbf{mode frequencies}. We use these interchangeably.
+
+There are three new ingredients in MPSFT:
 
 \begin{enumerate}
 \item \textbf{Matrix pencil method}: The matrix pencil method, like the Prony method, is a standard technique in signal processing for mode frequency identification.
 
 In this work, we integrate the matrix pencil method into the SFT framework to achieve two effects. Firstly, it identifies modes much more accurately than what is used in existing SFT algorithms. Secondly, it helps detect errors in our mode identification step and greatly reduces the number of spurious modes being found. In existing SFT algorithms, we pay a much heavier cost to filter away or undo such modes.
 
-\item \textbf{Exploiting symmetry}: Matrix pencil method is more accurate for mode identification, but it comes at a cost. The straightforward way of using it would double the time needed for mode identification, from code profiling. We realize that this cost can be roughly halved if we exploit some symmetry in the matrix pencil method.
+\item \textbf{Exploiting symmetry}: Matrix pencil method is more accurate for mode identification, but it comes at a cost. The straightforward way of using it would double the time needed for mode identification. We realize that this cost can be roughly halved if we exploit some symmetry in the matrix pencil method.
 
 \item \textbf{SIMD vectorization}: FFTW makes good use of SIMD instructions. To be competitive, we vectorize critical parts of our code using OMP-SIMD and Boost-SIMD. This yields at least a 2X improvement in running time.
 
