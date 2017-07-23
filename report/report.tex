@@ -123,7 +123,7 @@ If you repeat the analysis for more than one bin, the variance of the error in e
 
 Let $\Lambda$ be the set of heavy modes. Define the overall noise energy to be $\sigma^2 := \sum_{k\neq \Lambda} |\hat{x}_k|^2$. Then the above formula suggests that the error in each bin coefficient would be usually be on the order of $\frac{\sigma}{\sqrt{B}}$. Even in later iterations when $S$ of the residual signal is very small, we still want to maintain a \textbf{minimum number of bins} to mitigate the error in bin coefficients by $1/\sqrt{B}$. This is essential for ensuring a good chance of mode identification.
 
-\subsection{Translating by $\tau$}
+\subsection{Translating by $\tau$ for mode identification}
 
 Denote $x$ as the original signal and $y$ as the transformed signal using parameters $a,b,c$.
 
@@ -175,7 +175,7 @@ Compute the \textbf{SVD} of this $2\times 2$ matrix. If the second singular valu
 
 In existing SFT algorithms, there are various ways of handling wrongly identified modes. One way is to sort all the found modes by their magnitude in each iteration, and drop the smallest ones. Another way is to use larger $B$ and more conservative parameters to make sure that these wrong modes would be corrected in subsequent iterations. These are all much more expensive compared to this cheap SVD step.
 
-Furthermore, this SVD step \textbf{denoises the binned signal} $U$ as we consider only the dominant singular vector. Let $v$ be the dominant right singular vector. Then $$\text{imag}(\text{conj}(v_0)v_1)<0$$ is a vote for the isolated frequency being in the second half $[0.5,1)$ of the frequency space, i.e., the first bit of $k_*/N$. In a \href{https://github.com/tinkerstash/mpsft/blob/master/notebook/Mode%20identification.ipynb}{simple numerical experiment}, it boosts the chance of getting this bit right from $70\%$ to $80\%$.
+Furthermore, this SVD step \textbf{denoises the binned signal} $U$ as we consider only the dominant singular vector. Let $v$ be the dominant right singular vector. Then $$\text{imag}(\text{conj}(v_0)v_1)<0$$ is a vote for the isolated frequency being in the second half $[0.5,1)$ of the frequency space, i.e., the first bit of $k_*/N$ is $1$. In a \href{https://github.com/tinkerstash/mpsft/blob/master/notebook/Mode%20identification.ipynb}{simple numerical experiment}, it boosts the chance of getting this bit right from $70\%$ to $80\%$.
 
 Above, we use $\tau=-1,0,1$ for simplicity. In MPSFT, we actually sample $U$ at $\tau=q \pm 2^s B$ for $s=0,\ldots,1 + \lfloor \log_2 (N/B) \rfloor$ and multiple random $q$'s. For each $(q-2^s B, q, q+2^s B)$, we have a vote for the $s$-th bit of $k_* B/N$. For each $s$, we sum the votes over different $q$'s and take the majority.
 
