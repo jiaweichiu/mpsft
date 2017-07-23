@@ -57,7 +57,7 @@ void Demo1::Run() {
   }
 }
 
-void Demo1::PostAnalyze() {
+void Demo1::PostAnalyze(std::ostream &fout) {
   const int32_t n = x_.size();
 
   CplexArray xh2(n);
@@ -85,24 +85,29 @@ void Demo1::PostAnalyze() {
   }
   const double hit_l1_err = hit_l1_sum / hit;
   const double hit_l2_err = std::sqrt(hit_l2_sum / hit);
+  fout << hit << "\t" << hit_l1_err << "\t" << hit_l2_err << "\t";
   LOG(INFO) << "hit count=" << hit << " l1_err=" << hit_l1_err
             << " l2_err=" << hit_l2_err;
 
   const double miss_l1_err = miss_l1_sum / miss;
   const double miss_l2_err = std::sqrt(miss_l2_sum / miss);
+  fout << miss << "\t" << miss_l1_err << "\t" << miss_l2_err << "\t";
   LOG(INFO) << "miss count=" << miss << " l1_err=" << miss_l1_err
             << " l2_err=" << miss_l2_err;
 
   double sum1 = 0;
   double sum2 = 0;
+  double max_err = 0;
   for (int32_t i = 0; i < n; ++i) {
     const double err = std::abs(xh2[i] - xh_[i]);
     sum1 += err;
     sum2 += err * err;
+    max_err = std::max(max_err, err);
   }
   const double l1_err = sum1 / n;
   const double l2_err = std::sqrt(sum2 / n);
-  LOG(INFO) << l1_err << " " << l2_err;
+  fout << l1_err << "\t" << l2_err << "\t" << max_err << "\n";
+  LOG(INFO) << l1_err << " " << l2_err << " " << max_err;
 }
 
 } // namespace mps

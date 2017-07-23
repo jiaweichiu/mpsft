@@ -7,14 +7,14 @@ build:opt \
 --copt="-std=c++11" \
 --copt="-g0" \
 --copt="-DNDEBUG" \
---copt="-march=native" \
+--copt="-mtune=native" \
 --copt="-O3" \
 --copt="-ffast-math" \
 --copt="-mavx2" \
 --copt="-fopenmp-simd" \
---copt="-ftree-vectorize" \
 --copt="-fopt-info-vec-optimized"
 
+#--copt="-ftree-vectorize" \
 #--copt="-mavx" \
 #--copt="-march=corei7" \
 #--copt="-march=native" \

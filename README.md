@@ -139,18 +139,22 @@ We use the following parameters.
 
 ```
 n = 2^22
-window_delta = 1e-5
+window_delta = 1e-6
 window_threshold = 0.1
 max_stale_iter = 5
-min_bins = 101
-sigma = 1e-2
+min_bins = 201
+sigma = 0.1
 ```
 
 Here are the results. We see that the sparsity has to be around 1000 in order for MPSFT to be faster than FFTW.
 
 ```shell
 bazel build --config=opt :demo1_bench
-./bazel-bin/demo1_bench
+
+./bazel-bin/demo1_bench \
+--benchmark_repetitions=10 \
+--benchmark_report_aggregates_only \
+--benchmark_format=csv
 ```
 
 Results:

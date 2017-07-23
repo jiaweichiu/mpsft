@@ -16,6 +16,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301 USA
  *
  */
+#include <iostream>
 
 #include "base.h"
 
@@ -38,7 +39,7 @@ public:
   void Run();
 
   // Reports the errors.
-  void PostAnalyze();
+  void PostAnalyze(std::ostream &fout);
 
 private:
   const Demo1Options &opt_;

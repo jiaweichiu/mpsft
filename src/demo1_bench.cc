@@ -29,7 +29,7 @@ namespace mps {
 static void BM_Demo1(benchmark::State &state) {
   const int32_t n = state.range(0);
   const int32_t num_modes = state.range(1);
-  const double sigma = 1e-2;
+  const double sigma = 1e-1;
 
   Demo1Options opt;
   opt.trials = 1;
@@ -49,6 +49,7 @@ BENCHMARK(BM_Demo1)
     ->Args({kPrimes[22], 1 << 8})
     ->Args({kPrimes[22], 1 << 9})
     ->Args({kPrimes[22], 1 << 10})
-    ->Args({kPrimes[22], 1 << 11});
+    ->Args({kPrimes[22], 1 << 11})
+    ->Args({kPrimes[22], 1 << 12});
 
 } // namespace mps

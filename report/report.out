@@ -1,4 +1,18 @@
 \BOOKMARK [1][-]{section.1}{Introduction}{}% 1
 \BOOKMARK [1][-]{section.2}{SFT framework}{}% 2
-\BOOKMARK [2][-]{subsection.2.1}{Random modulation to mitigate noise}{section.2}% 3
-\BOOKMARK [1][-]{section.3}{Random permutation to isolate modes}{}% 4
+\BOOKMARK [2][-]{subsection.2.1}{Random transformation for mode isolation and denoising}{section.2}% 3
+\BOOKMARK [2][-]{subsection.2.2}{Binning in time domain}{section.2}% 4
+\BOOKMARK [2][-]{subsection.2.3}{Binning in frequency domain}{section.2}% 5
+\BOOKMARK [2][-]{subsection.2.4}{Binning can denoise}{section.2}% 6
+\BOOKMARK [2][-]{subsection.2.5}{Translating by }{section.2}% 7
+\BOOKMARK [2][-]{subsection.2.6}{Mode identification}{section.2}% 8
+\BOOKMARK [1][-]{section.3}{MPSFT enhancements}{}% 9
+\BOOKMARK [2][-]{subsection.3.1}{Matrix pencil method}{section.3}% 10
+\BOOKMARK [2][-]{subsection.3.2}{Exploiting symmetry to halve number of trigonometric operations}{section.3}% 11
+\BOOKMARK [3][-]{subsubsection.3.2.1}{Binning in frequency domain}{subsection.3.2}% 12
+\BOOKMARK [3][-]{subsubsection.3.2.2}{Binning in time domain}{subsection.3.2}% 13
+\BOOKMARK [2][-]{subsection.3.3}{SIMD vectorization}{section.3}% 14
+\BOOKMARK [1][-]{section.4}{Benchmarks}{}% 15
+\BOOKMARK [2][-]{subsection.4.1}{Setup details}{section.4}% 16
+\BOOKMARK [2][-]{subsection.4.2}{Experiment: Fix N, vary S}{section.4}% 17
+\BOOKMARK [2][-]{subsection.4.3}{Experiment: Vary amount of noise}{section.4}% 18

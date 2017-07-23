@@ -1,0 +1,26 @@
+\begin{thebibliography}{1}
+
+\bibitem{Esterie:2014:BGP:2568058.2568063}
+P.~Est{\'e}rie, J.~Falcou, M.~Gaunard, and J.-T. Laprest{\'e}.
+\newblock Boost.simd: Generic programming for portable simdization.
+\newblock In {\em Proceedings of the 2014 Workshop on Programming Models for
+  SIMD/Vector Processing}, WPMVP '14, pages 1--8, New York, NY, USA, 2014. ACM.
+
+\bibitem{hassanieh2012nearly}
+H.~Hassanieh, P.~Indyk, D.~Katabi, and E.~Price.
+\newblock Nearly optimal sparse {F}ourier transform.
+\newblock In {\em Proceedings of the 44th symposium on Theory of Computing},
+  pages 563--578. ACM, 2012.
+
+\bibitem{hassanieh2012simple}
+H.~Hassanieh, P.~Indyk, D.~Katabi, and E.~Price.
+\newblock Simple and practical algorithm for sparse {F}ourier transform.
+\newblock In {\em Proceedings of the Twenty-Third Annual ACM-SIAM Symposium on
+  Discrete Algorithms}, pages 1183--1194. SIAM, 2012.
+
+\bibitem{iwen2007empirical}
+M.~Iwen, A.~Gilbert, and M.~Strauss.
+\newblock Empirical evaluation of a sub-linear time sparse {DFT} algorithm.
+\newblock {\em Communications in Mathematical Sciences}, 5(4):981--998, 2007.
+
+\end{thebibliography}
