@@ -42,7 +42,9 @@ void Run(int argc, char *const argv[]) {
   constexpr int num_sigma = 6;
   constexpr int num_trials = 10;
 
-  std::ofstream fout("./demo1_main.tsv");
+  constexpr char filename[] =
+      "/home/jchiu/projects/mpsft/src/results/demo1_main.tsv";
+  std::ofstream fout(filename);
   fout << "i\tj\tsigma\thit\thit_l1_err\thit_l2_err\t"
        << "miss\tmiss_l1_err\tmiss_l2_err\t"
        << "l1_err\tl2_err\tmax_err\n";

@@ -52,4 +52,18 @@ BENCHMARK(BM_Demo1)
     ->Args({kPrimes[22], 1 << 11})
     ->Args({kPrimes[22], 1 << 12});
 
+BENCHMARK(BM_Demo1)
+    ->Args({kPrimes[13], 50})
+    ->Args({kPrimes[14], 50})
+    ->Args({kPrimes[15], 50})
+    ->Args({kPrimes[16], 50})
+    ->Args({kPrimes[17], 50})
+    ->Args({kPrimes[18], 50})
+    ->Args({kPrimes[19], 50})
+    ->Args({kPrimes[20], 50})
+    ->Args({kPrimes[21], 50})
+    ->Args({kPrimes[22], 50})
+    ->Args({kPrimes[23], 50})
+    ->Args({kPrimes[24], 50});
+
 } // namespace mps

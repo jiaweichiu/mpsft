@@ -27,7 +27,8 @@ namespace mps {
 Demo1::Demo1(const Demo1Options &opt, int32_t n, int32_t k, double sigma)
     : opt_(opt), k_(k), x_(n), xh_(n), sigma_(sigma) {
   GenerateModeMap(n, k, &mm_);
-  GenerateXhat(n, mm_, sigma, &xh_);
+  // GenerateXhat(n, mm_, sigma, &xh_);
+  GenerateXhatAlt(n, mm_, sigma, &xh_);
   FFTPlan plan(n, FFTW_BACKWARD);
   plan.Run(xh_, &x_);
 }

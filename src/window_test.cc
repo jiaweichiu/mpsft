@@ -35,13 +35,17 @@ TEST_CASE("WindowBasic", "") {
 
   CplexArray a(n);
   a.clear();
-  a[0] = window.wt(0);
+
+  double *wt = window.wt();
+  a[0] = wt[0];
   for (int32_t i = 1; i <= p2; ++i) {
-    a[i] = a[n - i] = window.wt(i);
+    REQUIRE(wt[i] == Approx(wt[p - i]));
+    REQUIRE(window.SampleInTime(i) == Approx(window.SampleInTime(-i)));
+    a[i] = a[n - i] = wt[i]; // Expand p-array to n-array, on two sides.
   }
 
   CplexArray ah(n);
-  FFTPlan plan(n, -1);
+  FFTPlan plan(n, FFTW_FORWARD);
   plan.Run(a, &ah);
 
   for (int32_t i = 0; i < n; ++i) {

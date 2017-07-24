@@ -51,4 +51,22 @@ TEST_CASE("GenerateXhatFFT", "") {
   REQUIRE(mse == Approx(sigma));
 }
 
+TEST_CASE("GenerateXhatAltBasic", "") {
+  constexpr int32_t n = 5; // Prime.
+  constexpr double sigma = 8.0;
+  constexpr Cplex coef(0.5, 0.6);
+  const ModeMap mm = {{2, coef}};
+
+  double total_energy = 0;
+  CplexArray xh(n);
+  constexpr int num_trials = 100000;
+  for (int i = 0; i < num_trials; ++i) {
+    GenerateXhatAlt(n, mm, sigma, &xh);
+    xh[2] -= coef;
+    total_energy += xh.energy();
+  }
+  const double noise_energy = total_energy / num_trials;
+  REQUIRE(std::abs(noise_energy - sigma * sigma) < 0.1);
+}
+
 } // namespace mps

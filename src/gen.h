@@ -32,10 +32,17 @@ void GenerateModeMap(int32_t n, int32_t k, ModeMap *mm);
 
 void EvaluateModes(int32_t n, const ModeMap &mm, CplexArray *out);
 
+// Note: x(t) = sum_k xh[k] exp(2*pi*i*k*t). This is unnormalized.
 // Add ambience noise such that in the *time domain*, each sample point is
 // contaminated by N(0, sigma).
-// Note: x(t) = sum_k xh[k] exp(2*pi*i*k*t). This is unnormalized.
-// If xh[k] ~ N(0, s*s), then x(t) ~ N(0, s*s*n) where s*s*n=sigma*sigma.
+
+// For this version, the energy of nonheavy modes (in frequency domain) is
+// always exactly sigma^2.
 void GenerateXhat(int32_t n, const ModeMap &mm, double sigma, CplexArray *out);
+
+// If xh[k] ~ N(0, s*s), then x(t) ~ N(0, sigma^2/N). For large N, the energy of
+// nonheavy modes will be very close to sigma^2.
+void GenerateXhatAlt(int32_t n, const ModeMap &mm, double sigma,
+                     CplexArray *out);
 
 } // namespace mps

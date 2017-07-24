@@ -53,16 +53,12 @@ void EvaluateModes(int32_t n, const ModeMap &mm, CplexArray *__restrict__ out) {
 }
 
 // Generate Xhat. Noise energy will sum up to n*sigma*sigma.
-void GenerateXhat(int32_t n, const ModeMap &mm, double sigma,
-                  CplexArray *__restrict__ out) {
+void GenerateXhat(int32_t n, const ModeMap &mm, double sigma, CplexArray *out) {
   CHECK_EQ(out->size(), n);
   double noise_energy = 0;
-  Cplex *data = out->data();
-
-#pragma omp simd aligned(data : kAlign) reduction(+ : noise_energy)
   for (int i = 0; i < n; ++i) {
-    data[i] = Cplex(RandomNormal(), RandomNormal());
-    noise_energy += AbsSq(RE(data[i]), IM(data[i]));
+    (*out)[i] = Cplex(RandomNormal(), RandomNormal());
+    noise_energy += AbsSq(RE((*out)[i]), IM((*out)[i]));
   }
   for (const auto &kv : mm) {
     Cplex x = (*out)[kv.first];
@@ -70,13 +66,25 @@ void GenerateXhat(int32_t n, const ModeMap &mm, double sigma,
   }
   // Rescale noise by this factor.
   const double factor = sigma / std::sqrt(noise_energy);
-
-#pragma omp simd aligned(data : kAlign)
   for (int i = 0; i < n; ++i) {
-    data[i] *= factor;
+    (*out)[i] *= factor;
   }
   for (const auto &kv : mm) {
     (*out)[kv.first] = kv.second;
+  }
+}
+
+// Generate Xhat. Noise energy will sum up to n*sigma*sigma.
+void GenerateXhatAlt(int32_t n, const ModeMap &mm, double sigma,
+                     CplexArray *out) {
+  CHECK_EQ(out->size(), n);
+  out->clear();
+  for (const auto &kv : mm) {
+    (*out)[kv.first] = kv.second;
+  }
+  double scale = sigma / std::sqrt(2 * n);
+  for (int i = 0; i < n; ++i) {
+    (*out)[i] += Cplex(RandomNormal(), RandomNormal()) * scale;
   }
 }
 

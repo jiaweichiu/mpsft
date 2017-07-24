@@ -97,40 +97,48 @@ From V3 to V4 and `BinInTime`, we vectorize more by splitting early into real an
 
 ## Benchmarks for FFTW
 
-As expected, FFTW is a lot faster when `n` is a power of 2. Here we see that it is about 3-4X faster. We will need to compare against those powers of 2.
+As expected, FFTW is a lot faster when `n` is a power of 2. Hence, for benchmarking FFTW, we shall only use powers of 2. The FFTW plan flags used are either FFTW_ESTIMATE or FFTW_MEASURE. The latter will tell FFTW to plan harder. We do not use that in MPSFT. But for benchmarking, we will consider both. The first set of results uses FFTW_ESTIMATE. The second set of results uses FFTW_MEASURE.
 
 ```
--------------------------------------------------------
-Benchmark                Time           CPU Iterations
--------------------------------------------------------
-BM_FFTW/512           2808 ns       2807 ns     246425
-BM_FFTW/1024          7178 ns       7177 ns      97796
-BM_FFTW/2048         16479 ns      16478 ns      42291
-BM_FFTW/4096         45325 ns      45323 ns      15458
-BM_FFTW/8192        112708 ns     112710 ns       6168
-BM_FFTW/16384       230591 ns     230573 ns       3016
-BM_FFTW/32768       577172 ns     577180 ns       1206
-BM_FFTW/65536      1140694 ns    1140611 ns        601
-BM_FFTW/131072     2798055 ns    2797629 ns        253
-BM_FFTW/262144     7015315 ns    7015529 ns         96
-BM_FFTW/524288    14596828 ns   14596991 ns         49
-BM_FFTW/1048576   47893827 ns   47891220 ns         15
-BM_FFTW/2097152  116089786 ns  116075660 ns          6
-BM_FFTW/4194304  241538333 ns  241533821 ns          3
-BM_FFTW/509          18738 ns      18738 ns      37353
-BM_FFTW/1021         43045 ns      43046 ns      16243
-BM_FFTW/2053        102193 ns     102196 ns       6795
-BM_FFTW/4099        224428 ns     224425 ns       3120
-BM_FFTW/8191        518752 ns     518746 ns       1322
-BM_FFTW/16381      1295849 ns    1295800 ns        537
-BM_FFTW/32771      2470733 ns    2470532 ns        285
-BM_FFTW/65537      4041268 ns    4041056 ns        156
-BM_FFTW/131071    14756750 ns   14756669 ns         47
-BM_FFTW/262147    25712783 ns   25711094 ns         27
-BM_FFTW/524287    87817229 ns   87809923 ns          8
-BM_FFTW/1048573  196519341 ns  196502387 ns          4
-BM_FFTW/2097143  406672788 ns  406631881 ns          2
-BM_FFTW/4194301  858727800 ns  858697804 ns          1
+-----------------------------------------------------------
+Benchmark                    Time           CPU Iterations
+-----------------------------------------------------------
+BM_FFTW/512/64            2784 ns       2785 ns     251328
+BM_FFTW/1024/64           7057 ns       7059 ns      98574
+BM_FFTW/2048/64          16129 ns      16132 ns      43301
+BM_FFTW/4096/64          43010 ns      43025 ns      16215
+BM_FFTW/8192/64         100024 ns     100037 ns       7000
+BM_FFTW/16384/64        216689 ns     216756 ns       3208
+BM_FFTW/32768/64        562530 ns     562611 ns       1233
+BM_FFTW/65536/64       1081297 ns    1081531 ns        646
+BM_FFTW/131072/64      2553803 ns    2554061 ns        278
+BM_FFTW/262144/64      6379433 ns    6381363 ns        107
+BM_FFTW/524288/64     13313930 ns   13317937 ns         54
+BM_FFTW/1048576/64    44782775 ns   44791387 ns         16
+BM_FFTW/2097152/64   106720464 ns  106719305 ns          6
+BM_FFTW/4194304/64   225274535 ns  225334617 ns          3
+BM_FFTW/8388608/64   481276039 ns  481304161 ns          2
+BM_FFTW/16777216/64 1065906592 ns 1066002488 ns          1
+BM_FFTW/33554432/64 2128920804 ns 2129135073 ns          1
+BM_FFTW/67108864/64 4910248197 ns 4910418695 ns          1
+BM_FFTW/512/0             2656 ns       2656 ns     264675
+BM_FFTW/1024/0            5680 ns       5680 ns     122469
+BM_FFTW/2048/0           12892 ns      12894 ns      54325
+BM_FFTW/4096/0           29686 ns      29689 ns      23483
+BM_FFTW/8192/0           66266 ns      66262 ns      10555
+BM_FFTW/16384/0         150574 ns     150589 ns       4620
+BM_FFTW/32768/0         336730 ns     336759 ns       2075
+BM_FFTW/65536/0         727801 ns     727724 ns        961
+BM_FFTW/131072/0       1547164 ns    1547240 ns        452
+BM_FFTW/262144/0       3920139 ns    3919367 ns        178
+BM_FFTW/524288/0       9995230 ns    9995484 ns         70
+BM_FFTW/1048576/0     22117878 ns   22117107 ns         31
+BM_FFTW/2097152/0     48003328 ns   47998012 ns         15
+BM_FFTW/4194304/0    102253167 ns  102220593 ns          7
+BM_FFTW/8388608/0    213492117 ns  213439206 ns          3
+BM_FFTW/16777216/0   446109139 ns  445996409 ns          2
+BM_FFTW/33554432/0   949558592 ns  949981237 ns          1
+BM_FFTW/67108864/0  1987623996 ns 1987469827 ns          1
 ```
 
 ## Benchmarks for MPSFT
@@ -151,6 +159,8 @@ Here are the results. We see that the sparsity has to be around 1000 in order fo
 ```shell
 bazel build --config=opt :demo1_bench
 
+./bazel-bin/demo1_bench
+
 ./bazel-bin/demo1_bench \
 --benchmark_repetitions=10 \
 --benchmark_report_aggregates_only \
@@ -163,12 +173,26 @@ Results:
 -------------------------------------------------------------
 Benchmark                      Time           CPU Iterations
 -------------------------------------------------------------
-BM_Demo1/4194301/64     29435038 ns   29433899 ns         23
-BM_Demo1/4194301/128    37364854 ns   37358244 ns         18
-BM_Demo1/4194301/256    51984590 ns   51972162 ns         12
-BM_Demo1/4194301/512    88579692 ns   88562375 ns          9
-BM_Demo1/4194301/1024  148947289 ns  148927532 ns          5
-BM_Demo1/4194301/2048  270542767 ns  270479943 ns          2
+BM_Demo1/4194301/64     30428257 ns   30410277 ns         23
+BM_Demo1/4194301/128    38843419 ns   38817081 ns         17
+BM_Demo1/4194301/256    55193802 ns   55165925 ns         13
+BM_Demo1/4194301/512    85895277 ns   85851744 ns          8
+BM_Demo1/4194301/1024  147274651 ns  147206528 ns          5
+BM_Demo1/4194301/2048  266954692 ns  266771060 ns          2
+BM_Demo1/4194301/4096  518171211 ns  517963308 ns          1
+
+BM_Demo1/8191/50        12631789 ns   12626927 ns         56
+BM_Demo1/16381/50       13856891 ns   13849957 ns         52
+BM_Demo1/32771/50       15143159 ns   15136513 ns         46
+BM_Demo1/65537/50       15852545 ns   15846134 ns         44
+BM_Demo1/131071/50      17780376 ns   17773203 ns         42
+BM_Demo1/262147/50      18572161 ns   18564325 ns         39
+BM_Demo1/524287/50      21893726 ns   21885413 ns         34
+BM_Demo1/1048573/50     24718207 ns   24709959 ns         28
+BM_Demo1/2097143/50     27063709 ns   27054014 ns         27
+BM_Demo1/4194301/50     28723220 ns   28711486 ns         25
+BM_Demo1/8388617/50     30199874 ns   30190546 ns         24
+BM_Demo1/16777213/50    32890323 ns   32883357 ns         21
 ```
 
 A couple of parameters are not the most aggressive. For example, `window_delta` can be slightly bigger.

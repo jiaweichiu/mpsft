@@ -83,11 +83,11 @@ void CplexMatrix::clear() {
   }
 }
 
-FFTPlan::FFTPlan(int32_t n, char sign)
-    : n_(n), sign_(sign), dummy1_(1), dummy2_(1) {
+FFTPlan::FFTPlan(int32_t n, char sign, unsigned flags)
+    : n_(n), sign_(sign), dummy1_(n), dummy2_(n) {
   fftw_complex *x = reinterpret_cast<fftw_complex *>(dummy1_.data());
   fftw_complex *y = reinterpret_cast<fftw_complex *>(dummy2_.data());
-  plan_ = fftw_plan_dft_1d(n, x, y, sign, FFTW_ESTIMATE);
+  plan_ = fftw_plan_dft_1d(n, x, y, sign, flags);
 }
 
 FFTPlan::~FFTPlan() { fftw_destroy_plan(plan_); }

@@ -25,6 +25,7 @@ namespace mps {
 
 static void BM_FFTW(benchmark::State &state) {
   const int32_t n = state.range(0);
+  const int flags = state.range(1);
   const int32_t num_modes = 100; // Shouldn't matter.
   const double sigma = 0.1;
 
@@ -35,27 +36,22 @@ static void BM_FFTW(benchmark::State &state) {
   GenerateXhat(n, mm, sigma, &xh);
   CplexArray x(n);
 
-  FFTPlan plan(n, FFTW_BACKWARD);
+  FFTPlan plan(n, FFTW_BACKWARD, flags);
   while (state.KeepRunning()) {
     plan.Run(xh, &x);
   }
 }
-BENCHMARK(BM_FFTW)->RangeMultiplier(2)->Range(1 << 9, 1 << 22);
 
-BENCHMARK(BM_FFTW)
-    ->Arg(kPrimes[9])
-    ->Arg(kPrimes[10])
-    ->Arg(kPrimes[11])
-    ->Arg(kPrimes[12])
-    ->Arg(kPrimes[13])
-    ->Arg(kPrimes[14])
-    ->Arg(kPrimes[15])
-    ->Arg(kPrimes[16])
-    ->Arg(kPrimes[17])
-    ->Arg(kPrimes[18])
-    ->Arg(kPrimes[19])
-    ->Arg(kPrimes[20])
-    ->Arg(kPrimes[21])
-    ->Arg(kPrimes[22]);
+static void CustomArguments(benchmark::internal::Benchmark *b) {
+  std::vector<int> flags = {FFTW_ESTIMATE, FFTW_MEASURE};
+  for (int flag : flags) {
+    for (int i = 9; i <= 26; ++i) {
+      b->Args({1 << i, flag});
+    }
+  }
+}
+BENCHMARK(BM_FFTW)->Apply(CustomArguments);
+
+// Don't worry about those primes. We know FFTW is a lot slower on primes.
 
 } // namespace mps

@@ -67,4 +67,10 @@ TEST_CASE("SinCosTwoPiBasic_BS", "") {
   }
 }
 
+TEST_CASE("SincBasic", "") {
+  for (int32_t i = 0; i < 100; ++i) {
+    REQUIRE(SincPi(i * 0.1) == Approx(SincPi(-i * 0.1)));
+  }
+}
+
 } // namespace mps

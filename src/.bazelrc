@@ -26,3 +26,15 @@ build:opt \
 #--copt="-fopt-info-vec-all" \
 
 #--copt="-fno-exceptions" \
+
+
+build:opt2 \
+--copt="-std=c99" \
+--copt="-g0" \
+--copt="-DNDEBUG" \
+--copt="-mtune=native" \
+--copt="-O3" \
+--copt="-ffast-math" \
+--copt="-mavx2" \
+--copt="-fopenmp-simd" \
+--copt="-fopt-info-vec-optimized"

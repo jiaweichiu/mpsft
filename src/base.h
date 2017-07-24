@@ -87,8 +87,16 @@ public:
   ~Array() { reset(); }
 
   inline int size() const { return n_; }
-  inline T &operator[](int i) { return data_[i]; }
-  inline const T &operator[](int i) const { return data_[i]; }
+  inline T &operator[](int i) {
+    DCHECK_GE(i, 0);
+    DCHECK_LT(i, n_);
+    return data_[i];
+  }
+  inline const T &operator[](int i) const {
+    DCHECK_GE(i, 0);
+    DCHECK_LT(i, n_);
+    return data_[i];
+  }
   inline T *data() const { return data_; }
 
   void clear() { ::memset(data_, 0, sizeof(T) * n_); }
@@ -147,7 +155,8 @@ public:
   // For sign:
   // #define FFTW_FORWARD (-1)
   // #define FFTW_BACKWARD (+1)
-  FFTPlan(int32_t n, char sign);
+  // flags are flags for FFTW plans.
+  FFTPlan(int32_t n, char sign, unsigned flags = FFTW_ESTIMATE);
   ~FFTPlan();
 
   inline int32_t n() const { return n_; }
