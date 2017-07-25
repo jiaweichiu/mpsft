@@ -1,0 +1,11 @@
+g++ sfft_benchmark.cc rand.cc ../libbenchmark.a libsfft.a \
+-O3 \
+-DNDEBUG \
+-mtune=native \
+-ffast-math \
+-fopenmp-simd \
+-L/usr/local/lib \
+-lglog -lm -lrt -lpthread -lgomp \
+-L/usr/local/lib \
+-lfftw3 \
+-o sfft_benchmark
