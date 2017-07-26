@@ -266,25 +266,3 @@ cc_library(
   srcs = ["magic.cc"],
   hdrs = ["magic.h"],
 )
-
-# Optimized SFFT lib.
-cc_library(
-  name = "sfft",
-  hdrs = ["sfft.h"],
-  #srcs = ["libsfft.a"]
-)
-
-cc_binary(
-  name = "sfft_benchmark",
-  srcs = ["sfft_benchmark.cc"],
-  deps = [
-    ":base",
-    ":gen",
-    ":benchmark",
-    ":sfft",
-  ],
-  linkopts = [
-    "-lgomp",
-    "-lsfft",
-  ],
-)

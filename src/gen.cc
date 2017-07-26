@@ -82,7 +82,7 @@ void GenerateXhatAlt(int32_t n, const ModeMap &mm, double sigma,
   for (const auto &kv : mm) {
     (*out)[kv.first] = kv.second;
   }
-  double scale = sigma / std::sqrt(2 * n);
+  const double scale = sigma / std::sqrt(2 * n);
   for (int i = 0; i < n; ++i) {
     (*out)[i] += Cplex(RandomNormal(), RandomNormal()) * scale;
   }

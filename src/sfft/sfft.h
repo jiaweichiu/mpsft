@@ -1,6 +1,8 @@
 #pragma once
 
 #include <complex.h>
+#include <stdint.h>
+#include <stdlib.h>
 #include <tr1/unordered_map>
 
 typedef double complex complex_t;
@@ -19,6 +21,7 @@ struct sfft_plan {
 
 sfft_plan *sfft_make_plan(int n, int k, sfft_version version,
                           int fftw_optimization);
+void sfft_free_plan(sfft_plan * plan);
 
 void *sfft_malloc(size_t s);
 void sfft_free(void *);
