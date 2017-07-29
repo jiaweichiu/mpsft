@@ -15,5 +15,6 @@
 \BOOKMARK [1][-]{section.4}{Benchmarks}{}% 15
 \BOOKMARK [2][-]{subsection.4.1}{Setup details}{section.4}% 16
 \BOOKMARK [2][-]{subsection.4.2}{Experiment: Fix N, vary S}{section.4}% 17
-\BOOKMARK [2][-]{subsection.4.3}{Experiment: Vary amount of noise}{section.4}% 18
-\BOOKMARK [2][-]{subsection.4.4}{Binning benchmarks}{section.4}% 19
+\BOOKMARK [2][-]{subsection.4.3}{Experiment: Fix N, vary S}{section.4}% 18
+\BOOKMARK [2][-]{subsection.4.4}{Experiment: Vary amount of noise}{section.4}% 19
+\BOOKMARK [2][-]{subsection.4.5}{Binning benchmarks}{section.4}% 20

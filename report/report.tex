@@ -15,9 +15,9 @@ This is not a formal publication. We try to be brief.
 \section{Introduction}
 Given a $N$-vector $x$, we like to perform the forward FFT to obtain $\hat{x}$. This is typically done in $O(N \log N)$ time. However, suppose we know that $\hat{x}$ is $S$-sparse plus some noise. Then it is possible to recover these $S$ modes in $\tilde{O}(S)$ time where $\tilde{O}(\cdot)$ is $O(\cdot)$ notation ignoring log factors. We call such algorithms SFT algorithms.
 
-SFT is not new. Existing work includes AAFFT\cite{iwen2007empirical}, sFFT3.0\cite{hassanieh2012simple, hassanieh2012nearly}. However, these algorithms have seen little use because $n$ has to be very large relative to $S$ in order to justify its use.
+SFT is not new. Existing work includes AAFFT\cite{iwen2007empirical}, sFFT3 \cite{hassanieh2012simple, hassanieh2012nearly}. However, these algorithms have seen little use because $n$ has to be very large relative to $S$ in order to justify its use.
 
-In a study done by creators of sFFT3.0, where noiseless inputs are assumed, AAFFT is faster than FFTW\cite{FFTW05} only when $k\lesssim 2^8$. In our benchmarks, MPSFT, our new SFT algorithm, is faster than FFTW when $k \lesssim 1800$, when we consider rather noisy inputs. We believe there is \textbf{at least a 5X improvement} over AAFFT. Note that we do not consider sFFT3.0 because it works only for noiseless inputs.
+In a study done by creators of sFFT3, where noiseless inputs are assumed, AAFFT is faster than FFTW\cite{FFTW05} only when $k\lesssim 2^8$. In our benchmarks, MPSFT, our new SFT algorithm, is faster than FFTW when $k \lesssim 1800$, when we consider rather noisy inputs. We believe there is \textbf{at least a 5X improvement} over AAFFT. Note that we do not consider sFFT3 because it works only for noiseless inputs.
 
 Before proceeding, we set up some notation. We use the following convention:
 $$x_t = \sum_k \hat{x}_k e^{2\pi i kt/N}; \quad \hat{x}_k =\frac{1}{n} \sum_t x_t e^{-2\pi i k t/N}.$$
@@ -31,7 +31,7 @@ There are three new ingredients in MPSFT:
 
 In this work, we integrate the matrix pencil method into the SFT framework to achieve two effects. Firstly, it identifies modes much more accurately than what is used in existing SFT algorithms. Secondly, it helps detect errors in our mode identification step and greatly reduces the number of spurious modes being found. In existing SFT algorithms, we pay a much heavier cost to filter away or undo such modes.
 
-\item \textbf{Exploiting symmetry}: Matrix pencil method is more accurate for mode identification, but it comes at a cost. The straightforward way of using it would double the time needed for mode identification. We realize that this cost can be roughly halved if we exploit some symmetry in the matrix pencil method.
+\item \textbf{Exploiting symmetry}: The matrix pencil method offers big advantages, but it comes at a cost. The straightforward way of using it roughly doubles the runtime. A crucial step we took is to exploit some symmetry in the algorithm to eliminate this extra cost.
 
 \item \textbf{SIMD vectorization}: FFTW makes good use of SIMD instructions. To be competitive, we vectorize critical parts of our code using OMP-SIMD and Boost-SIMD. This yields at least a 2X improvement in running time.
 
@@ -39,7 +39,7 @@ In this work, we integrate the matrix pencil method into the SFT framework to ac
 
 \section{SFT framework}
 
-Before we can discuss MPSFT, we need to describe the typical SFT framework, from our perspective. We begin with a summary.
+Before we can discuss MPSFT, we need to describe the typical SFT framework, from our perspective. Here is our summary.
 \begin{itemize}
 \item SFT algorithms are \textbf{iterative}. We aim to find a constant proportion of nodes in each iteration.
 
@@ -59,13 +59,13 @@ $$U^b_{\tau} \simeq \sum_k \hat{x}_k \hat{W}_{b,k} e^{2\pi i k \tau/N}.$$
 
 \item When there is mode isolation in bin $b$, then $U^b$ is a signal with only one mode and we can identify this mode using techniques such as the matrix pencil method.
 
-\item As an example, sFFT3.0 samples $U^b$ at only two points $\tau=0,1$. When there is mode isolation in bin $b$, then
+\item As an example, sFFT3 samples $U^b$ at only two points $\tau=0,1$. When there is mode isolation in bin $b$, then
 $$U^b_1/U^b_0 \simeq e^{2\pi i k_*\tau/N}.$$
-It is clear that its argument or angle yields $k_*$, the mode location we want.
+It is clear that its argument or angle yields $k_*$, the mode location we want. We call this the \textbf{method of simple ratios}.
 
 \item This can only tolerate an error of $O(1/N)$ in the frequency estimation, which does not work in the noisy case.
 
-\item In the noisy case, we \textbf{dilate in frequency space} by powers of $2$ in order to discover each \textbf{bit} of the mode frequency. Each bit can tolerate $O(1)$ error.
+\item In the noisy case, we \textbf{dilate in frequency space} by powers of $2$ in order to discover each \textbf{bit} of the mode frequency. Each bit can tolerate $O(1)$ error instead of $O(1/N)$ error.
 
 \item For each bit, we can also do multiple independent measurements and use \textbf{probability amplification} to further drive down the chance of getting the bit wrong.
 
@@ -133,13 +133,13 @@ $$y^{\tau}_{t} = y_{t+\tau}; \quad \hat{y}^{\tau}_k = \hat{y}_k e^{2\pi i k \tau
 To recap, we have the following signals:
 $$x \xrightarrow{a,b,c} y \xrightarrow{\tau} y^{\tau}.$$
 
-Note that binning is applied to each $y^{\tau}$ signal. Binning takes up almost all the running time of SFT algorithms. Hence, each additional $\tau$ we add comes at great cost. sFFT3.0 only needs $\tau=0,1$ because it assumes no noise. It is not surprisingly that it is so fast. However, in the noisy case, as we see in the next section, we need many more $\tau$'s.
+Note that binning is applied to each $y^{\tau}$ signal. Binning takes up almost all the running time of SFT algorithms. Hence, each additional $\tau$ we add comes at great cost. sFFT3 only needs $\tau=0,1$ because it assumes no noise. It is not surprisingly that it is so fast. However, in the noisy case, as we see in the next section, we need many more $\tau$'s.
 
 \subsection{Mode identification}
 
 Mode identification is applied to the \textbf{binned signal} $U^b$ for each bin $b$. For all discussion related to mode identification, we fix a bin $b$ and let $U=U^b$ to avoid writing the $b$ superscript.
 
-Say our input signal is $U_{\tau} \simeq \hat{y}_{k_*} e^{2\pi i k_* \tau/N}$. As we saw in sFFT3.0, $U_1/U_0 \simeq e^{2\pi i k_* \tau/N}$. Using this method, to recover $k_*$ \textbf{exactly}, we need to estimate the frequency $k_*/N$ within $O(1/N)$ accuracy. In other words, $U_1/U_0$ cannot be perturbed by no more than $O(1/N)$. That means the error in each bin coefficient $U_0^b,U_1^b$ has to be $O(|\hat{W}_{b,k_*}\hat{y}_{k_*}|/N)$.
+Say our input signal is $U_{\tau} \simeq \hat{y}_{k_*} e^{2\pi i k_* \tau/N}$. As we saw in sFFT3, $U_1/U_0 \simeq e^{2\pi i k_* \tau/N}$. Using this method of simple ratios, to recover $k_*$ \textbf{exactly}, we need to estimate the frequency $k_*/N$ within $O(1/N)$ accuracy. In other words, $U_1/U_0$ cannot be perturbed by no more than $O(1/N)$. That means the error in each bin coefficient $U_0^b,U_1^b$ has to be $O(|\hat{W}_{b,k_*}\hat{y}_{k_*}|/N)$.
 
 For simplicity, we assume that all heavy modes has at least magnitude $1$ and we reject modes when $\hat{W}_{b,k_*}$ is below a fixed threshold. Hence, the error in each bin coefficient has to be $O(1/N)$. Since this error decreases with $1/\sqrt{B}$, we would need $B=\Omega(N^2)$, which would make SFT algorithms slower than dense FFT algorithms!
 
@@ -149,15 +149,15 @@ Due to the random permutation, there is a good chance that $k_*/N$ is $\Omega(1)
 
 After getting the first bit of $k_*/N$, we try to get the second bit by dilating $U_{\tau}$ in the frequency space. Specifically, for $s\geq 0$, consider $\tau=0,2^s$ and compute
 $$U_{2^s}/U_0 \simeq e^{2\pi i k_* 2^s/N}.$$
-Seeing which half of the complex plane $U_{2^2}/U_0$ is in tells us the $s$-th bit of $k_*/N$. Repeat this $\sim \log_2 N$ times to recover $k_*/N$ up to $O(1/N)$ accuracy.
+Seeing which half of the complex plane $U_{2^2}/U_0$ is in tells us the $s$-th bit of $k_*/N$. Repeat this $\sim \log_2 N$ times and obtain $\sim \log_2 N$ bits, so as to recover $k_*/N$ up to $O(1/N)$ accuracy.
 
-Two more tweaks and we have the basic framework for mode identification.
+We need two more tweaks to complete the mode identification component.
 
 The first tweak is that since $k_*$ is in some bin $b$, there are only $N/B$ possibilities not $N$. Thus, we only need to estimate $\sim \log_2 (N/B)$ bits not $\log_2 N$, and the $\tau$'s used would be $0, B, 2B, 2^2 B, 2^3 B, 2^4 B, \ldots$. In other words, we further dilate $y$ by a factor of $B$ in frequency space.
 
 The second tweak has to do with \textbf{probability amplification}. For example, instead of only doing $U_{1}/U_0$, we can do $U_{q+1}/U_q$ for multiple different random $q$'s, and use \textbf{majority voting} to decide which half $k_*/N$ is in. The probability of identifying this bit wrongly would decrease exponentially with the number of different $q$'s used.
 
-Suppose we obtain a $m$-bit integer $z$. Then we can estimate the frequency $k_*/N$ as $\frac{z+0.5}{2^m} \frac{1}{B} + \frac{b}{B}$. Multiply this by $N$ and round off to estimate $k_*$. In other words, estimate $k_*$ as
+Suppose we obtain a $m$-bit integer $z$. Then we can estimate the frequency $k_*/N$ as $\frac{z+0.5}{2^m} \frac{1}{B} + \frac{b}{B}$. Multiply this by $N$ and round off to estimate $k_*$. More concisely, estimate $k_*$ as
 $$\text{round}\left( \frac{N}{B} \left( \frac{2z+1}{2^{m+1}} + b\right)\right).$$
 
 \section{MPSFT enhancements}
@@ -261,9 +261,11 @@ where $\sigma$ is user-provided. By the way, this means that in the time domain,
 \subsection{Setup details}
 Our CPU is a I7-6700K 4GHz. We disable CPU scaling and run Google Benchmarks with the flags \texttt{--benchmark\_repetitions=10} to obtain confidence intervals.
 
-FFTW-3.3.6-pl2 is compiled locally with all the optimization turned on, for example \texttt{-O3} \texttt{-mtune-native} \texttt{-ffast-math}. We also run FFTW with $N$ being powers of $2$ only.
+FFTW-3.3.6-pl2 is compiled locally with all the optimization turned on, for example \texttt{-O3} \texttt{-mtune-native} \texttt{-ffast-math}. We also run FFTW with $N$ being powers of $2$ only. Note that we only use the \texttt{FFTW\_ESTIMATE} mode, not the \texttt{FFTW\_MEASURE} mode.
 
 MPSFT is also compiled locally with \texttt{-O3} \texttt{-mtune=native} \texttt{-ffast-math} \texttt{-fopenmp-simd}. Note that we are using only OpenMP SIMD, and the program is \textbf{single-threaded}.
+
+sFFT1 and sFFT2 are also compiled locally with \texttt{-O3} \texttt{-mtune-native} \texttt{-ffast-math}. We also tried running optimized versions of it by Jörn Schumacher, ETH Zurich. However, it crashes for various pairs of $(n,k)$ and we have to omit its benchmarks for now.
 
 \subsection{Experiment: Fix $N$, vary $S$}
 When $N$ is fixed, we want to know how small $S$ has to be for MPSFT to be competitive with FFTW.
@@ -272,32 +274,43 @@ Pick $N=4194301\simeq 2^{22}$. Fix the amount of noise by setting $\sigma=0.1$.
 
 The $\delta$ controlling the accuracy of our window function is $10^{-5}$. Modes are rejected when $\hat{W}_{b,k}$ is below the threshold of $0.1$.
 
-In each iteration, we set the number of bins $B$ to be $2S+1$ where $S$ is the total number of heavy modes minus the number of found modes. Fix the minimum of bins as $101$.
+In each iteration, we set the number of bins $B$ to be $2S+1$ where $S$ is the total number of heavy modes minus the number of found modes. Fix the minimum of bins as $51$. If $\sigma$ is smaller, this value can be made smaller, which would speed up the last few iterations. However, for $S\gtrsim 200$, this does not matter much.
 
 A bin is not processed if it does not have enough energy. This threshold is set as $\frac{3\sigma}{\sqrt{B}}$. A bin is also not processed if the second singular value reported by the matrix pencil method is too large. This threshold is set as $\frac{\sigma}{\sqrt{B}}$.
 
-As the amount of noise is low, the number of trials used to identify each bit is set to $1$. However, even with only one trial, we can already tolerate much noise as we identify the mode frequency one bit at a time instead of trying to resolve it to $O(1/N)$ accuracy like in sFFT3.0.
+As the amount of noise is low, the number of trials used to identify each bit is set to $1$. However, even with only one trial, we can already tolerate much noise as we identify the mode frequency one bit at a time instead of trying to resolve it to $O(1/N)$ accuracy like in sFFT3.
 
 MPSFT stops iterating when it hits a maximum number of stale iterations. An iteration is stale if no mode is found at all. This threshold is set as $5$ here.
 
-We plot the results in Figure \ref{fig:runtime}. Errorbars are included and they are very small. For $N=2^{22}$, FFTW took around $0.242$ seconds. With some interpolation, we see that MPSFT is faster when $S\lesssim 1800$.
+We plot the results in Figure \ref{fig:runtime_vary_k}. By interpolation, we see that MPSFT is faster than FFTW when $S\lesssim 1800$. This is a significant improvement over AAFFT which is faster than FFTW only when $S \lesssim 200$ according to this \href{https://groups.csail.mit.edu/netmit/sFFT/results.html}{evaluation} by the sFFT team.
 
+Unfortunately, for $N\simeq 2^{22}$, MPSFT is not competitive with sFFT1 or sFFT2. However, do note that sFFT1 or sFFT2 has a runtime of $\tilde{O}(\sqrt{NS})$ unlike MPSFT which has a runtime of $\tilde{O}(S)$.
 
 \begin{figure}
 \centering
-\includegraphics[scale=0.6]{./graph/runtime}
-\caption{Loglog plot of running time versus sparsity $S$. The running time grows roughly linearly with $S$. Errorbars are very small. \label{fig:runtime}}
+\includegraphics[scale=0.6]{./graph/runtime_vary_k}
+\caption{Loglog plot of running time versus sparsity $S$. Runtime of MPSFT is roughly linear with $S$. \label{fig:runtime_vary_k}}
 \end{figure}
 
+\subsection{Experiment: Fix $N$, vary $S$}
+Use the same parameters as the last experiment. The only difference is that we fix $S=50$ and increase $N$. We see that FFTW runtime has roughly a linear relationship with $N$ as expected. MPSFT runtime grows very slowly with $N$ and beats sFFT1 at $N \gtrsim 2^{23}$ and sFFT2 at $N \gtrsim 2^{25}$.
+
+\begin{figure}
+\centering
+\includegraphics[scale=0.6]{./graph/runtime_vary_n}
+\caption{Loglog plot of running time versus $N$. Runtime of MPSFT is roughly independent of $N$. \label{fig:runtime_vary_n}}
+\end{figure}
 
 \subsection{Experiment: Vary amount of noise}
 
-Use the same parameters as the previous section. The only difference is that $\sigma$ is varied while $S$ is fixed at $1024$. Define the $L_1$ error or mean absolute error as $\frac{1}{N}\sum_k |\hat{x}_k - \hat{x}^{\text{est}}_k|$. We plot the mean $L_1$ error versus $\sigma$ on a log-log scale in Figure \ref{fig:noise}. Observe that this $L_1$ error scales linearly with $\sigma$.
+Use the same parameters as the previous section except that the minimum number of bins is set to $101$.
+
+Fix $S=1024$ and vary $\sigma$. Define the $L_1$ error or mean absolute error as $\frac{1}{N}\sum_k |\hat{x}_k - \hat{x}^{\text{est}}_k|$. We plot the mean $L_1$ error versus $\sigma$ on a log-log scale in Figure \ref{fig:noise}. Observe that this $L_1$ error scales linearly with $\sigma$.
 
 \begin{figure}
 \centering
 \includegraphics[scale=0.6]{./graph/noise}
-\caption{Loglog plot of mean $L_1$ error versus $\sigma$. The mean $L_1$ error grows roughly linearly with $\sigma$. Errorbars are very small. \label{fig:noise}}
+\caption{Loglog plot of mean $L_1$ error versus $\sigma$. The mean $L_1$ error grows roughly linearly with $\sigma$. Errorbars are included and very small. \label{fig:noise}}
 \end{figure}
 
 \subsection{Binning benchmarks}

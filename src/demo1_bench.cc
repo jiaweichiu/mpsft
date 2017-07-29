@@ -33,7 +33,7 @@ static void BM_Demo1(benchmark::State &state) {
 
   Demo1Options opt;
   opt.trials = 1;
-  opt.min_bins = 101;
+  opt.min_bins = 51;
   opt.window_delta = 1e-5;
   opt.window_threshold = 0.1;
   opt.max_stale_iter = 5;
@@ -64,6 +64,8 @@ BENCHMARK(BM_Demo1)
     ->Args({kPrimes[21], 50})
     ->Args({kPrimes[22], 50})
     ->Args({kPrimes[23], 50})
-    ->Args({kPrimes[24], 50});
+    ->Args({kPrimes[24], 50})
+    ->Args({kPrimes[25], 50})
+    ->Args({kPrimes[26], 50});
 
 } // namespace mps
