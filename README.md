@@ -6,7 +6,7 @@ SFT (sparse Fourier transform) algorithms aim to perform discrete Fourier transf
 
 In MPSFT (Matrix Pencil Sparse Fourier Transform), we apply the matrix pencil method to improve the accuracy of mode identification and to reduce the chance of creating spurious modes (and having to correct them later). It makes SFT algorithms more feasible and practical. For N=2^22, we are faster than FFTW when S is less than around 1800. Previously, the fastest SFT algorithm that has a runtime of O(S) is faster for a much smaller range of S (around <= 200).
 
-![plot](https://raw.githubusercontent.com/tinkerstash/mpsft/master/report/graph/runtime_vary_k.eps)
+![plot](https://raw.githubusercontent.com/tinkerstash/mpsft/master/report/graph/runtime_vary_k.png)
 
 # Licensing
 
