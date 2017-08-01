@@ -1,22 +1,25 @@
 # Introduction
 
 Here is our report: https://github.com/tinkerstash/mpsft/blob/master/report/report.pdf
+(Here is an old thesis: https://dspace.mit.edu/handle/1721.1/83691?show=full)
 
 SFT (sparse Fourier transform) algorithms aim to perform discrete Fourier transform in O(S) time, ignoring log factors, where S is the sparsity in frequency domain. In other words, the solution has a support of size S, plus some noise.
 
 In MPSFT (Matrix Pencil Sparse Fourier Transform), we apply the matrix pencil method to improve the accuracy of mode identification and to reduce the chance of creating spurious modes (and having to correct them later). It makes SFT algorithms more feasible and practical. For N=2^22, we are faster than FFTW when S is less than around 1800. Previously, the fastest SFT algorithm that has a runtime of O(S) is faster for a much smaller range of S (around <= 200).
 
 In the plot below, we fix N=2^22 and vary S (sparsity) and plot the running time. SFFT1 and SFFT2 are faster but they have a runtime of O(sqrt(NS)) ignoring log factors.
+
 ![plot](https://raw.githubusercontent.com/tinkerstash/mpsft/master/report/graph/runtime_vary_k.png)
 
 In the plot below, we fix K=50 and increase N.
+
 ![plot](https://raw.githubusercontent.com/tinkerstash/mpsft/master/report/graph/runtime_vary_n.png)
+
+For more details, please check out the report above.
 
 # Licensing
 
 For now, we will use the GPL license. This is mainly due to our use of FFTW. We do intend to move away from that in the near future, say using KissFFT.
-
-We are working on a brief paper to put on arXiv. For now, if you use our results, please kindly reference https://dspace.mit.edu/handle/1721.1/83691?show=full
 
 # Installation
 
