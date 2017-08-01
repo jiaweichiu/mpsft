@@ -4,6 +4,18 @@
 		"selected_items":
 		[
 			[
+				"FFTW_",
+				"FFTW_ESTIMATE"
+			],
+			[
+				"FFTW",
+				"FFTW_BACKWARD"
+			],
+			[
+				"com",
+				"complex_t"
+			],
+			[
 				"pack_",
 				"pack_card"
 			],
@@ -72,10 +84,6 @@
 				"window_threshold"
 			],
 			[
-				"FFTW_",
-				"FFTW_FORWARD"
-			],
-			[
 				"Ra",
 				"RandomNormal"
 			],
@@ -96,10 +104,27 @@
 	"buffers":
 	[
 		{
-			"file": "src/iterate.h",
+			"file": "src/base.cc",
 			"settings":
 			{
-				"buffer_size": 2466,
+				"buffer_size": 2953,
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "src/.bazelrc",
+			"settings":
+			{
+				"buffer_size": 601,
+				"encoding": "UTF-8",
+				"line_ending": "Unix"
+			}
+		},
+		{
+			"file": "src/demo1_bench.cc",
+			"settings":
+			{
+				"buffer_size": 2087,
 				"encoding": "UTF-8",
 				"line_ending": "Unix"
 			}
@@ -108,87 +133,16 @@
 			"file": "README.md",
 			"settings":
 			{
-				"buffer_size": 9490,
+				"buffer_size": 11145,
 				"encoding": "UTF-8",
 				"line_ending": "Unix"
 			}
 		},
 		{
-			"file": "src/.bazelrc",
+			"file": "src/results/runtime.csv",
 			"settings":
 			{
-				"buffer_size": 600,
-				"encoding": "UTF-8",
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "src/iterate.cc",
-			"settings":
-			{
-				"buffer_size": 5632,
-				"encoding": "UTF-8",
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "src/iterate_test.cc",
-			"settings":
-			{
-				"buffer_size": 4902,
-				"encoding": "UTF-8",
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "src/demo1.cc",
-			"settings":
-			{
-				"buffer_size": 3462,
-				"encoding": "UTF-8",
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "src/demo1.h",
-			"settings":
-			{
-				"buffer_size": 1439,
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "src/demo1_bench.cc",
-			"settings":
-			{
-				"buffer_size": 1646,
-				"encoding": "UTF-8",
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "src/sincos_bench.cc",
-			"settings":
-			{
-				"buffer_size": 6509,
-				"encoding": "UTF-8",
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "src/window_test.cc",
-			"settings":
-			{
-				"buffer_size": 2110,
-				"encoding": "UTF-8",
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "src/binner.h",
-			"settings":
-			{
-				"buffer_size": 4308,
+				"buffer_size": 2568,
 				"encoding": "UTF-8",
 				"line_ending": "Unix"
 			}
@@ -197,51 +151,7 @@
 			"file": "src/demo1_main.cc",
 			"settings":
 			{
-				"buffer_size": 2101,
-				"encoding": "UTF-8",
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "src/base.h",
-			"settings":
-			{
-				"buffer_size": 4488,
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "src/binner.cc",
-			"settings":
-			{
-				"buffer_size": 20797,
-				"encoding": "UTF-8",
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "src/freqid.cc",
-			"settings":
-			{
-				"buffer_size": 1508,
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "src/binner_bench.cc",
-			"settings":
-			{
-				"buffer_size": 2251,
-				"encoding": "UTF-8",
-				"line_ending": "Unix"
-			}
-		},
-		{
-			"file": "src/binner_test.cc",
-			"settings":
-			{
-				"buffer_size": 5224,
-				"encoding": "UTF-8",
+				"buffer_size": 2184,
 				"line_ending": "Unix"
 			}
 		}
@@ -295,18 +205,49 @@
 	"expanded_folders":
 	[
 		"/home/jchiu/projects/mpsft",
-		"/home/jchiu/projects/mpsft/src"
+		"/home/jchiu/projects/mpsft/notebook",
+		"/home/jchiu/projects/mpsft/src",
+		"/home/jchiu/projects/mpsft/src/results"
 	],
 	"file_history":
 	[
+		"/home/jchiu/projects/mpsft/sFFT-1.0-2.0_modified/generate_graphs.cc",
+		"/home/jchiu/projects/mpsft/src/sfft/demo.cc",
+		"/home/jchiu/projects/mpsft/src/sfft/gen.cc",
+		"/home/jchiu/projects/mpsft/src/sfft/rand.h",
+		"/home/jchiu/projects/mpsft/src/sfft/rand.cc",
+		"/home/jchiu/projects/mpsft/src/sfft/gen.h",
+		"/home/jchiu/projects/mpsft/src/sfft/sfft.h",
+		"/home/jchiu/projects/mpsft/src/sfft/sfft_benchmark.cc",
+		"/home/jchiu/projects/mpsft/src/sfft/README.md",
+		"/home/jchiu/projects/mpsft/sFFT-1.0-2.0_modified/plot.h",
+		"/home/jchiu/projects/mpsft/sFFT-1.0-2.0_modified/computefourier.cc",
+		"/home/jchiu/projects/mpsft/sFFT-1.0-2.0_modified/runall.sh",
+		"/home/jchiu/projects/mpsft/sFFT-1.0-2.0_modified/GNUmakefile",
+		"/home/jchiu/projects/mpsft/sFFT-1.0-2.0_modified/plot.cc",
+		"/home/jchiu/projects/mpsft/sFFT-1.0-2.0/GNUmakefile",
+		"/home/jchiu/projects/mpsft/sFFT-1.0-2.0/runall.sh",
 		"/home/jchiu/projects/mpsft/src/gen.cc",
-		"/home/jchiu/projects/mpsft/src/BUILD",
-		"/home/jchiu/projects/mpsft/src/demo1.h",
-		"/home/jchiu/projects/mpsft/README.md",
-		"/home/jchiu/projects/mpsft/src/binner_bench.cc",
-		"/home/jchiu/projects/mpsft/src/integer.h",
+		"/home/jchiu/projects/mpsft/src/demo1_main.cc",
 		"/home/jchiu/projects/mpsft/src/base.h",
+		"/home/jchiu/projects/mpsft/src/binner.cc",
+		"/home/jchiu/projects/mpsft/src/binner_bench.cc",
 		"/home/jchiu/projects/mpsft/src/binner_test.cc",
+		"/home/jchiu/projects/mpsft/sFFT-1.0-2.0/generate_graphs.cc",
+		"/home/jchiu/projects/mpsft/src/iterate.h",
+		"/home/jchiu/projects/mpsft/README.md",
+		"/home/jchiu/projects/mpsft/src/.bazelrc",
+		"/home/jchiu/projects/mpsft/src/iterate.cc",
+		"/home/jchiu/projects/mpsft/src/iterate_test.cc",
+		"/home/jchiu/projects/mpsft/src/demo1.cc",
+		"/home/jchiu/projects/mpsft/src/demo1.h",
+		"/home/jchiu/projects/mpsft/src/demo1_bench.cc",
+		"/home/jchiu/projects/mpsft/src/sincos_bench.cc",
+		"/home/jchiu/projects/mpsft/src/window_test.cc",
+		"/home/jchiu/projects/mpsft/src/binner.h",
+		"/home/jchiu/projects/mpsft/src/sfft/.gitignore",
+		"/home/jchiu/projects/mpsft/src/BUILD",
+		"/home/jchiu/projects/mpsft/src/integer.h",
 		"/home/jchiu/projects/mpsft/src/sincos.h",
 		"/home/jchiu/projects/mpsft/src/magic.cc",
 		"/home/jchiu/projects/mpsft/src/base_test.cc",
@@ -315,7 +256,6 @@
 		"/home/jchiu/projects/mpsft/src/freqid.cc",
 		"/home/jchiu/projects/mpsft/src/vec.txt",
 		"/home/jchiu/projects/mpsft/src/base.cc",
-		"/home/jchiu/projects/mpsft/src/binner.h",
 		"/home/jchiu/projects/mpsft/src/integer.cc",
 		"/home/jchiu/projects/mpsft/src/magic.h",
 		"/home/jchiu/projects/mpsft/src/gen.h",
@@ -323,21 +263,11 @@
 		"/home/jchiu/projects/mpsft/src/sincos_test.cc",
 		"/home/jchiu/projects/mpsft/src/fftw_bench.cc",
 		"/home/jchiu/projects/mpsft/src/sincos.cc",
-		"/home/jchiu/projects/mpsft/src/window_test.cc",
 		"/home/jchiu/projects/mpsft/src/window.h",
 		"/home/jchiu/projects/mpsft/src/window.cc",
-		"/home/jchiu/projects/mpsft/src/demo1_bench.cc",
-		"/home/jchiu/projects/mpsft/src/sincos_bench.cc",
-		"/home/jchiu/projects/mpsft/src/.bazelrc",
 		"/home/jchiu/projects/mpsft/src/integer_test.cc",
 		"/home/jchiu/projects/mpsft/src/freqid.h",
-		"/home/jchiu/projects/mpsft/src/iterate.h",
-		"/home/jchiu/projects/mpsft/src/iterate_test.cc",
-		"/home/jchiu/projects/mpsft/src/iterate.cc",
-		"/home/jchiu/projects/mpsft/src/demo1_main.cc",
-		"/home/jchiu/projects/mpsft/src/binner.cc",
 		"/home/jchiu/libdivide/gen.cc",
-		"/home/jchiu/projects/mpsft/src/demo1.cc",
 		"/home/jchiu/projects/mpsft/src/catch.cc",
 		"/home/jchiu/projects/mpsft/src/freqid_test.cc",
 		"/home/jchiu/projects/mpsft/src/benchmark.cc",
@@ -374,6 +304,27 @@
 		"case_sensitive": false,
 		"find_history":
 		[
+			"gver",
+			"fout",
+			"repetitions",
+			"ginnerreps",
+			"repetitions",
+			"gouterreps",
+			"fout",
+			"run_experiment",
+			"SFFT_Time",
+			"avg_sfft_time",
+			"run_experiment",
+			"SFFT_Time",
+			"snr",
+			"AWGN",
+			"get_expermient_vs_N_parameters",
+			"ggraphtype",
+			"eigen",
+			"sigma",
+			"ssqrt",
+			"scale",
+			"memset",
 			"bins =",
 			"Int",
 			"int",
@@ -480,28 +431,7 @@
 			"BinnerType::Simple",
 			"m_pi",
 			"range",
-			"transform",
-			"#",
-			"window.",
-			"identifyfreq",
-			"Real",
-			"mpsft",
-			"Real",
-			"real",
-			"Real",
-			"real",
-			"Real",
-			"cplexarray",
-			"real",
-			"Real",
-			"real",
-			"Real",
-			"bins",
-			"snr",
-			"num_mods",
-			"sum",
-			"round",
-			"SVD22"
+			"transform"
 		],
 		"highlight": true,
 		"in_selection": false,
@@ -520,24 +450,24 @@
 	"groups":
 	[
 		{
-			"selected": 1,
+			"selected": 2,
 			"sheets":
 			[
 				{
 					"buffer": 0,
-					"file": "src/iterate.h",
+					"file": "src/base.cc",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 2466,
+						"buffer_size": 2953,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								795,
-								795
+								858,
+								858
 							]
 						],
 						"settings":
@@ -547,57 +477,27 @@
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 360.0,
+						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 8,
+					"stack_index": 5,
 					"type": "text"
 				},
 				{
 					"buffer": 1,
-					"file": "README.md",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 9490,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								1857,
-								1857
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/Markdown/Markdown.sublime-syntax",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 900.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 0,
-					"type": "text"
-				},
-				{
-					"buffer": 2,
 					"file": "src/.bazelrc",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 600,
+						"buffer_size": 601,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								600,
-								600
+								251,
+								251
 							]
 						],
 						"settings":
@@ -608,151 +508,95 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 5,
+					"stack_index": 4,
 					"type": "text"
 				},
+				{
+					"buffer": 2,
+					"file": "src/demo1_bench.cc",
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 2087,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								1363,
+								1363
+							]
+						],
+						"settings":
+						{
+							"syntax": "Packages/C++/C++.sublime-syntax",
+							"tab_size": 2,
+							"translate_tabs_to_spaces": true
+						},
+						"translation.x": -0.0,
+						"translation.y": 405.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 2,
+					"type": "text"
+				}
+			]
+		},
+		{
+			"selected": 2,
+			"sheets":
+			[
 				{
 					"buffer": 3,
-					"file": "src/iterate.cc",
+					"file": "README.md",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 5632,
+						"buffer_size": 11145,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								2467,
-								2467
+								6887,
+								6887
 							]
 						],
 						"settings":
 						{
-							"syntax": "Packages/C++/C++.sublime-syntax",
+							"syntax": "Packages/Markdown/Markdown.sublime-syntax",
 							"tab_size": 2,
 							"translate_tabs_to_spaces": true
 						},
 						"translation.x": 0.0,
-						"translation.y": 768.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 7,
-					"type": "text"
-				},
-				{
-					"buffer": 4,
-					"file": "src/iterate_test.cc",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 4902,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								0,
-								0
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/C++/C++.sublime-syntax",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 15,
-					"type": "text"
-				},
-				{
-					"buffer": 5,
-					"file": "src/demo1.cc",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 3462,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								2299,
-								2299
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/C++/C++.sublime-syntax",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 757.0,
+						"translation.y": 2505.0,
 						"zoom_level": 1.0
 					},
 					"stack_index": 3,
 					"type": "text"
 				},
 				{
-					"buffer": 6,
-					"file": "src/demo1.h",
+					"buffer": 4,
+					"file": "src/results/runtime.csv",
 					"semi_transient": false,
 					"settings":
 					{
-						"buffer_size": 1439,
+						"buffer_size": 2568,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								1250,
-								1250
+								2568,
+								2568
 							]
 						],
 						"settings":
 						{
-							"syntax": "Packages/C++/C++.sublime-syntax",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 4,
-					"type": "text"
-				},
-				{
-					"buffer": 7,
-					"file": "src/demo1_bench.cc",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 1646,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								1623,
-								1623
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/C++/C++.sublime-syntax",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true
+							"syntax": "Packages/Text/Plain text.tmLanguage"
 						},
 						"translation.x": 0.0,
 						"translation.y": 0.0,
@@ -762,206 +606,20 @@
 					"type": "text"
 				},
 				{
-					"buffer": 8,
-					"file": "src/sincos_bench.cc",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 6509,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								1519,
-								1519
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/C++/C++.sublime-syntax",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 14,
-					"type": "text"
-				},
-				{
-					"buffer": 9,
-					"file": "src/window_test.cc",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 2110,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								803,
-								803
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/C++/C++.sublime-syntax",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 13,
-					"type": "text"
-				},
-				{
-					"buffer": 10,
-					"file": "src/binner.h",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 4308,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								2907,
-								2907
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/C++/C++.sublime-syntax",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 950.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 10,
-					"type": "text"
-				}
-			]
-		},
-		{
-			"selected": 0,
-			"sheets":
-			[
-				{
-					"buffer": 11,
+					"buffer": 5,
 					"file": "src/demo1_main.cc",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 2101,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								1601,
-								1601
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/C++/C++.sublime-syntax",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 112.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 2,
-					"type": "text"
-				},
-				{
-					"buffer": 12,
-					"file": "src/base.h",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 4488,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								0,
-								0
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/C++/C++.sublime-syntax",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 0.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 16,
-					"type": "text"
-				},
-				{
-					"buffer": 13,
-					"file": "src/binner.cc",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 20797,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								18964,
-								18964
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/C++/C++.sublime-syntax",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 7929.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 6,
-					"type": "text"
-				},
-				{
-					"buffer": 14,
-					"file": "src/freqid.cc",
 					"semi_transient": true,
 					"settings":
 					{
-						"buffer_size": 1508,
+						"buffer_size": 2184,
 						"regions":
 						{
 						},
 						"selection":
 						[
 							[
-								1223,
-								1223
+								1092,
+								1092
 							]
 						],
 						"settings":
@@ -974,67 +632,7 @@
 						"translation.y": 0.0,
 						"zoom_level": 1.0
 					},
-					"stack_index": 9,
-					"type": "text"
-				},
-				{
-					"buffer": 15,
-					"file": "src/binner_bench.cc",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 2251,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								1089,
-								1089
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/C++/C++.sublime-syntax",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 180.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 11,
-					"type": "text"
-				},
-				{
-					"buffer": 16,
-					"file": "src/binner_test.cc",
-					"semi_transient": false,
-					"settings":
-					{
-						"buffer_size": 5224,
-						"regions":
-						{
-						},
-						"selection":
-						[
-							[
-								3407,
-								3407
-							]
-						],
-						"settings":
-						{
-							"syntax": "Packages/C++/C++.sublime-syntax",
-							"tab_size": 2,
-							"translate_tabs_to_spaces": true
-						},
-						"translation.x": 0.0,
-						"translation.y": 1265.0,
-						"zoom_level": 1.0
-					},
-					"stack_index": 12,
+					"stack_index": 0,
 					"type": "text"
 				}
 			]
@@ -1116,7 +714,7 @@
 		],
 		"width": 0.0
 	},
-	"selected_group": 0,
+	"selected_group": 1,
 	"settings":
 	{
 	},
