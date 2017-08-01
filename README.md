@@ -1,6 +1,7 @@
 # Introduction
 
 Here is our report: https://github.com/tinkerstash/mpsft/blob/master/report/report.pdf
+
 (Here is an old thesis: https://dspace.mit.edu/handle/1721.1/83691?show=full)
 
 SFT (sparse Fourier transform) algorithms aim to perform discrete Fourier transform in O(S) time, ignoring log factors, where S is the sparsity in frequency domain. In other words, the solution has a support of size S, plus some noise.
