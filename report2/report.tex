@@ -27,7 +27,7 @@ Here are the three ingredients of MPSFT.
 
 SFT algorithms typically seek to identify isolated modes. This will be made clearer later. They usually use a very simplistic method to identify these mode locations. The matrix pencil method allows us to perform this mode identification step with greater accuracy.
 
-Secondly, the matrix pencil method helps detect when modes are not isolated. This reduces the number of spurious modes being found. In existing SFT algorithms, we pay a much heavier cost to remove these spurious modes.
+Secondly, the matrix pencil method helps detect when modes are not isolated. This reduces the number of spurious modes being found. In existing SFT algorithms, we pay a nontrivial cost to remove these spurious modes.
 
 \item \textbf{Exploiting symmetry}: The matrix pencil method offers sizable advantages over the simplistic method for mode identification, but it is also computationally expensive. The naive way of applying it will roughly double the runtime and eliminate its benefits. A crucial step of MPSFT is to exploit symmetry in the algorithm to almost completely mitigate this extra cost.
 
