@@ -207,7 +207,7 @@ We summarize the steps in the first iteration below.
 \State Randomly generate $a,b,c$ for random mode permutation and modulation
 \State Random generate an integer set $Q$ where $|Q|$ is odd
 \State $L \leftarrow 1 + \lfloor \log_2(N/B) \rfloor$
-\State $T\leftarrow \cup_{q\in Q} \{q, q \pm 2^0 B, q \pm 2^1 B, \ldots q \pm 2^L B \}$
+\State $T\leftarrow \cup_{q\in Q} \{q, q \pm 2^0 B, q \pm 2^1 B, \ldots q \pm 2^{L-1} B \}$
 \For{$\tau\in T$}
   \State $U_\tau \leftarrow \texttt{BinInTime}(\tau, a, b, c)$
 \EndFor
