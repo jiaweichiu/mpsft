@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.16 (TeX Live 2015/Debian) (preloaded format=pdflatex 2017.8.25)  3 SEP 2017 23:00
+This is pdfTeX, Version 3.14159265-2.6-1.40.16 (TeX Live 2015/Debian) (preloaded format=pdflatex 2017.8.25)  3 SEP 2017 23:01
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -869,7 +869,7 @@ Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
 (hyperref)                removing `math shift' on input line 322.
 
-[9] <./graph/runtime_vary_k.png, id=170, 578.16pt x 397.485pt>
+[9] <./graph/runtime_vary_k.png, id=169, 578.16pt x 397.485pt>
 File: ./graph/runtime_vary_k.png Graphic file (type png)
 
 <use ./graph/runtime_vary_k.png>
@@ -892,39 +892,43 @@ Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
 (hyperref)                removing `math shift' on input line 347.
 
-<./graph/runtime_vary_n.png, id=173, 578.16pt x 397.485pt>
+<./graph/runtime_vary_n.png, id=172, 578.16pt x 397.485pt>
 File: ./graph/runtime_vary_n.png Graphic file (type png)
 
 <use ./graph/runtime_vary_n.png>
 Package pdftex.def Info: ./graph/runtime_vary_n.png used on input line 354.
 (pdftex.def)             Requested size: 346.89867pt x 238.49283pt.
-
-<./graph/noise.png, id=175, 578.16pt x 397.485pt>
+ [10 <./graph/runtime_vary_k.png>]
+<./graph/noise.png, id=182, 578.16pt x 397.485pt>
 File: ./graph/noise.png Graphic file (type png)
  <use ./graph/noise.png>
 Package pdftex.def Info: ./graph/noise.png used on input line 366.
 (pdftex.def)             Requested size: 346.89867pt x 238.49283pt.
 
-[10 <./graph/runtime_vary_k.png>] [11 <./graph/runtime_vary_n.png> <./graph/noi
-se.png>] (./report.bbl)
+(./report.bbl [11 <./graph/runtime_vary_n.png>])
 Package atveryend Info: Empty hook `BeforeClearDocument' on input line 394.
- [12]
+ [12 <./graph/noise.png>]
 Package atveryend Info: Empty hook `AfterLastShipout' on input line 394.
- (./report.aux)
+
+(./report.aux)
 Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 394.
 Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 394.
 Package rerunfilecheck Info: File `report.out' has not changed.
 (rerunfilecheck)             Checksum: B85B97C57B453857D84C389502007B27;1613.
+
+
+LaTeX Warning: Label(s) may have changed. Rerun to get cross-references right.
+
 Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 394.
  ) 
 Here is how much of TeX's memory you used:
  9748 strings out of 494910
  142963 string characters out of 6179836
- 242756 words of memory out of 5000000
+ 241756 words of memory out of 5000000
  12822 multiletter control sequences out of 15000+600000
  24827 words of font info for 72 fonts, out of 8000000 for 9000
  36 hyphenation exceptions out of 8191
- 43i,11n,40p,1014b,455s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 43i,11n,40p,1014b,447s stack positions out of 5000i,500n,10000p,200000b,80000s
  </home/jchiu/.texmf-var/fonts/pk/ljfour/jknappen/ec/ecrm0700.600pk> </home/j
 chiu/.texmf-var/fonts/pk/ljfour/jknappen/ec/ecbx1000.600pk> </home/jchiu/.texmf
 -var/fonts/pk/ljfour/jknappen/ec/ectt1000.600pk> </home/jchiu/.texmf-var/fonts/
@@ -945,9 +949,9 @@ fb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr7.pfb></usr
 /texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy5.pfb></usr/share/texliv
 e/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy7.pfb></usr/share/texlive/texmf
 -dist/fonts/type1/public/amsfonts/symbols/msam10.pfb>
-Output written on report.pdf (12 pages, 318480 bytes).
+Output written on report.pdf (12 pages, 319667 bytes).
 PDF statistics:
- 598 PDF objects out of 1000 (max. 8388607)
+ 599 PDF objects out of 1000 (max. 8388607)
  245 compressed objects within 3 object streams
  45 named destinations out of 1000 (max. 500000)
  192 words of extra memory for PDF output out of 10000 (max. 10000000)

@@ -13,7 +13,7 @@
 \section{Introduction}
 Given a $N$-vector $x$, we like to perform the forward discrete Fourier transform to obtain $\hat{x}$:
 $$x_t = \sum_k \hat{x}_k e^{2\pi i kt/N}; \quad \hat{x}_k =\frac{1}{n} \sum_t x_t e^{-2\pi i k t/N}.$$
-This is typically done in $O(N \log N)$ time %using Fast Fourier transform (FFT). However, if it is known a priori that $\hat{x}$ is $S$-sparse with some noise, then it is possible to recover these $S$ modes in $\tilde{O}(S)$ time where $\tilde{O}(\cdot)$ is the $O(\cdot)$ notation ignoring log factors. `We call such algorithms Sparse Fourier transform (SFT) algorithms.
+This is typically done in $O(N \log N)$ time using Fast Fourier transform (FFT). However, if it is known a priori that $\hat{x}$ is $S$-sparse with some noise, then it is possible to recover these $S$ modes in $\tilde{O}(S)$ time where $\tilde{O}(\cdot)$ is the $O(\cdot)$ notation ignoring log factors. `We call such algorithms Sparse Fourier transform (SFT) algorithms.
 
 SFT algorithms are not new. Existing work includes AAFFT\cite{iwen2007empirical}, sFFT4 \cite{hassanieh2012simple, hassanieh2012nearly}. However, these algorithms have not seen much use because the hidden constants in the $\tilde{O}(S)$ running time are large, and $N$ has to be very large relative to $S$ in order for SFT algorithms to run faster than FFT. In a study by authors of sFFT3, when $N$ is fixed as $2^{22}$, AAFFT is faster than FFTW\cite{FFTW05} only when $S\lesssim 2^8$. Note that FFTW is the state-of-the-art FFT implementation.
 
