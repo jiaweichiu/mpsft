@@ -56,7 +56,7 @@ In MPSFT, we apply the matrix pencil method to each of the $B$ binned signals $U
 
 The matrix pencil method offers two advantages over the method of simple ratios. Firstly, the matrix pencil method has a built-in denoising mechanism, which improves the chance of getting the mode frequency correct. Secondly, the matrix pencil method helps us detect if there is more than one mode in the signal $U^b$, i.e., more than one mode in bin $b$. We call this the problem of \emph{mode collision}. In existing SFT algorithms, this problem is handled in arguably less optimal ways. For example, if we found $100$ modes in this iteration, we may have to assume that up to $20$ of them are spurious due to mode collision. As a result, we can only assume that the residual signal has $60$ fewer modes because $80$ of them are correct but we add $20$ extra modes. With the matrix pencil method, we can avoid creating these $20$ spurious modes and assume that the residual signal has $80$ fewer modes. The implication is that MPSFT can use fewer number of bins in the next iteration.
 
-However, a naive application of the matrix pencil in the SFT framework will make the binning procedure roughly twice as slow as before. SFT algorithms spend most of time in the binning procedure, so this slowdown would completely eliminate any benefits of the matrix pencil method.
+However, a naive application of the matrix pencil method to the SFT framework will make the binning procedure take twice as long as before. As SFT algorithms spend most of the runtime in the binning procedure, this slowdown would completely eliminate the benefits of the matrix pencil method.
 
 A crucial innovation in MPSFT is to exploit symmetry to almost completely mitigate this extra computational cost.
 
