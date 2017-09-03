@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.14159265-2.6-1.40.16 (TeX Live 2015/Debian) (preloaded format=pdflatex 2017.8.25)  3 SEP 2017 21:23
+This is pdfTeX, Version 3.14159265-2.6-1.40.16 (TeX Live 2015/Debian) (preloaded format=pdflatex 2017.8.25)  3 SEP 2017 22:55
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -830,24 +830,24 @@ File: t1cmtt.fd 2014/09/29 v2.5h Standard LaTeX font definitions
 ) [2] [3] [4]
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 149.
+(hyperref)                removing `math shift' on input line 147.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `\tau' on input line 149.
+(hyperref)                removing `\tau' on input line 147.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 149.
+(hyperref)                removing `math shift' on input line 147.
 
 [5] [6] [7] [8]
-Overfull \hbox (6.70183pt too wide) in paragraph at lines 318--319
+Overfull \hbox (6.70183pt too wide) in paragraph at lines 316--317
 []\T1/cmr/m/n/10 FFTW-3.3.6-pl2 is com-piled lo-cally with all the op-ti-miza-t
 ion turned on, for ex-am-ple \T1/cmtt/m/n/10 -O3 -mtune-native
  []
 
 
-Overfull \hbox (5.86276pt too wide) in paragraph at lines 318--319
+Overfull \hbox (5.86276pt too wide) in paragraph at lines 316--317
 \T1/cmtt/m/n/10 -ffast-math\T1/cmr/m/n/10 . We also run FFTW with $\OML/cmm/m/i
 t/10 N$ \T1/cmr/m/n/10 be-ing pow-ers of $\OT1/cmr/m/n/10 2$ \T1/cmr/m/n/10 onl
 y. Note that we only use the \T1/cmtt/m/n/10 FFTW_ESTIMATE
@@ -855,76 +855,76 @@ y. Note that we only use the \T1/cmtt/m/n/10 FFTW_ESTIMATE
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 324.
+(hyperref)                removing `math shift' on input line 322.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 324.
+(hyperref)                removing `math shift' on input line 322.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 324.
+(hyperref)                removing `math shift' on input line 322.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 324.
+(hyperref)                removing `math shift' on input line 322.
 
-[9] <./graph/runtime_vary_k.png, id=169, 578.16pt x 397.485pt>
+[9] <./graph/runtime_vary_k.png, id=170, 578.16pt x 397.485pt>
 File: ./graph/runtime_vary_k.png Graphic file (type png)
 
 <use ./graph/runtime_vary_k.png>
-Package pdftex.def Info: ./graph/runtime_vary_k.png used on input line 345.
+Package pdftex.def Info: ./graph/runtime_vary_k.png used on input line 343.
 (pdftex.def)             Requested size: 346.89867pt x 238.49283pt.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 349.
+(hyperref)                removing `math shift' on input line 347.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 349.
+(hyperref)                removing `math shift' on input line 347.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 349.
+(hyperref)                removing `math shift' on input line 347.
 
 
 Package hyperref Warning: Token not allowed in a PDF string (PDFDocEncoding):
-(hyperref)                removing `math shift' on input line 349.
+(hyperref)                removing `math shift' on input line 347.
 
-<./graph/runtime_vary_n.png, id=172, 578.16pt x 397.485pt>
+<./graph/runtime_vary_n.png, id=173, 578.16pt x 397.485pt>
 File: ./graph/runtime_vary_n.png Graphic file (type png)
 
 <use ./graph/runtime_vary_n.png>
-Package pdftex.def Info: ./graph/runtime_vary_n.png used on input line 356.
+Package pdftex.def Info: ./graph/runtime_vary_n.png used on input line 354.
 (pdftex.def)             Requested size: 346.89867pt x 238.49283pt.
- [10 <./graph/runtime_vary_k.png>]
-<./graph/noise.png, id=182, 578.16pt x 397.485pt>
+
+<./graph/noise.png, id=175, 578.16pt x 397.485pt>
 File: ./graph/noise.png Graphic file (type png)
  <use ./graph/noise.png>
-Package pdftex.def Info: ./graph/noise.png used on input line 368.
+Package pdftex.def Info: ./graph/noise.png used on input line 366.
 (pdftex.def)             Requested size: 346.89867pt x 238.49283pt.
 
-(./report.bbl [11 <./graph/runtime_vary_n.png>])
-Package atveryend Info: Empty hook `BeforeClearDocument' on input line 396.
- [12 <./graph/noise.png>]
-Package atveryend Info: Empty hook `AfterLastShipout' on input line 396.
-
-(./report.aux)
-Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 396.
-Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 396.
+[10 <./graph/runtime_vary_k.png>] [11 <./graph/runtime_vary_n.png> <./graph/noi
+se.png>] (./report.bbl)
+Package atveryend Info: Empty hook `BeforeClearDocument' on input line 394.
+ [12]
+Package atveryend Info: Empty hook `AfterLastShipout' on input line 394.
+ (./report.aux)
+Package atveryend Info: Executing hook `AtVeryEndDocument' on input line 394.
+Package atveryend Info: Executing hook `AtEndAfterFileList' on input line 394.
 Package rerunfilecheck Info: File `report.out' has not changed.
-(rerunfilecheck)             Checksum: 2067714A799C1C7814BC945BD6930553;1626.
-Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 396.
+(rerunfilecheck)             Checksum: B85B97C57B453857D84C389502007B27;1613.
+Package atveryend Info: Empty hook `AtVeryVeryEnd' on input line 394.
  ) 
 Here is how much of TeX's memory you used:
  9748 strings out of 494910
  142963 string characters out of 6179836
- 241756 words of memory out of 5000000
+ 242756 words of memory out of 5000000
  12822 multiletter control sequences out of 15000+600000
  24827 words of font info for 72 fonts, out of 8000000 for 9000
  36 hyphenation exceptions out of 8191
- 43i,11n,40p,1014b,447s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 43i,11n,40p,1014b,455s stack positions out of 5000i,500n,10000p,200000b,80000s
  </home/jchiu/.texmf-var/fonts/pk/ljfour/jknappen/ec/ecrm0700.600pk> </home/j
 chiu/.texmf-var/fonts/pk/ljfour/jknappen/ec/ecbx1000.600pk> </home/jchiu/.texmf
 -var/fonts/pk/ljfour/jknappen/ec/ectt1000.600pk> </home/jchiu/.texmf-var/fonts/
@@ -945,7 +945,7 @@ fb></usr/share/texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmr7.pfb></usr
 /texlive/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy5.pfb></usr/share/texliv
 e/texmf-dist/fonts/type1/public/amsfonts/cm/cmsy7.pfb></usr/share/texlive/texmf
 -dist/fonts/type1/public/amsfonts/symbols/msam10.pfb>
-Output written on report.pdf (12 pages, 319275 bytes).
+Output written on report.pdf (12 pages, 318475 bytes).
 PDF statistics:
  598 PDF objects out of 1000 (max. 8388607)
  245 compressed objects within 3 object streams

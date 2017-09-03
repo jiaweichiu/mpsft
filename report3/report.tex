@@ -19,18 +19,18 @@ SFT algorithms are not new. Existing work includes AAFFT\cite{iwen2007empirical}
 
 In this paper, we introduce a new SFT algorithm called Matrix Pencil Sparse Fourier Transform (MPSFT). It is faster than FFTW when $S \lesssim 1800$, with $N\simeq 2^{22}$. Unlike the study mentioned earlier, we also use much noisier inputs, which are more realistic in applications. We believe there is at least a 5X improvement over AAFFT. We do not consider sFFT3 because it works only for noiseless inputs.
 
-Before describing what is new in MPSFT, we introduce the SFT framework that many SFT algorithms follow. We present the basic ideas while skipping all the details here.
+Before describing what is new in MPSFT, we introduce the SFT framework that many SFT algorithms share. We present the basic ideas and avoid details when possible.
 
 \subsection{SFT framework}\label{sec:sftoverview}
 The first idea is that if the signal has only \emph{one} mode, it is trivial to identify this mode. For example, if our mode location is $k_*$, then $x_t = \hat{x}_{k_*} e^{2\pi i k_* t/N}$ assuming there is no noise. The mode coeffcient can be obtained by sampling $x_0 = \hat{x}_{k_*}$. The mode location $k_*$ can be obtained as follows. Observe that $x_1/x_0 = e^{2\pi i k_*/N}$. Hence, $k_* = \frac{N}{2\pi} \text{arg}(x_1/x_0)$. We have computed the Fourier transform in $O(1)$ time.
 
 The second idea is called ``binning''. The goal is to create new signals, many of which have exactly one mode so that we can apply the first idea. ``Binning'' works by convolving the signal $\hat{x}$ with the boxcar filter in frequency domain, and sampling the result at a few uniformly spaced points. Let us be more precise. Let $B$ be $\tilde{O}(S)$. Think of the frequency space as $[0,1)$ and let the boxcar filter's width be $1/B$. Sampling the convolution result at $B$ uniformly spaced points yield $B$ ``bin coefficients'' $U^b_0$ for $b=0,\ldots,B-1$. They satisfy
 $$U^b_0 \simeq \sum_k \hat{x}_k \hat{W}_{b,k} \text{ where } \hat{W}_{b,k} \simeq \text{Indicator}\left(\left\lfloor \frac{kB}{N} \right\rfloor = b\right).$$
-We say mode $k$ is in bin $b$ if $\left\lfloor kB/N \right\rfloor = b$ We see that $U^b_0$ is simply the sum over all modes in bin $b$. If $B$ is sufficiently large relative to $S$, then for many $b$'s, there will be exactly one mode $k_b$ in bin $b$ and we can recover the mode cofficient as $U^b_0 \simeq \hat{x}_{k_b}$. Note that ``binning'' can be carried out efficiently in the time domain using our input $x$ instead of the desired output $\hat{x}$. For example, convolution with the boxcar filter in frequency domain corresponds to multiplying with the sinc function in time domain.
+We say mode $k$ is in bin $b$ if $\left\lfloor kB/N \right\rfloor = b$ We see that $U^b_0$ is simply the sum over all modes in bin $b$. If $B$ is sufficiently large relative to $S$, then for many $b$'s, there will be exactly one mode $k_b$ in bin $b$ and we can recover the mode cofficient as $U^b_0 \simeq \hat{x}_{k_b}$. Note that ``binning'' can be carried out efficiently in the time domain using our input $x$ instead of the desired output $\hat{x}$.
 
 The third idea is that if binning is applied to $x$ translated by some integer $\tau$, then the $B$ bin coefficients $U^b_{\tau}$ will satisfy
 $$U^b_{\tau} \simeq \sum_k \hat{x}_k \hat{W}_{b,k} e^{2\pi i k \tau/N}.$$
-The reason is that translation by $\tau$ in the time domain corresponds to applying a modulation factor of $e^{2\pi i k \tau/N}$ in the frequency domain. Interpret $U^b_{\tau}$ as sampling a signal $U^b$ at location $\tau$. Each signal $U^b$ can be understood as the original signal $x$ with \emph{only} the modes in bin $b$. Applying the first idea, when there is exactly one mode in bin $b$, we can recover the mode location as $\frac{N}{2\pi} \text{arg}(U^b_1/U^b_0)$.
+The reason is that translation by $\tau$ in the time domain corresponds to applying a modulation factor of $e^{2\pi i k \tau/N}$ in the frequency domain. Interpret $U^b_{\tau}$ as sampling a signal $U^b$ at location $\tau$. We call $U^b$ a \emph{binned signal}. Each $U^b$ can be understood as the original signal $x$ with \emph{only} the modes in bin $b$. Applying the first idea, when there is exactly one mode in bin $b$, we can recover the mode location as $\frac{N}{2\pi} \text{arg}(U^b_1/U^b_0)$.
 
 We summarize the above three ideas as follows.
 
@@ -47,14 +47,12 @@ We summarize the above three ideas as follows.
 
 The fourth idea is that modes can be randomly permuted such that a good proportion of the $B$ bins would have exactly one mode, and we can attempt to recover the isolated mode's location and coefficient as above. Similar to binning, this mode permutation can be carried out in the time domain using $x$ instead of $\hat{x}$.
 
-Finally, SFT algorithms are iterative. Let the residual signal be the original input subtracted by our current solution. In each iteration, we randomly permute the modes, apply binning to the residual signal, find a good proportion of modes in the residual signal, and add them to the current solution.
+Finally, SFT algorithms are iterative. Let the residual signal be the original input signal subtracted by our current solution. In each iteration, we randomly permute the modes, apply binning to the residual signal, find a good proportion of modes in the residual signal, and add them to the current solution.
 
 \subsection{What is new in MPSFT}
-In this section, we describe the improvements MPSFT bring to the SFT framework.
+Like the Prony method, the matrix pencil method \cite{hua1990matpencil} is a classical technique for frequency estimation in signal processing. Say we are given a signal $U$ in time domain and assume it has only a few modes. Then we can take a few sample points, say $U_0,\ldots,U_5$, and apply the matrix pencil method to recover the mode coefficients and frequencies.
 
-The new ingredient is the matrix pencil method \cite{hua1990matpencil}. Like the Prony method, the matrix pencil method is a classical technique for frequency estimation in signal processing. Say we are given a signal $U$ in time domain and we assume it has only a few modes. Then we can take a few sample points, say $U_0,\ldots,U_5$, and apply the matrix pencil method to recover the mode coefficients and frequencies.
-
-In MPSFT, we apply the matrix pencil method to each of the $B$ signals $U^b$. Say there is only one mode $k_*$ in bin $b$. Instead of using the simple ratio $U^b_1/U^b_0$ to estimate the frequency $k_*/N$, we apply the matrix pencil method. In particular, we use three sample points $U^b_{-1},U^b_{0},U^b_{1}$ instead of two sample points $U^b_0,U^b_1$.
+In MPSFT, we apply the matrix pencil method to each of the $B$ binned signals $U^b$. Say there is only one mode $k_*$ in bin $b$. Instead of using the simple ratio $U^b_1/U^b_0$ to estimate the frequency $k_*/N$, we apply the matrix pencil method on three sample points $U^b_{-1},U^b_{0},U^b_{1}$.
 
 The matrix pencil method offers two advantages over the method of simple ratios. Firstly, the matrix pencil method has a built-in denoising mechanism, which improves the chance of getting the mode frequency correct. Secondly, the matrix pencil method helps us detect if there is more than one mode in the signal $U^b$, i.e., more than one mode in bin $b$. We call this the problem of \emph{mode collision}. In existing SFT algorithms, this problem is handled in arguably less optimal ways. For example, if we found $100$ modes in this iteration, we may have to assume that up to $20$ of them are spurious due to mode collision. As a result, we can only assume that the residual signal has $60$ fewer modes because $80$ of them are correct but we add $20$ extra modes. With the matrix pencil method, we can avoid creating these $20$ spurious modes and assume that the residual signal has $80$ fewer modes. The implication is that MPSFT can use fewer number of bins in the next iteration.
 
@@ -178,9 +176,9 @@ $$\text{round}\left( \frac{N}{B} \left( \frac{2z+1}{2^{L+1}} + b\right)\right).$
 
 The second change is related to \emph{probability amplification}. Say we want to estimate the first bit of the mode frequency. Instead of computing only $U_{1}/U_0$, we can compute $U_{q+1}/U_q$ for multiple different random $q$'s, and use \emph{majority voting} to decide the value of this bit. This idea can be applied easily to other bits. Note that the probability of wrongly identifying one bit decreases exponentially with the number of $q$'s used.
 
-\section{MPSFT enhancements}
+\section{MPSFT}
 
-We now discuss the enhancements made to the SFT framework in MPSFT.
+We now discuss how MPSFT builds upon the SFT framework.
 
 \subsection{Matrix pencil method}
 Fix a bin $b$ and consider the binned signal $U=U^b$. Sample the input signal $U$ at three points $-1, 0, +1$. Form the $2\times 2$ matrix
